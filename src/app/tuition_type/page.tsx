@@ -19,7 +19,7 @@ import getAllHireableInstruments from "@/lib/server_actions/getAllHireableInstru
 import filterProgramsByInstrument from "@/lib/helpers/filterProgramsByInstrument";
 
 // Types
-import { Programs, SchoolData } from "@/lib/types";
+import { Programs, SchoolData, HireableInstrumentInput } from "@/lib/types";
 
 export default function TuitionTypePage() {
   const router = useRouter();
@@ -54,10 +54,14 @@ export default function TuitionTypePage() {
     }
 
     async function runEffect() {
-      const hireableInstrumentsResponse: HireableInstrumentInput[] =
-        await getAllHireableInstruments();
+      if (!schoolData) {
+        return;
+      }
 
-      setAllHireableInstruments(hireableInstrumentsResponse);
+      const response: HireableInstrumentInput[] =
+        await getAllHireableInstruments();
+      console.log("response --->", response);
+      setAllHireableInstruments(response);
 
       const programs: any = filterProgramsByInstrument(
         instrument,

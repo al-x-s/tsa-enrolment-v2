@@ -1,5 +1,7 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import Link from "next/link";
+
 export function GeneralTermsDialogContent() {
   return (
     <ScrollArea className="text-left h-[60vh] md:h-[50vh] px-2 md:px-8 mb-1">

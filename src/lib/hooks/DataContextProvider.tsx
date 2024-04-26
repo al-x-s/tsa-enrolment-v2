@@ -4,6 +4,9 @@ import React, { Dispatch, SetStateAction } from "react";
 
 import Provider from "@/components/Provider";
 
+// TYPES
+import { SchoolData, InstrumentData, HireableInstrumentInput } from "../types";
+
 // INITIAL VALUE
 
 interface InitialValue {
@@ -11,8 +14,10 @@ interface InitialValue {
   setSchoolData: Dispatch<SetStateAction<SchoolData | null>>;
   instrumentData: InstrumentData | null;
   setInstrumentData: Dispatch<SetStateAction<InstrumentData | null>>;
-  allHireableInstruments: InstrumentData[] | null;
-  setAllHireableInstruments: Dispatch<SetStateAction<InstrumentData[] | null>>;
+  allHireableInstruments: HireableInstrumentInput[] | null;
+  setAllHireableInstruments: Dispatch<
+    SetStateAction<HireableInstrumentInput[] | null>
+  >;
 }
 
 const initialValue: InitialValue = {
@@ -22,13 +27,9 @@ const initialValue: InitialValue = {
   setInstrumentData: (action: SetStateAction<InstrumentData | null>) => {},
   allHireableInstruments: null,
   setAllHireableInstruments: (
-    action: SetStateAction<InstrumentData[] | null>
+    action: SetStateAction<HireableInstrumentInput[] | null>
   ) => {},
 };
-
-// TYPES
-import { SchoolData, InstrumentData } from "../types";
-import { FormProvider } from "react-hook-form";
 
 interface DataContextProviderProps {
   children: React.ReactNode;
@@ -41,7 +42,7 @@ const DataContextProvider = ({ children }: DataContextProviderProps) => {
   const [instrumentData, setInstrumentData] =
     React.useState<InstrumentData | null>(null);
   const [allHireableInstruments, setAllHireableInstruments] = React.useState<
-    InstrumentData[] | null
+    HireableInstrumentInput[] | null
   >(null);
 
   return (
