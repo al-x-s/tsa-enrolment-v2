@@ -8,8 +8,13 @@ interface SchoolNames {
 }
 
 export default async function getSchoolNames(): Promise<SchoolNames[]> {
-  const result = await prisma.school.findMany({
-    select: { name: true },
-  });
-  return JSON.parse(JSON.stringify(result));
+  try {
+    const result = await prisma.school.findMany({
+      select: { name: true },
+    });
+
+    return JSON.parse(JSON.stringify(result));
+  } catch (error) {
+    return JSON.parse(JSON.stringify(error));
+  }
 }
