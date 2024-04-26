@@ -1,13 +1,13 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -18,6 +18,9 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        ubuntu: ["var(--font-ubuntu)"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -33,7 +36,8 @@ const config = {
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
+          // DEFAULT: "hsl(var(--destructive))",
+          DEFAULT: "#F7EC59",
           foreground: "hsl(var(--destructive-foreground))",
         },
         muted: {
@@ -51,6 +55,21 @@ const config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        theme: {
+          100: "#e6d3f9",
+          300: "#cea0f1",
+          600: "#9e66c6",
+          700: "#8148a8",
+          800: "#6c3f8a",
+          900: "#6027e1",
+          grey: {
+            DEFAULT: "#3a3537",
+            light: "#9d9398",
+          },
+        },
+        form: {
+          nav: "#5da3f2",
         },
       },
       borderRadius: {
@@ -74,7 +93,10 @@ const config = {
       },
     },
   },
+  variants: {
+    // fill: ["hover", "focus"],
+  },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
 
-export default config
+export default config;

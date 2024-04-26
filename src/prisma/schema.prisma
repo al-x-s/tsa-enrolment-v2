@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Enrolment {
+  id Int @id @default(autoincrement())
+  student_school  String
+  agree_tsa_terms Boolean
+  student_first_name  String
+  student_surname     String
+  student_grade       String
+  previous_student    Boolean
+  opportunity_student Boolean
+  instrument          String
+  inst_other          String?
+  student_medical     String
+  selected_program_id String
+  client_first_name        String
+  client_surname           String
+  relationship             String?
+  secondary_first_name     String?
+  secondary_surname        String?
+  secondary_email          String?
+  secondary_contact_number String?
+  client_email             String
+  client_mobile            String
+  client_home_phone        String?
+  client_work_phone        String?
+  client_street_address    String
+  client_city_suburb       String
+  client_state             String
+  client_postcode          String
+  hire_purchase_byo String
+  inst_is_insured   Boolean
+  drivers_license_no         String?
+  nearest_relative_name      String?
+  nearest_relative_phone     String?
+  main_earner_name           String?
+  main_earner_mobile         String?
+  main_earner_employer_name  String?
+  main_earner_employer_phone String?
+  cc_or_direct_debit         String?
+  agree_rental_terms         Json?
+  cc_name   String?
+  cc_number String?
+  cc_expiry String?
+  cc_ccv    String?
+  bank_country        String?
+  bank_name           String?
+  bank_street_address String?
+  bank_city_suburb    String?
+  bank_state          String?
+  bank_postcode       String?
+  bank_bsb            String?
+  bank_acc_name       String?
+  bank_acc_number     String?
+  purchased_model String?
+  accessories Json
+}
+
+model School {
+  id                       Int             @id @default(autoincrement())
+  name                     String          @unique
+  programs                 SchoolProgram[]
+  resource_levy            Int
+  facility_hire            Int
+  grades                   Json
+  offers_instrument_rental Boolean
+  instrument_options       Json
+}
+
+model SchoolProgram {
+  school                School  @relation(fields: [schoolId], references: [id])
+  schoolId              Int
+  program               Program @relation(fields: [programId], references: [id])
+  programId             Int
+  school_program_status String
+
+  @@id([schoolId, programId])
+  @@index([schoolId])
+  @@index([programId])
+}
+
+model Program {
+  id             Int             @id @default(autoincrement())
+  name           String          @unique
+  description    String
+  cost           Int
+  cost_breakdown Json[]
+  whats_included String[]
+  type           String
+  classType      String
+  program_status String
+  enrol_fee      Int
+  schools        SchoolProgram[]
+}
+
+model Instrument {
+  id               Int         @id @default(autoincrement())
+  name             String      @unique
+  purchase_options Json
+  can_hire         Boolean
+  hire_cost        Int?
+  hire_insurance   Int?
+  accessories      Accessory[]
+}
+
+model Accessory {
+  id                Int          @id @default(autoincrement())
+  name              String       @unique
+  status            String
+  price             Decimal
+  is_recommended    Boolean
+  description_short String
+  description_long  String
+  instruments       Instrument[]
+}
