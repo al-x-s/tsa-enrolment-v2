@@ -1,11 +1,9 @@
 "use server";
 
 import prisma from "@/prisma/client";
-import { cache } from "react";
+// import { cache } from "react";
 
-export default cache(async function getSchoolData(
-  schoolName: string
-): Promise<any> {
+export default async function getSchoolData(schoolName: string): Promise<any> {
   const result = await prisma.school.findFirst({
     where: { name: schoolName },
     include: {
@@ -13,4 +11,4 @@ export default cache(async function getSchoolData(
     },
   });
   return JSON.parse(JSON.stringify(result));
-});
+}

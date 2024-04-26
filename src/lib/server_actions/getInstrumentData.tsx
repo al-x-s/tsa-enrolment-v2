@@ -1,9 +1,9 @@
 "use server";
 
 import prisma from "@/prisma/client";
-import { cache } from "react";
+// import { cache } from "react";
 
-export default cache(async function getInstrumentData(
+export default async function getInstrumentData(
   instrument: string
 ): Promise<any> {
   const result = await prisma.instrument.findFirst({
@@ -13,4 +13,4 @@ export default cache(async function getInstrumentData(
     },
   });
   return JSON.parse(JSON.stringify(result));
-});
+}

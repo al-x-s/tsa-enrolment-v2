@@ -1,9 +1,9 @@
 "use server";
 
 import prisma from "@/prisma/client";
-import { cache } from "react";
+// import { cache } from "react";
 
-export default cache(async function getAllHireableInstruments(): Promise<any> {
+export default async function getAllHireableInstruments(): Promise<any> {
   const result = await prisma.instrument.findMany({
     where: { can_hire: true },
     select: {
@@ -13,4 +13,4 @@ export default cache(async function getAllHireableInstruments(): Promise<any> {
     },
   });
   return JSON.parse(JSON.stringify(result));
-});
+}
