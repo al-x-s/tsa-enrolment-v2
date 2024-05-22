@@ -3,41 +3,95 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  hashedPassword String?
+  image         String?
+  role          String?
+  accounts      Account[]
+  sessions      Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
 model Enrolment {
-  id Int @id @default(autoincrement())
-  student_school  String
-  agree_tsa_terms Boolean
-  student_first_name  String
-  student_surname     String
-  student_grade       String
-  previous_student    Boolean
-  opportunity_student Boolean
-  instrument          String
-  inst_other          String?
-  student_medical     String
-  selected_program_id String
-  client_first_name        String
-  client_surname           String
-  relationship             String?
-  secondary_first_name     String?
-  secondary_surname        String?
-  secondary_email          String?
-  secondary_contact_number String?
-  client_email             String
-  client_mobile            String
-  client_home_phone        String?
-  client_work_phone        String?
-  client_street_address    String
-  client_city_suburb       String
-  client_state             String
-  client_postcode          String
-  hire_purchase_byo String
-  inst_is_insured   Boolean
+  id                         Int     @id @default(autoincrement())
+  student_school             String
+  agree_tsa_terms            Boolean
+  student_first_name         String
+  student_surname            String
+  student_grade              String
+  previous_student           Boolean
+  opportunity_student        Boolean
+  instrument                 String
+  inst_other                 String?
+  student_medical            String
+  selected_program_id        String
+  client_first_name          String
+  client_surname             String
+  relationship               String?
+  secondary_first_name       String?
+  secondary_surname          String?
+  secondary_email            String?
+  secondary_contact_number   String?
+  client_email               String
+  client_mobile              String
+  client_home_phone          String?
+  client_work_phone          String?
+  client_street_address      String
+  client_city_suburb         String
+  client_state               String
+  client_postcode            String
+  hire_purchase_byo          String
+  inst_is_insured            Boolean
   drivers_license_no         String?
   nearest_relative_name      String?
   nearest_relative_phone     String?
@@ -47,21 +101,21 @@ model Enrolment {
   main_earner_employer_phone String?
   cc_or_direct_debit         String?
   agree_rental_terms         Json?
-  cc_name   String?
-  cc_number String?
-  cc_expiry String?
-  cc_ccv    String?
-  bank_country        String?
-  bank_name           String?
-  bank_street_address String?
-  bank_city_suburb    String?
-  bank_state          String?
-  bank_postcode       String?
-  bank_bsb            String?
-  bank_acc_name       String?
-  bank_acc_number     String?
-  purchased_model String?
-  accessories Json
+  cc_name                    String?
+  cc_number                  String?
+  cc_expiry                  String?
+  cc_ccv                     String?
+  bank_country               String?
+  bank_name                  String?
+  bank_street_address        String?
+  bank_city_suburb           String?
+  bank_state                 String?
+  bank_postcode              String?
+  bank_bsb                   String?
+  bank_acc_name              String?
+  bank_acc_number            String?
+  purchased_model            String?
+  accessories                Json
 }
 
 model School {

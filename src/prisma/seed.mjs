@@ -1,6 +1,35 @@
-const { PrismaClient } = require("@prisma/client");
+import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
+
+// const { PrismaClient } = require("@prisma/client");
 // const { categories, products } = require("./data.js");
 const prisma = new PrismaClient();
+
+async function initAdmin() {
+  const hashedPassword = await bcrypt.hash(process.env.INIT_ADMIN_PASSWORD, 10);
+
+  const admin = await prisma.user.create({
+    data: {
+      name: "Admin",
+      email: process.env.INIT_ADMIN_EMAIL,
+      hashedPassword,
+      role: "admin",
+    },
+  });
+}
+
+async function initUser() {
+  const hashedPassword = await bcrypt.hash(process.env.INIT_USER_PASSWORD, 10);
+
+  const admin = await prisma.user.create({
+    data: {
+      name: "User",
+      email: process.env.INIT_USER_EMAIL,
+      hashedPassword,
+      role: "user",
+    },
+  });
+}
 
 async function schoolsAndPrograms() {
   const arcadia = await prisma.school.create({
@@ -542,6 +571,8 @@ const load = async () => {
 
     schoolsAndPrograms();
     instrumentsAndAccessories();
+    initAdmin();
+    initUser();
   } catch (e) {
     console.error(e);
     process.exit(1);

@@ -85,31 +85,4 @@
   body {
     @apply text-foreground;
   }
-
-  html {
-    /* background: linear-gradient(
-      115deg,
-      #e6d3f9 0%,
-      #e6d3f9 50%,
-      #cea0f1 50%,
-      #cea0f1 100%
-    ); */
-    background-image: radial-gradient(
-      circle at -70% 50%,
-      #e6d3f9 0%,
-      #e6d3f9 70%,
-      #cea0f1 70%,
-      #cea0f1 100%
-    );
-
-    @media (max-width: 1023px) {
-      background-image: radial-gradient(
-        circle at -50% -50%,
-        #e6d3f9 0%,
-        #e6d3f9 70%,
-        #cea0f1 70%,
-        #cea0f1 100%
-      );
-    }
-  }
 }

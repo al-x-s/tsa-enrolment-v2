@@ -2,6 +2,8 @@ import { z } from "zod";
 import React from "react";
 import { Ubuntu } from "next/font/google";
 import clsx from "clsx";
+// import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 // Components
 import Provider from "@/components/Provider";
 import DataContextProvider from "@/lib/hooks/DataContextProvider";
@@ -11,6 +13,7 @@ import { FormDataSchema } from "@/lib/schema";
 // import Form from "@/components/Form";
 // Styles
 import "@/app/globals.css";
+import NavBar from "./NavBar";
 // import "@/stylesheets/fonts.css";
 
 export const metadata = {
@@ -25,19 +28,22 @@ const ubuntu = Ubuntu({
   display: "swap",
 });
 
-export default function RootLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // const session = await auth();
+
+  // if (!session) {
+  //   redirect("/api/auth/signin");
+  // }
+
   return (
     <html lang="en" className="h-full">
-      <body className="font-ubuntu h-full flex flex-col justify-start lg:justify-center items-center">
-        <main className="font-normal relative w-full max-w-lg lg:max-w-[940px] min-h-screen flex flex-col justify-start lg:justify-center items-center h-full">
-          <div className=" w-full flex flex-col lg:flex-row px-4 lg:p-4 rounded-2xl h-[calc(100%-72px)] lg:h-4/5">
-            <DataContextProvider>{children}</DataContextProvider>
-          </div>
-        </main>
+      <body className="">
+        <NavBar userName={"hello..."} />
+        <main>{children}</main>
       </body>
     </html>
   );
