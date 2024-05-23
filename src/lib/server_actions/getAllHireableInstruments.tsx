@@ -1,7 +1,6 @@
 "use server";
 
 import prisma from "@/prisma/client";
-// import { cache } from "react";
 
 export default async function getAllHireableInstruments(): Promise<any> {
   const result = await prisma.instrument.findMany({

@@ -1,20 +1,13 @@
-import { z } from "zod";
 import React from "react";
 import { Ubuntu } from "next/font/google";
-import clsx from "clsx";
-// import { auth } from "@/auth";
+import { validateRequest } from "@/auth";
 import { redirect } from "next/navigation";
+
 // Components
-import Provider from "@/components/Provider";
-import DataContextProvider from "@/lib/hooks/DataContextProvider";
 
-import { FormDataSchema } from "@/lib/schema";
-
-// import Form from "@/components/Form";
 // Styles
 import "@/app/globals.css";
 import NavBar from "./NavBar";
-// import "@/stylesheets/fonts.css";
 
 export const metadata = {
   title: "TSA Enrolment",
@@ -33,16 +26,16 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // const session = await auth();
+  const { user } = await validateRequest();
 
-  // if (!session) {
-  //   redirect("/api/auth/signin");
-  // }
+  if (!user) {
+    return redirect("/login");
+  }
 
   return (
     <html lang="en" className="h-full">
       <body className="">
-        <NavBar userName={"hello..."} />
+        <NavBar userName={user?.username} />
         <main>{children}</main>
       </body>
     </html>

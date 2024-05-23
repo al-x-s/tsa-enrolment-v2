@@ -1,77 +1,77 @@
-// import NextAuth, { type DefaultSession } from "next-auth";
-// import { PrismaAdapter } from "@auth/prisma-adapter";
-// import CredentialsProvider from "next-auth/providers/credentials";
-// import prisma from "@/prisma/client";
-// import bcrypt from "bcryptjs";
-// import { signInSchema } from "@/lib/signInSchema";
-// import { User } from "lucide-react";
+import { Lucia } from "lucia";
+import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
+import prisma from "@/prisma/client";
+import { cookies } from "next/headers";
+import { cache } from "react";
 
-// declare module "next-auth" {
-//   interface Session {
-//     user: {
-//       role: string;
-//     } & DefaultSession["user"];
-//   }
-// }
+import type { Session, User } from "lucia";
+// import type { DatabaseUser } from "./db";
 
-// export const { handlers, auth, signIn, signOut } = NextAuth({
-//   adapter: PrismaAdapter(prisma),
-//   session: {
-//     strategy: "jwt",
-//   },
-//   providers: [
-//     CredentialsProvider({
-//       name: "Email",
-//       credentials: {
-//         email: { label: "Email", type: "email", placeholder: "Email" },
-//         password: {
-//           label: "Password",
-//           type: "password",
-//           placeholder: "Password",
-//         },
-//       },
-//       authorize: async (credentials) => {
-//         if (!credentials.email || !credentials.password) {
-//           return null;
-//         }
+interface DatabaseUser {
+  id: string;
+  username: string;
+  role: string;
+  password_hash: string;
+}
 
-//         const { email, password } = await signInSchema.parseAsync(credentials);
+// import { webcrypto } from "crypto";
+// globalThis.crypto = webcrypto as Crypto;
 
-//         const user = await prisma.user.findUnique({
-//           where: { email: email },
-//         });
+const adapter = new PrismaAdapter(prisma?.session, prisma.user);
 
-//         if (!user || typeof user.hashedPassword !== "string") {
-//           return null;
-//         }
+export const lucia = new Lucia(adapter, {
+  sessionCookie: {
+    attributes: {
+      secure: process.env.NODE_ENV === "production",
+    },
+  },
+  getUserAttributes: (attributes) => {
+    return {
+      username: attributes.username,
+      role: attributes.role,
+    };
+  },
+});
 
-//         const passwordsMatch = await bcrypt.compare(
-//           password,
-//           user.hashedPassword
-//         );
-//         user.hashedPassword = "";
+export const validateRequest = cache(
+  async (): Promise<
+    { user: User; session: Session } | { user: null; session: null }
+  > => {
+    const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
+    if (!sessionId) {
+      return {
+        user: null,
+        session: null,
+      };
+    }
 
-//         return passwordsMatch ? user : null;
-//       },
-//     }),
-//   ],
-//   callbacks: {
-//     async redirect({ url, baseUrl }) {
-//       return "/admin"; // Redirect to dashboard after sign-in
-//     },
-//     async session({ session, token, user }) {
-//       console.log("session --->", session);
-//       console.log("token ---->", token);
-//       console.log("user ---->", user);
-//       const result = await user;
-//       console.log("result --->", result);
-//       return {
-//         ...session,
-//         user: {
-//           ...session.user,
-//           // role: user.role,
-//         },
-//       };
-//     },
-//   },
-// });
+    const result = await lucia.validateSession(sessionId);
+    // next.js throws when you attempt to set cookie when rendering page
+    try {
+      if (result.session && result.session.fresh) {
+        const sessionCookie = lucia.createSessionCookie(result.session.id);
+        cookies().set(
+          sessionCookie.name,
+          sessionCookie.value,
+          sessionCookie.attributes
+        );
+      }
+      if (!result.session) {
+        const sessionCookie = lucia.createBlankSessionCookie();
+        cookies().set(
+          sessionCookie.name,
+          sessionCookie.value,
+          sessionCookie.attributes
+        );
+      }
+    } catch {}
+    return result;
+  }
+);
+
+declare module "lucia" {
+  interface Register {
+    Lucia: typeof lucia;
+    DatabaseUserAttributes: Omit<DatabaseUser, "id">;
+  }
+}

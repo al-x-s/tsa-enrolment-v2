@@ -1,31 +1,38 @@
-import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { Argon2id } from "oslo/password";
 
 // const { PrismaClient } = require("@prisma/client");
 // const { categories, products } = require("./data.js");
 const prisma = new PrismaClient();
 
 async function initAdmin() {
-  const hashedPassword = await bcrypt.hash(process.env.INIT_ADMIN_PASSWORD, 10);
+  const argon2id = new Argon2id();
+  const password_hash = await argon2id.hash(
+    process.env.INIT_ADMIN_PASSWORD,
+    10
+  );
 
   const admin = await prisma.user.create({
     data: {
-      name: "Admin",
+      id: crypto.randomUUID(),
+      username: "Ben",
       email: process.env.INIT_ADMIN_EMAIL,
-      hashedPassword,
+      password_hash,
       role: "admin",
     },
   });
 }
 
 async function initUser() {
-  const hashedPassword = await bcrypt.hash(process.env.INIT_USER_PASSWORD, 10);
+  const argon2id = new Argon2id();
+  const password_hash = await argon2id.hash(process.env.INIT_USER_PASSWORD, 10);
 
   const admin = await prisma.user.create({
     data: {
-      name: "User",
+      id: crypto.randomUUID(),
+      username: "Steve",
       email: process.env.INIT_USER_EMAIL,
-      hashedPassword,
+      password_hash,
       role: "user",
     },
   });

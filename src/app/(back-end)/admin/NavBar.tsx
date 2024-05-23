@@ -10,6 +10,8 @@ import { usePathname } from "next/navigation";
 
 import { LogOut, Lock, Settings, User, UserPlus } from "lucide-react";
 
+import { signOut } from "@/lib/server_actions/auth.actions";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -58,7 +60,9 @@ function UserMenu({ ...props }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <LogOut className="mr-2 h-4 w-4" />
-          <Link href="/api/auth/signout?callbackUrl=/welcome">Logout</Link>
+          <form action={signOut}>
+            <button type="submit">Sign out</button>
+          </form>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
