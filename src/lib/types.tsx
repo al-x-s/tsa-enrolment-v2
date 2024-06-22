@@ -45,9 +45,15 @@ export interface SchoolData {
   id: number;
   name: string;
   facility_hire: number;
-  grades: JSON;
-  instrument_options: InstrumentOptions;
-  programs: Programs[];
+  grades: any;
+  instrument_options: any;
+  programs: any;
+  // programs: {
+  //   schoolId: number;
+  //   programId: number;
+  //   school_program_status: string;
+  //   program: Program[];
+  // };
   resource_levy: number;
   offers_instrument_rental: Boolean;
 }

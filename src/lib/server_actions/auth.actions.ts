@@ -1,10 +1,37 @@
 "use server";
+// Database
+import prisma from "@/prisma/client";
+// Schema
 import { z } from "zod";
 import { signInSchema } from "@/lib/schema";
-import prisma from "@/prisma/client";
-import { Argon2id } from "oslo/password";
-import { cookies } from "next/headers";
+// Lucia Auth
 import { lucia, validateRequest } from "@/auth";
+import { Argon2id } from "oslo/password";
+import { decodeHex } from "oslo/encoding";
+import { TOTPController } from "oslo/otp";
+
+import { cookies } from "next/headers";
+import { error } from "console";
+
+export const createSession = async (userId: string) => {
+  console.log("create session user ID ->>>", userId);
+  const session = await lucia.createSession(userId, {
+    // 24 Hours
+    // expiresIn: 60 * 60 * 24 * 1,
+  });
+
+  const sessionCookie = lucia.createSessionCookie(session.id);
+
+  cookies().set(
+    sessionCookie.name,
+    sessionCookie.value,
+    sessionCookie.attributes
+  );
+
+  return {
+    success: "Logged in successfully",
+  };
+};
 
 export const signIn = async (values: z.infer<typeof signInSchema>) => {
   try {
@@ -21,13 +48,13 @@ export const signIn = async (values: z.infer<typeof signInSchema>) => {
 
   if (!existingUser) {
     return {
-      error: "User not found",
+      error: "Invalid username or password",
     };
   }
 
   if (!existingUser.password_hash) {
     return {
-      error: "User not found",
+      error: "Invalid username or password",
     };
   }
 
@@ -44,22 +71,43 @@ export const signIn = async (values: z.infer<typeof signInSchema>) => {
     };
   }
 
-  const session = await lucia.createSession(existingUser.id, {
-    // 24 Hours
-    // expiresIn: 60 * 60 * 24 * 1,
-  });
+  const is2faEnabled = existingUser.mfa_secret_hash === null ? false : true;
 
-  const sessionCookie = lucia.createSessionCookie(session.id);
+  if (is2faEnabled) {
+    if (values?.otp === undefined) {
+      return;
+    }
 
-  cookies().set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes
-  );
+    if (values?.otp.length === 6) {
+      let hashedSecret: string = "";
 
-  return {
-    success: "Logged in successfully",
-  };
+      if (existingUser?.mfa_secret_hash === null) {
+        return;
+      } else {
+        hashedSecret = existingUser?.mfa_secret_hash;
+      }
+
+      const validOTP = await new TOTPController().verify(
+        values.otp,
+        decodeHex(hashedSecret)
+      );
+
+      if (validOTP === false) {
+        return { error: "Invalid Code - Please try again" };
+      } else if (validOTP === true) {
+        const res = createSession(existingUser.id);
+        return res;
+      }
+    } else {
+      const message: any = { message: "2FA Required" };
+      return message;
+    }
+  }
+
+  if (!is2faEnabled) {
+    const res = createSession(existingUser.id);
+    return res;
+  }
 };
 
 export const signOut = async () => {

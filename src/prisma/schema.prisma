@@ -9,12 +9,13 @@ datasource db {
 }
 
 model User {
-  id       String    @id 
-  username  String @unique
-  email String @unique
-  password_hash String
-  role String @default("user")
-  sessions Session[]
+  id              String    @id
+  username        String    @unique
+  email           String    @unique
+  password_hash   String
+  mfa_secret_hash String?
+  role            String    @default("user")
+  sessions        Session[]
 }
 
 model Session {

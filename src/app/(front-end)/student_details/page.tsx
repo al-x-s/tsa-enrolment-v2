@@ -54,7 +54,6 @@ export default function StudentDetailsPage() {
     }
   }, []);
 
-  // const [schoolData, setSchoolData] = React.useState([]);
   const { schoolData, setInstrumentData } = React.useContext(DataContext);
   const [instrumentSelectMap, setInstrumentSelectMap] = React.useState<
     InstrumentSelectMap[]

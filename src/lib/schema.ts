@@ -293,6 +293,6 @@ export const signInSchema = z.object({
   password: z
     .string({ required_error: "Password is required" })
     .min(1, "Password is required")
-    .min(8, "Password must be more than 8 characters")
     .max(45, "Password must be less than 45 characters"),
+  otp: z.string().optional(),
 });
