@@ -3,7 +3,6 @@ import React from "react";
 import { useRouter } from "next/navigation";
 
 // Hooks
-import { DataContext } from "@/lib/hooks/DataContextProvider";
 import useAppFormContext from "@/lib/hooks/useAppFormContext";
 
 // Components
@@ -13,30 +12,52 @@ import { TuitionTypeOption } from "@/components/ui/tuition_type_option";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Server Actions
-import getAllHireableInstruments from "@/lib/server_actions/getAllHireableInstruments";
-
-// Helper functions
-import filterProgramsByInstrument from "@/lib/helpers/filterProgramsByInstrument";
+import getProgramsData from "@/lib/server_actions/front_end/getProgramsData";
 
 // Types
-import { Programs, SchoolData, HireableInstrumentInput } from "@/lib/types";
+import { SchoolProgramWithPrograms } from "@/lib/types";
+import { useQuery } from "@tanstack/react-query";
+import getSchoolData from "@/lib/server_actions/front_end/getSchoolData";
 
 export default function TuitionTypePage() {
   const router = useRouter();
+
+  React.useEffect(() => {
+    if (!student_school) {
+      router.replace("/welcome");
+      return;
+    }
+  });
+
+  // React hook form config
   const { trigger, formState, control, watch, setValue } = useAppFormContext();
+  const {
+    student_school,
+    program_type,
+    school_id,
+    student_details,
+    selected_program_id,
+  } = watch();
+  const { instrument } = student_details;
   const { errors } = formState;
-  const { student_school, student_details, selected_program_id } = watch();
-  const instrument = student_details.instrument;
 
-  // Instantiating schoolData and programsData
-  // const [schoolData, setSchoolData] = React.useState<SchoolData | null>(null);
-  const { schoolData, setAllHireableInstruments } =
-    React.useContext(DataContext);
-  const [programsData, setProgramsData] = React.useState<Programs[] | null>(
-    null
-  );
+  // Get page data
+  const { data: schoolData } = useQuery({
+    queryKey: ["schoolData", student_school],
+    queryFn: () => getSchoolData(student_school),
+  });
 
-  const levyFee = schoolData?.resource_levy;
+  const { data: programsData, isPending } = useQuery({
+    queryKey: ["programsData", school_id, program_type],
+    queryFn: () => getProgramsData(parseInt(school_id!), program_type),
+  });
+
+  if (isPending) {
+    return <p>loading...</p>;
+  }
+
+  // Desctructure schoolData
+  const { levyFee } = schoolData;
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     if (event.target instanceof HTMLButtonElement) {
@@ -45,41 +66,6 @@ export default function TuitionTypePage() {
       });
     }
   };
-
-  // Fetching schoolData and programsData data from server
-  React.useEffect(() => {
-    if (!student_school) {
-      router.replace("/welcome");
-      return;
-    }
-
-    async function runEffect() {
-      if (!schoolData) {
-        return;
-      }
-
-      const response: HireableInstrumentInput[] =
-        await getAllHireableInstruments();
-      console.log("response --->", response);
-      setAllHireableInstruments(response);
-
-      const programs: any = filterProgramsByInstrument(
-        instrument,
-        schoolData.instrument_options,
-        schoolData.programs
-      );
-
-      setProgramsData(programs);
-    }
-
-    runEffect();
-  }, []);
-
-  // Ordering programsData
-  const order: any = { Group: 1, Private: 2, "Band Only": 3 };
-  programsData?.sort((a: Programs, b: Programs) => {
-    return order[a.program.classType] - order[b.program.classType];
-  });
 
   // Validates form fields on this page
   const validateStep = async () => {
@@ -102,17 +88,17 @@ export default function TuitionTypePage() {
         description="Choose your tuition type."
       >
         {errors.selected_program_id?.message && (
-          <p className="text-destructive ml-8 mb-2">
+          <p className="text-highlight ml-8 mb-2">
             {errors.selected_program_id.message}
           </p>
         )}
         <ScrollArea className="px-8 max-h-[calc(100%-160px)] lg:max-h-none overflow-auto">
           <div className="flex flex-col mt-6">
-            {programsData?.map((program) => (
+            {programsData?.map((program: any) => (
               <TuitionTypeOption
                 key={program.programId}
                 programData={program.program}
-                levyFee={levyFee}
+                levyFee={parseInt(levyFee)}
                 handleClick={handleClick}
                 selectedTuitionType={selected_program_id}
               />

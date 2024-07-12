@@ -7,7 +7,8 @@ import questionButton from "@/images/question-mark-with-circle.svg";
 import circleTick from "@/images/circle-tick.svg";
 
 // Types
-import { Program } from "@/lib/types";
+import { CostBreakdown } from "@/lib/types";
+import { Program } from "@prisma/client";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -86,7 +87,14 @@ const TuitionTypeOption = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
-    const program_status = programData.program_status;
+    const {
+      program_status,
+      rehearsal_fee,
+      tuition_fee,
+      type,
+      classType,
+      description,
+    } = programData;
     const programId = programData.id.toString();
     const isSelected = selectedTuitionType === programId ? true : false;
     return (
@@ -105,7 +113,7 @@ const TuitionTypeOption = React.forwardRef<HTMLButtonElement, ButtonProps>(
               isSelected ? "bg-[#F3A644] text-[#FEF9EE]" : "bg-[#9689A4]"
             )}
           >
-            {programData.classType}
+            {classType}
           </div>
           {program_status === "Inactive" && (
             <h2 className="mr-2 text-right font-medium">
@@ -117,7 +125,7 @@ const TuitionTypeOption = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <div className="px-4">
           <div className="flex flex-row items-center mt-4 font-bold">
             <h2 className="text-xl my-1 font-ubuntu">
-              ${programData.cost + levyFee} per term
+              ${tuition_fee + rehearsal_fee + levyFee} per term
             </h2>
             <Dialog>
               <DialogTrigger asChild>
@@ -134,7 +142,7 @@ const TuitionTypeOption = React.forwardRef<HTMLButtonElement, ButtonProps>(
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>{programData.classType} Tuition</DialogTitle>
+                  <DialogTitle>{classType} Tuition</DialogTitle>
                   <DialogDescription>Price breakdown.</DialogDescription>
                 </DialogHeader>
                 <Table>
@@ -155,16 +163,26 @@ const TuitionTypeOption = React.forwardRef<HTMLButtonElement, ButtonProps>(
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {programData.cost_breakdown.map((cost) => (
-                      <TableRow key={crypto.randomUUID()}>
+                    {tuition_fee !== 0 && (
+                      <TableRow>
                         <TableCell className="font-medium w-60">
-                          {cost.item}
+                          Tuition Fee
                         </TableCell>
                         <TableCell className="text-right">
-                          {cost.price}
+                          {`${tuition_fee}`}
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
+                    {type === ("Band" || "String") && (
+                      <TableRow>
+                        <TableCell className="font-medium w-60">
+                          Rehearsal Fee
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {rehearsal_fee === 0 ? "Included" : rehearsal_fee}
+                        </TableCell>
+                      </TableRow>
+                    )}
                     {levyFee && (
                       <TableRow>
                         <TableCell className="font-medium">
@@ -178,7 +196,7 @@ const TuitionTypeOption = React.forwardRef<HTMLButtonElement, ButtonProps>(
                     <TableRow>
                       <TableCell>Total Per Term</TableCell>
                       <TableCell className="text-right">
-                        ${programData.cost + levyFee}
+                        ${tuition_fee + rehearsal_fee + levyFee}
                       </TableCell>
                     </TableRow>
                   </TableFooter>
@@ -197,16 +215,24 @@ const TuitionTypeOption = React.forwardRef<HTMLButtonElement, ButtonProps>(
               </DialogContent>
             </Dialog>
           </div>
-          <p className="pb-1 font-light">{programData.description}</p>
-          {programData.whats_included.map((value) => (
-            <div
-              key={crypto.randomUUID()}
-              className="flex flex-row items-center mt-2"
-            >
+          <p className="pb-1 font-light">{description}</p>
+          {classType !== "Rehearsal" && (
+            <div className="flex flex-row items-center mt-2">
               <Image alt="tick inside a circle" src={circleTick} />
-              <p className="ml-2">{value}</p>
+              <p className="ml-2">One {classType} lesson per week</p>
             </div>
-          ))}
+          )}
+
+          {type === ("Band" || "String") && (
+            <div className="flex flex-row items-center mt-2">
+              <Image alt="tick inside a circle" src={circleTick} />
+              <p className="ml-2">One Rehearsal per week</p>
+            </div>
+          )}
+          <div className="flex flex-row items-center mt-2">
+            <Image alt="tick inside a circle" src={circleTick} />
+            <p className="ml-2">Access to the Online Resource Library</p>
+          </div>
         </div>
         <div className="flex justify-center">
           <Comp
@@ -225,7 +251,7 @@ const TuitionTypeOption = React.forwardRef<HTMLButtonElement, ButtonProps>(
           >
             {program_status === "Inactive"
               ? "Unavailable"
-              : `Select ${programData.classType}`}
+              : `Select ${classType}`}
           </Comp>
         </div>
       </article>

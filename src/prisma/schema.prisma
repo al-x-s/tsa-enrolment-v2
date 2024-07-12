@@ -82,22 +82,49 @@ model Enrolment {
 }
 
 model School {
-  id                       Int             @id @default(autoincrement())
-  name                     String          @unique
+  id                       Int                @id @default(autoincrement())
+  name                     String             @unique
+  state_territory          String
+  facility_hire            Int @default(0)
+  grades                   SchoolGrade[]  
+  instruments              SchoolInstrument[]
   programs                 SchoolProgram[]
-  resource_levy            Int
-  facility_hire            Int
-  grades                   Json
+  resource_levy            Int @default(0)
   offers_instrument_rental Boolean
-  instrument_options       Json
+}
+
+model SchoolInstrument {
+  school       School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId     Int
+  instrument   Instrument @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  instrumentId Int
+  enrolled     Int        @default(0)
+  cap          Int        @default(-1)
+  status       String     @default("Available")
+
+  @@id([instrumentId, schoolId])
+  @@index([schoolId])
+  @@index([instrumentId])
+}
+
+model Instrument {
+  id             Int                @id @default(autoincrement())
+  name           String             @unique
+  program_type   String
+  can_hire       Boolean
+  hire_cost      Int?
+  hire_insurance Int?
+  accessories    Accessory[]
+  schools        SchoolInstrument[]
+  models         InstrumentModel[]
 }
 
 model SchoolProgram {
-  school                School  @relation(fields: [schoolId], references: [id])
-  schoolId              Int
-  program               Program @relation(fields: [programId], references: [id])
-  programId             Int
-  school_program_status String
+  school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId  Int
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  programId Int
+  status    String @default("Active")
 
   @@id([schoolId, programId])
   @@index([schoolId])
@@ -108,31 +135,73 @@ model Program {
   id             Int             @id @default(autoincrement())
   name           String          @unique
   description    String
-  cost           Int
-  cost_breakdown Json[]
-  whats_included String[]
-  type           String
-  classType      String
-  program_status String
+  type           ProgramType
+  classType      ClassType
+  program_status ProgramStatus
+  tuition_fee     Int
+  rehearsal_fee     Int
   enrol_fee      Int
   schools        SchoolProgram[]
 }
 
-model Instrument {
-  id               Int         @id @default(autoincrement())
-  name             String      @unique
-  purchase_options Json
-  can_hire         Boolean
-  hire_cost        Int?
-  hire_insurance   Int?
-  accessories      Accessory[]
+enum ProgramType {
+  Band
+  String
+  Keyboard
+  Guitar
+}
+
+enum ClassType {
+  Group
+  Private
+  Rehearsal
+}
+
+enum ProgramStatus {
+  Active
+  Inactive
+}
+
+model SchoolGrade {
+  school      School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId    Int
+  grade       Grade   @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  gradeId     Int
+
+  @@id([gradeId, schoolId])
+  @@index([schoolId])
+  @@index([gradeId])
+}
+
+model Grade {
+  id              Int           @id @default(autoincrement())
+  order           Int
+  name            String
+  state_territory String
+  category        String
+  schools         SchoolGrade[]
+
+  @@unique([name, state_territory])
+}
+
+
+model InstrumentModel {
+  id                  Int           @id @default(autoincrement())
+  instrument_category Instrument[]
+  rrp                 Float
+  sale_price          Float
+  features            String[]
+  brand               String
+  image               String
+  model               String        @unique
+  status              String        @default("Available")
 }
 
 model Accessory {
   id                Int          @id @default(autoincrement())
   name              String       @unique
   status            String
-  price             Decimal
+  price             Decimal @db.Decimal(4, 2)
   is_recommended    Boolean
   description_short String
   description_long  String

@@ -1,17 +1,19 @@
 "use client";
-
-import clsx from "clsx";
 import React from "react";
-import useAppFormContext from "@/lib/hooks/useAppFormContext";
 import { useRouter } from "next/navigation";
+
+// React Hook Form and Form Provider
+import useAppFormContext from "@/lib/hooks/useAppFormContext";
 import FormWrapper from "@/components/FormWrapper";
 import FormActions from "@/components/FormActions";
-import { DataContext } from "@/lib/hooks/DataContextProvider";
-import getSchoolData from "@/lib/server_actions/getSchoolData";
+
+// React Query and related server actions
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import getSchoolNames from "@/lib/server_actions/front_end/getSchoolNames";
+import getSchoolData from "@/lib/server_actions/front_end/getSchoolData";
 
 // Components
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -42,11 +44,8 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 
-// Server Actions
-import getSchoolNames from "@/lib/server_actions/getSchoolNames";
-
 // Terms and Conditions
-import { GeneralTermsDialogContent } from "@/lib/terms_and_conditions/generalTerms";
+import { GeneralTermsDialogContent } from "./generalTerms";
 
 function WelcomeMessage({ ...props }) {
   return (
@@ -158,46 +157,63 @@ function WelcomeMessage({ ...props }) {
 
 export default function WelcomePage() {
   const router = useRouter();
+
+  // React hook form config
   const { trigger, formState, control, watch, setValue } = useAppFormContext();
   const { student_school } = watch();
+  const { errors } = formState;
 
-  const [schoolList, setSchoolList] = React.useState([]);
+  // Get page data
+  const {
+    data: schoolNames,
+    error,
+    isFetched,
+  } = useQuery({
+    queryKey: ["schoolNames"],
+    queryFn: async () => {
+      const data = await getSchoolNames();
+      return data;
+    },
+  });
 
-  const { setSchoolData } = React.useContext(DataContext);
-
-  React.useEffect(() => {
-    async function runEffect() {
-      const response: any = await getSchoolNames();
-      setSchoolList(response);
-    }
-
-    runEffect();
-  }, []);
-
+  // Prefetch schoolData when student_school is changed
+  const queryClient = useQueryClient();
   React.useEffect(() => {
     if (!student_school) {
       return;
     }
 
-    async function runEffect() {
-      const response: any = await getSchoolData(student_school);
-      setSchoolData(response);
-    }
-
+    // If student_school is changed the below values will be reset
     setValue("student_details.student_grade", "");
     setValue("student_details.instrument", "");
     setValue("selected_program_id", "");
     setValue("instrument_options.purchased_model", "");
     setValue("accessories", {});
-    runEffect();
+    setValue("school_id", "");
+    setValue("program_type", "");
+
+    // schoolData is prefetched
+    queryClient.prefetchQuery({
+      queryKey: ["schoolData", student_school],
+      queryFn: () => getSchoolData(student_school),
+    });
   }, [student_school]);
 
-  const { errors } = formState;
+  // Fetch school data to set value of school_id and levy within validateStep function
+  const { data: schoolData, isPending } = useQuery({
+    queryKey: ["schoolData", student_school],
+    queryFn: () => getSchoolData(student_school),
+    enabled: !!student_school,
+  });
 
+  // Check form fields before moving to student_details
   const validateStep = async () => {
     const isValid = await trigger(["student_school", "agree_tsa_terms"], {
       shouldFocus: true,
     });
+
+    setValue("school_id", schoolData?.schoolId.toString());
+
     if (isValid) {
       router.push("/student_details");
     }
@@ -230,7 +246,7 @@ export default function WelcomePage() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {schoolList.map((school: any) => (
+                      {schoolNames?.map((school: any) => (
                         <SelectItem key={school.name} value={school.name}>
                           {school.name}
                         </SelectItem>

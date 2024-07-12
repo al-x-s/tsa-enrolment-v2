@@ -80,4 +80,7 @@ export const formDefaultValues: z.infer<typeof FormDataSchema> = {
     bank_bsb: "",
     bank_acc_number: "",
   },
+  // CONTEXT VARIABLES
+  school_id: "",
+  program_type: "",
 };

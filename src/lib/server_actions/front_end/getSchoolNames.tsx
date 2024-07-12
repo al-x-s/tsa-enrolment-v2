@@ -3,9 +3,9 @@
 import prisma from "@/prisma/client";
 // import { cache } from "react";
 
-interface SchoolNames {
+type SchoolNames = {
   name: string;
-}
+};
 
 export default async function getSchoolNames(): Promise<SchoolNames[]> {
   try {

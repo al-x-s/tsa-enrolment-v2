@@ -1,6 +1,7 @@
 import React from "react";
 import prisma from "@/prisma/client";
-import { Program, columns } from "./columns";
+import { columns } from "./columns";
+import { Program } from "@prisma/client";
 import { DataTable } from "@/components/tables/data-table";
 import Link from "next/link";
 
@@ -23,13 +24,14 @@ const ProgramsPage = async () => {
         <h1 className="text-3xl font-semibold">Programs</h1>
       </div>
       <div className="mx-auto w-full max-w-6xl items-start gap-6">
-        <Link
-          className="h-10 px-4 py-2 rounded font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  bg-blue-700 hover:bg-blue-900 text-white"
-          href="/admin/programs/add-new"
-        >
-          Add New Program
-        </Link>
-        <DataTable columns={columns} data={data} />
+        <DataTable columns={columns} data={data}>
+          <Link
+            className="h-10 px-4 py-2 rounded font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  bg-sky-700 hover:bg-sky-900 text-white"
+            href="/admin/programs/create"
+          >
+            Create New Program
+          </Link>
+        </DataTable>
       </div>
     </div>
   );

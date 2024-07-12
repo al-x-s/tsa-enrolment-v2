@@ -1,12 +1,15 @@
 "use client";
-
-import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
+// Tanstack Table
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  SortButton,
+  currencyFilter,
+  booleanFilter,
+  arrayFilter,
+} from "@/components/tables/tableUtils";
+
 export type School = {
   id: string;
   name: string;
@@ -19,36 +22,13 @@ export type School = {
 
 export const columns: ColumnDef<School>[] = [
   {
-    accessorKey: "id",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          ID
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
-  {
     accessorKey: "name",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Name" />;
     },
     cell: ({ row }) => {
-      const school_id: string = row.getValue("id");
+      const school = row.original as School;
+      const school_id: string = school.id;
       const school_name: string = row.getValue("name");
       const href = `/admin/schools/${school_id}/general`;
       return (
@@ -62,16 +42,7 @@ export const columns: ColumnDef<School>[] = [
     id: "Resource Levy",
     accessorKey: "resource_levy",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Resource Levy
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Resource Levy" />;
     },
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("Resource Levy"));
@@ -82,21 +53,13 @@ export const columns: ColumnDef<School>[] = [
 
       return <div>{formatted}</div>;
     },
+    filterFn: currencyFilter(),
   },
   {
     id: "Facility Hire",
     accessorKey: "facility_hire",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Facility Hire
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Facility Hire" />;
     },
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("Facility Hire"));
@@ -107,27 +70,19 @@ export const columns: ColumnDef<School>[] = [
 
       return <div>{formatted}</div>;
     },
+    filterFn: currencyFilter(),
   },
   {
     accessorKey: "programs",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Programs
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Programs" />;
     },
     cell: ({ row }) => {
       const options: any = row.getValue("programs");
 
       return options.map((option: any, index: number) => (
         <Link
-          href={`/admin/programs/${option.program.name}`}
+          href={`/admin/programs/${option.program.id}`}
           className="text-blue-500 hover:text-red-600"
           key={crypto.randomUUID()}
         >
@@ -136,25 +91,18 @@ export const columns: ColumnDef<School>[] = [
         </Link>
       ));
     },
+    filterFn: arrayFilter(),
   },
   {
     id: "Instrument Rental Available",
     accessorKey: "offers_instrument_rental",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Instrument Rental Available
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Instrument Rental Available" />;
     },
     cell: ({ row }) => {
       const data: boolean = row.getValue("Instrument Rental Available");
       return <div>{data === true ? "Yes" : "No"}</div>;
     },
+    filterFn: booleanFilter(),
   },
 ];

@@ -6,7 +6,7 @@ export default async function SignUpPage() {
   const { user } = await validateRequest();
 
   if (user) {
-    return redirect("/admin");
+    return redirect("/admin/schools");
   }
 
   return (

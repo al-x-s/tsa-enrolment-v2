@@ -6,7 +6,7 @@ import Image from "next/image";
 import questionButton from "@/images/question-mark-with-circle.svg";
 
 // Types
-import { Accessory, PurchaseOptions } from "@/lib/types";
+import { Accessory } from "@/lib/types";
 
 // Components
 import { Button } from "@/components/ui/button";

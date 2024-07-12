@@ -1,16 +1,16 @@
 // Types
-import { InstrumentOptions, Programs } from "@/lib/types";
+import {
+  SchoolInstrumentWithInstrument,
+  SchoolProgramWithPrograms,
+} from "@/lib/types";
 
 export default function filterProgramsByInstrument(
-  instrument: string,
-  instruments: InstrumentOptions,
-  programs: any
+  instrumentData: SchoolInstrumentWithInstrument[],
+  programs: SchoolProgramWithPrograms[]
 ) {
-  const programType: string = instruments[instrument].program;
-  const result: Programs[] = programs.filter(
-    (program: any) =>
-      program.program.type === programType &&
-      program.school_program_status !== "Hidden"
+  const programType: string = instrumentData[0].instrument.program_type;
+  const result: SchoolProgramWithPrograms[] = programs.filter(
+    (item: any) => item.program.type === programType && item.status !== "Hidden"
   );
   return result;
 }

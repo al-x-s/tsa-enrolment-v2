@@ -12,6 +12,8 @@ import Sidebar from "@/components/Sidebar";
 import { Form } from "@/components/ui/form";
 // Default Values
 import { formDefaultValues } from "@/lib/formDefaultValues";
+// React Query Provider
+import ReactQueryProvider from "@/lib/hooks/ReactQueryProviders";
 
 export default function Provider({ children }: FormProviderProps) {
   const route = useRouter();
@@ -19,7 +21,6 @@ export default function Provider({ children }: FormProviderProps) {
   const methods = useAppForm(formDefaultValues);
 
   const onSubmit = async (data: z.infer<typeof FormDataSchema>) => {
-    console.log(data);
     fetch("/api/register", {
       method: "POST",
       headers: {
@@ -47,18 +48,20 @@ export default function Provider({ children }: FormProviderProps) {
   const formRef = React.useRef<HTMLFormElement>(null);
 
   return (
-    <FormProvider {...methods}>
-      <Sidebar />
-      <Form {...methods}>
-        <form
-          ref={formRef}
-          onSubmit={methods.handleSubmit(onSubmit, onError)}
-          className="flex flex-col w-full h-full"
-        >
-          {children}
-        </form>
-      </Form>
-    </FormProvider>
+    <ReactQueryProvider>
+      <FormProvider {...methods}>
+        <Sidebar />
+        <Form {...methods}>
+          <form
+            ref={formRef}
+            onSubmit={methods.handleSubmit(onSubmit, onError)}
+            className="flex flex-col w-full h-full"
+          >
+            {children}
+          </form>
+        </Form>
+      </FormProvider>
+    </ReactQueryProvider>
   );
 }
 

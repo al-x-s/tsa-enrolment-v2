@@ -27,20 +27,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQueryClient } from "@tanstack/react-query";
+import getHireableTableData from "@/lib/server_actions/front_end/getHireableTableData";
 
 export default function YourDetailsPage() {
   const router = useRouter();
   const { trigger, formState, control, watch, setFocus } = useAppFormContext();
   const { errors } = formState;
-  const { student_school, student_details, your_details } = watch();
+  const {
+    student_school,
+    student_details,
+    your_details,
+    school_id,
+    program_type,
+  } = watch();
   const { client_email, confirm_client_email } = your_details;
   const instrument = student_details.instrument;
+  const queryClient = useQueryClient();
 
   React.useEffect(() => {
     if (!student_school) {
       router.replace("/welcome");
       return;
     }
+
+    queryClient.prefetchQuery({
+      queryKey: ["getHireableTableData", instrument],
+      queryFn: () => getHireableTableData(parseInt(school_id!), program_type!),
+    });
   }, []);
 
   const isEmailMatch = client_email === confirm_client_email ? true : false;
@@ -123,7 +137,7 @@ export default function YourDetailsPage() {
             />
 
             {!isEmailMatch && (
-              <p className="text-destructive text-sm text-right">
+              <p className="text-highlight text-sm text-right">
                 Email fields must match
               </p>
             )}
@@ -165,7 +179,7 @@ export default function YourDetailsPage() {
                     />
                   </FormControl>
                   {errors.your_details?.client_mobile && (
-                    <p className="text-destructive text-sm">
+                    <p className="text-highlight text-sm">
                       A mobile number is required
                     </p>
                   )}

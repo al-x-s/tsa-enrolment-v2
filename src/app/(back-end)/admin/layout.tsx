@@ -3,8 +3,13 @@ import { Ubuntu } from "next/font/google";
 import { validateRequest } from "@/auth";
 import { redirect } from "next/navigation";
 import { Toaster } from "@/components/ui/toaster";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 
-import Provider from "./Providers";
+import ReactQueryProvider from "@/lib/hooks/ReactQueryProviders";
 
 // Components
 
@@ -35,14 +40,18 @@ export default async function AdminLayout({
     return redirect("/login");
   }
 
+  const queryClient = new QueryClient();
+
   return (
     <html lang="en" className="h-full">
       <body className="flex min-h-screen w-full flex-col">
-        <Provider>
+        <ReactQueryProvider>
           <NavBar userName={user?.username} role={user?.role} />
-          <main>{children}</main>
+          <HydrationBoundary state={dehydrate(queryClient)}>
+            <main>{children}</main>
+          </HydrationBoundary>
           <Toaster />
-        </Provider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

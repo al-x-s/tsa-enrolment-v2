@@ -276,13 +276,15 @@ export const FormDataSchema = z.object({
       .string()
       .min(1, { message: "Please enter your postcode" }),
   }),
-
   // INSTRUMENT OPTIONS
   instrument_options: instrument_options,
   // ACCESSORIES
   accessories: z.object({}).optional(),
   // SUMMARY PAGE
   payment_options: payment_options,
+  // CONTEXT VARIABLES
+  school_id: z.string().optional(),
+  program_type: z.enum(["Band", "String", "Keyboard", "Guitar"]),
 });
 
 export const signInSchema = z.object({
@@ -295,4 +297,31 @@ export const signInSchema = z.object({
     .min(1, "Password is required")
     .max(45, "Password must be less than 45 characters"),
   otp: z.string().optional(),
+});
+
+export const programSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  type: z.enum(["Band", "String", "Keyboard", "Guitar"]),
+  classType: z.enum(["Group", "Private", "Rehearsal"]),
+  tuition_fee: z.number(),
+  rehearsal_fee: z.number(),
+  enrol_fee: z.number(),
+  program_status: z.enum(["Active", "Inactive"]),
+});
+
+export const gradeSchema = z.object({
+  name: z.string().min(1, "The name must have a minimum length of 1 character"),
+  category: z.enum(["Pre", "Primary", "Secondary", "Tertiary"]),
+  order: z.number(),
+  state_territory: z.enum([
+    "ACT",
+    "NSW",
+    "NT",
+    "QLD",
+    "SA",
+    "TAS",
+    "VIC",
+    "WA",
+  ]),
 });

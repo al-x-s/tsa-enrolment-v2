@@ -1,30 +1,26 @@
-interface InputItem {
-  name: string;
-  hire_cost: number;
-  hire_insurance: number;
-}
+import { HireableInstrumentInput } from "../types";
 
-interface OutputItem {
-  hire_cost: number;
-  insurance_cost: number;
+interface HireableTableData {
+  hire_cost: number | null;
+  insurance_cost: number | null;
   instruments: string[];
 }
 
 export function generateAllHireOptionsObject(
-  inputArray: InputItem[] | null
-): OutputItem[] | undefined {
+  inputArray: HireableInstrumentInput[] | null
+): HireableTableData[] | undefined {
   if (inputArray === null) {
     return;
   }
 
-  const result: OutputItem[] = [];
+  const result: HireableTableData[] = [];
 
   // Create a Map to store unique cost combinations
-  const costMap = new Map<string, OutputItem>();
+  const costMap = new Map<string, HireableTableData>();
 
   // Iterate over the input array
   for (const item of inputArray) {
-    const { name, hire_cost, hire_insurance } = item;
+    const { name, hire_cost, hire_insurance } = item.instrument;
     const costKey = `${hire_cost},${hire_insurance}`;
 
     // Check if the cost combination exists in the Map

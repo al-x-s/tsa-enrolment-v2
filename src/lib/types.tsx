@@ -1,92 +1,35 @@
-// School and Programs Tables
+import { Prisma } from "@prisma/client";
 
-export interface InstrumentOptions {
-  [key: string]: {
-    category: string;
-    program: string;
-    status: string;
-    enrolled: number;
-    cap: number;
+export type SchoolProgramWithPrograms = Prisma.SchoolProgramGetPayload<{
+  include: {
+    program: true;
   };
-}
+}>;
 
-export interface Option {
-  label: string;
-  message: string;
-  disabled: boolean;
-}
+export type SchoolGradeWithGrades = Prisma.SchoolGradeGetPayload<{
+  include: {
+    grade: true;
+  };
+}>;
 
-export interface InstrumentSelectMap {
-  program: string;
-  children: Option[];
-}
+export type SchoolInstrumentWithInstrument = Prisma.SchoolInstrumentGetPayload<{
+  include: {
+    instrument: true;
+  };
+}>;
 
-export interface Programs {
-  schoolId: number;
-  programId: number;
-  school_program_status: string;
-  program: Program;
-}
+export type InstrumentWithRelations = Prisma.InstrumentGetPayload<{
+  include: {
+    models: true;
+    accessories: true;
+  };
+}>;
 
-export interface Program {
-  id: number;
-  name: string;
-  type: string;
-  description: string;
-  cost: number;
-  cost_breakdown: [{ [key: string]: string }];
-  whats_included: string[];
-  classType: string;
-  program_status: string;
-  enrol_fee: number;
-}
-
-export interface SchoolData {
-  id: number;
-  name: string;
-  facility_hire: number;
-  grades: any;
-  instrument_options: any;
-  programs: any;
-  // programs: {
-  //   schoolId: number;
-  //   programId: number;
-  //   school_program_status: string;
-  //   program: Program[];
-  // };
-  resource_levy: number;
-  offers_instrument_rental: Boolean;
-}
-
-// Instrument and Accessories Tables
-
-export interface Accessory {
-  name: string;
-  price: number;
-  status: string;
-  is_recommended: boolean;
-  description_short: string;
-  description_long: string;
-}
-
-export interface PurchaseOptions {
-  brand: string;
-  model: any;
-  image: any;
-  rrp: number;
-  sale_price: number;
-  status: string;
-  features: String[];
-}
-
-export interface InstrumentData {
-  name: string;
-  can_hire: boolean;
-  hire_cost: number;
-  hire_insurance: number;
-  accessories: Accessory[];
-  purchase_options: PurchaseOptions[];
-}
+// Tuition Type Component
+export type CostBreakdown = {
+  item?: string;
+  price?: string;
+};
 
 // Summary Page
 
@@ -102,9 +45,11 @@ export interface UserData {
 // Instrument Options Page
 
 export interface HireableInstrumentInput {
-  name: string;
-  hire_cost: number;
-  hire_insurance: number;
+  instrument: {
+    name: string;
+    hire_cost: number | null;
+    hire_insurance: number | null;
+  };
 }
 
 // Accessories Page
@@ -112,3 +57,16 @@ export interface HireableInstrumentInput {
 export interface SelectedAccessory {
   [key: string]: boolean;
 }
+
+// Student Details Page
+
+export type Option = {
+  label: string;
+  message: string;
+  disabled: boolean;
+};
+
+export type InstrumentSelectMap = {
+  program: string;
+  children: Option[];
+};

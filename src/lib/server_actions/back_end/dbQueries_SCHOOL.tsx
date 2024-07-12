@@ -1,14 +1,16 @@
 "use server";
 import prisma from "@/prisma/client";
-import { formSchema } from "./[school_id]/schema";
-import { SchoolData } from "@/lib/types";
+import { formSchema } from "../../../app/(back-end)/admin/schools/[school_id]/general/schema";
+// import { SchoolData } from "@/lib/types";
+import { School } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 async function getSchoolById({
   school_id,
 }: {
   school_id: number;
-}): Promise<SchoolData | null> {
+}): Promise<School | null> {
   try {
     const school = await prisma.school.findFirst({
       where: {
@@ -16,6 +18,8 @@ async function getSchoolById({
       },
       include: {
         programs: { include: { program: true } },
+        grades: { include: { grade: true } },
+        instruments: { include: { instrument: true } },
       },
     });
 
@@ -25,18 +29,34 @@ async function getSchoolById({
       return null;
     }
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching school", error);
     return null;
   }
 }
 
-const update = async (formData: any, id: number) => {
+async function deleteSchool(school_id: number): Promise<any> {
+  try {
+    const school = await prisma.school.delete({
+      where: {
+        id: school_id,
+      },
+    });
+
+    if (school) {
+      revalidatePath("admin/schools");
+      return { isSuccess: true };
+    }
+  } catch (error) {
+    console.error("Error deleting school", error);
+    return null;
+  }
+}
+
+const updateSchool = async (formData: any, id: number) => {
   const keys = Object.keys(formData);
   const fieldName = keys[0];
   const schema = formSchema.pick({ [fieldName]: true });
   const parsed = schema.safeParse(formData);
-
-  console.log("Form Data", formData[fieldName]);
 
   if (parsed.success) {
     // update db
@@ -55,15 +75,12 @@ const update = async (formData: any, id: number) => {
         revalidatePath(`/admin/schools/${id}/`);
         return { isSuccess: true };
       } else {
-        console.log("db error");
         return { isSuccess: false };
       }
     } catch (error) {
-      console.log(error);
       return { isSuccess: false };
     }
   } else {
-    console.log("no attempt to update db");
     return {
       isSuccess: false,
       issues: parsed.error.issues.map((issue) => issue.message),
@@ -71,4 +88,4 @@ const update = async (formData: any, id: number) => {
   }
 };
 
-export { update, getSchoolById };
+export { updateSchool, getSchoolById, deleteSchool };

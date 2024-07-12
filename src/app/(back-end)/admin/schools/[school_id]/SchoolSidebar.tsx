@@ -9,7 +9,8 @@ const SchoolSidebar = ({ ...props }) => {
   const links = [
     { segmentName: "general", label: "General" },
     { segmentName: "grades", label: "Grades" },
-    { segmentName: "instrument_options", label: "Instrument Options" },
+    { segmentName: "programs", label: "Programs" },
+    { segmentName: "instruments", label: "Instruments" },
   ];
 
   return (

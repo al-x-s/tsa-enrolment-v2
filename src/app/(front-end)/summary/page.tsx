@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 // Hooks
 import useAppFormContext from "@/lib/hooks/useAppFormContext";
-import { DataContext } from "@/lib/hooks/DataContextProvider";
+import { useQuery } from "@tanstack/react-query";
 
 // Components
 import Link from "next/link";
@@ -23,13 +23,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { SummaryTable } from "@/components/SummaryTable";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import InputFormatted from "@/components/ui/input_formatted";
@@ -41,18 +34,12 @@ import cc_visa from "@/images/visa.svg";
 import cc_mastercard from "@/images/mastercard.svg";
 
 // Server Actions
-import getSchoolData from "@/lib/server_actions/getSchoolData";
-import getInstrumentData from "@/lib/server_actions/getInstrumentData";
+import getSchoolData from "@/lib/server_actions/front_end/getSchoolData";
+import getInstrumentData from "@/lib/server_actions/front_end/getInstrumentData";
+import getProgramsData from "@/lib/server_actions/front_end/getProgramsData";
 
 // Types
-import {
-  InstrumentOptions,
-  Program,
-  Programs,
-  SchoolData,
-  InstrumentData,
-  UserData,
-} from "@/lib/types";
+import { UserData } from "@/lib/types";
 
 function RadioOption({ ...props }) {
   return (
@@ -268,14 +255,41 @@ export default function SummaryPage() {
     instrument_options,
     accessories,
     payment_options,
+    school_id,
+    program_type,
   } = watch();
   const { instrument } = student_details;
   const { inst_is_insured, hire_purchase_byo, purchased_model } =
     instrument_options;
   const { payment_method, cc_number } = payment_options;
 
-  const { schoolData, instrumentData, allHireableInstruments } =
-    React.useContext(DataContext);
+  React.useEffect(() => {
+    if (!student_school) {
+      router.replace("/welcome");
+    }
+  }, []);
+
+  const { data: schoolData } = useQuery({
+    queryKey: ["schoolData", student_school],
+    queryFn: () => getSchoolData(student_school),
+  });
+
+  const { data: programsData } = useQuery({
+    queryKey: ["programsData", school_id, program_type],
+    queryFn: () => getProgramsData(parseInt(school_id!), program_type),
+    enabled: !!schoolData,
+  });
+
+  const { data, isPending } = useQuery({
+    queryKey: ["instrumentData", instrument],
+    queryFn: () => getInstrumentData(instrument),
+    enabled: !!programsData,
+  });
+
+  if (isPending) {
+    return <p>loading</p>;
+  }
+  const { instrumentData, accessoriesOptions } = data;
 
   const userData: UserData | undefined = {
     selected_program_id,
@@ -285,12 +299,6 @@ export default function SummaryPage() {
     accessories,
     instrument,
   };
-
-  React.useEffect(() => {
-    if (!student_school) {
-      router.replace("/welcome");
-    }
-  }, []);
 
   const [cardType, setCardType] = React.useState(cc_blank);
 
@@ -330,7 +338,9 @@ export default function SummaryPage() {
             <SummaryTable
               userData={userData}
               instrumentData={instrumentData}
+              accessoriesOptions={accessoriesOptions}
               schoolData={schoolData}
+              programsData={programsData}
             />
             <h1 className="mt-4 text-white text-xl font-semibold">
               When will my first payment be processed?

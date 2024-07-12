@@ -1,56 +1,21 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { Program } from "@prisma/client";
 import Link from "next/link";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Program = {
-  id: string;
-  name: string;
-  description: string;
-  cost: number;
-  type: string;
-  classType: string;
-  program_status: string;
-  enrol_fee: number;
-};
+import { currencyFilter, SortButton } from "@/components/tables/tableUtils";
 
 export const columns: ColumnDef<Program>[] = [
   {
-    accessorKey: "id",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          ID
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
-  {
     accessorKey: "name",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Name" />;
     },
     cell: ({ row }) => {
       const value: string = row.getValue("name");
-      const href = `/admin/programs/${value}`;
+      const program = row.original as Program;
+
+      const href = `/admin/programs/${program.id}`;
       return (
         <Link className="text-blue-500 hover:text-red-600" href={href}>
           {value}
@@ -61,104 +26,48 @@ export const columns: ColumnDef<Program>[] = [
   {
     accessorKey: "description",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Description
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Description" />;
     },
   },
   {
-    accessorKey: "cost",
+    accessorKey: "tuition_fee",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Cost
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Tuition Fee" />;
     },
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("cost"));
-      console.log(amount);
+      const amount = parseFloat(row.getValue("tuition_fee"));
+
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount);
-      console.log(formatted);
+
       return <div>{formatted}</div>;
     },
+    filterFn: currencyFilter(),
   },
   {
-    accessorKey: "type",
+    accessorKey: "rehearsal_fee",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Program Type
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Rehearsal Fee" />;
     },
-  },
-  {
-    id: "Class Type",
-    accessorKey: "classType",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Class Type
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("rehearsal_fee"));
+
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+
+      return <div>{formatted}</div>;
     },
-  },
-  {
-    id: "Status",
-    accessorKey: "program_status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    filterFn: currencyFilter(),
   },
   {
     id: "Enrolment Fee",
     accessorKey: "enrol_fee",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Enrolment Fee
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Enrolment Fee" />;
     },
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("Enrolment Fee"));
@@ -168,6 +77,27 @@ export const columns: ColumnDef<Program>[] = [
       }).format(amount);
 
       return <div>{formatted}</div>;
+    },
+    filterFn: currencyFilter(),
+  },
+  {
+    accessorKey: "type",
+    header: ({ column }) => {
+      return <SortButton column={column} label="Program Type" />;
+    },
+  },
+  {
+    id: "Class Type",
+    accessorKey: "classType",
+    header: ({ column }) => {
+      return <SortButton column={column} label="Class Type" />;
+    },
+  },
+  {
+    id: "Status",
+    accessorKey: "program_status",
+    header: ({ column }) => {
+      return <SortButton column={column} label="Status" />;
     },
   },
 ];

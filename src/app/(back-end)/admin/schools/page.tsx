@@ -10,6 +10,9 @@ async function getData(): Promise<School[]> {
       include: {
         programs: { include: { program: true } },
       },
+      orderBy: {
+        name: "asc",
+      },
     });
 
     return JSON.parse(JSON.stringify(schools));
@@ -27,14 +30,14 @@ const SchoolsPage = async () => {
         <h1 className="text-3xl font-semibold">Schools</h1>
       </div>
       <div className="mx-auto w-full max-w-6xl items-start gap-6">
-        <Link
-          className="h-10 px-4 py-2 rounded font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  bg-blue-700 hover:bg-blue-900 text-white"
-          // variant="secondary"
-          href="/admin/schools/add-new"
-        >
-          Add New School
-        </Link>
-        <DataTable columns={columns} data={data} />
+        <DataTable columns={columns} data={data}>
+          <Link
+            className="h-10 px-4 py-2 rounded font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  bg-sky-700 hover:bg-sky-900 text-white"
+            href="/admin/schools/create"
+          >
+            Create New School
+          </Link>
+        </DataTable>
       </div>
     </div>
   );

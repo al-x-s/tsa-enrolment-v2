@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import z, { isDirty } from "zod";
+import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,15 @@ import {
   FormField,
 } from "@/components/ui/form";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -23,23 +32,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getSchoolById, update } from "../getSchoolById";
-import { useQuery } from "@tanstack/react-query";
+import { updateSchool } from "@/lib/server_actions/back_end/dbQueries_SCHOOL";
 import { formSchema } from "./schema";
-import { SchoolData } from "@/lib/types";
+import { School } from "@prisma/client";
 import { useToast } from "@/components/ui/use-toast";
 
 const InputCard = ({ ...props }) => {
-  const { data, error, isFetched } = useQuery({
-    queryKey: ["school", props.school_id],
-    queryFn: async () => {
-      const data = await getSchoolById(props.school_id);
-      return data;
-    },
-  });
-
-  const fieldName = props.fieldName as keyof SchoolData;
-  const value: any = data?.[fieldName];
+  const fieldName = props.fieldName as keyof Pick<
+    School,
+    "facility_hire" | "name" | "offers_instrument_rental" | "resource_levy"
+  >;
+  const value: any = props.data?.[fieldName];
   const defaultValue: any = { [fieldName]: value };
 
   const schema = formSchema.pick({ [fieldName]: true });
@@ -54,9 +57,8 @@ const InputCard = ({ ...props }) => {
   const { toast } = useToast();
 
   const onSubmit = async (formData: z.infer<typeof schema>) => {
-    const response = await update(formData, props.school_id);
+    const response = await updateSchool(formData, props.school_id);
     if (response.isSuccess) {
-      console.log("success!");
       toast({
         title: "Success!",
         description: `${props.title} successfully updated`,
@@ -83,19 +85,18 @@ const InputCard = ({ ...props }) => {
               name={props.fieldName}
               render={({ field }) => (
                 <FormItem className="w-full pb-6">
-                  {/* <div className="flex items-baseline justify-between">
-                          <FormLabel className="text-black">{props.title}</FormLabel>
-                        </div> */}
-                  <FormControl>
-                    <>
-                      {props.inputType === "text" && (
+                  <>
+                    {props.inputType === "text" && (
+                      <FormControl>
                         <Input
                           className="max-w-[300px]"
                           type={props.inputType}
                           {...field}
                         />
-                      )}
-                      {props.inputType === "number" && (
+                      </FormControl>
+                    )}
+                    {props.inputType === "number" && (
+                      <FormControl>
                         <Input
                           className="max-w-[300px]"
                           type={props.inputType}
@@ -104,45 +105,47 @@ const InputCard = ({ ...props }) => {
                             field.onChange(+event.target.value)
                           }
                         />
-                      )}
-                      {props.inputType === "checkbox" && (
-                        <>
+                      </FormControl>
+                    )}
+                    {props.inputType === "checkbox" && (
+                      <>
+                        <FormControl>
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
                             className="border-black mr-1"
                           />
-                          <FormLabel className="">{props.label}</FormLabel>
-                        </>
-                      )}
-                      {/* {props.inputType === "radio" && (
-                        <RadioGroup
+                        </FormControl>
+                        <FormLabel className="">{props.label}</FormLabel>
+                      </>
+                    )}
+                    {props.inputType === "select" && (
+                      <>
+                        <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value.toString()}
-                          className="flex flex-col space-y-1 fill-black"
+                          value={field.value}
                         >
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem
-                                value={`${true}`}
-                                className=" text-black"
-                              />
-                            </FormControl>
-                            <FormLabel className="">Yes</FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem
-                                value={`${false}`}
-                                className=" text-black"
-                              />
-                            </FormControl>
-                            <FormLabel className="">No</FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      )} */}
-                    </>
-                  </FormControl>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {props.options.map((item: any) => (
+                              <SelectItem
+                                key={item}
+                                value={item}
+                                className="ml-3"
+                              >
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </>
+                    )}
+                  </>
+
                   <FormMessage />
                 </FormItem>
               )}

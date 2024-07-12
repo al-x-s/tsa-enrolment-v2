@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { ReactNode } from "react";
 
 import {
   ColumnDef,
@@ -23,15 +23,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "./DataTableViewOptions";
 import { DataTablePagination } from "./DataTablePagination";
+import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  children?: ReactNode;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  children,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -55,6 +58,7 @@ export function DataTable<TData, TValue>({
   return (
     <>
       <div className="flex items-between gap-2 py-4">
+        {children}
         <DataTableViewOptions table={table} />
       </div>
       <div className="rounded-md border bg-card">
@@ -75,34 +79,23 @@ export function DataTable<TData, TValue>({
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                      {typeof firstValue === "number" ? (
-                        <Input
-                          disabled
-                          type="number"
-                          value={
-                            (header.column.getFilterValue() as number) ?? ""
-                          }
-                          onChange={(e) =>
-                            header.column.setFilterValue(e.target.value)
-                          }
-                          placeholder={""}
-                          className="my-2 max-w-sm"
-                        />
-                      ) : (
-                        <Input
-                          placeholder="Search..."
-                          value={
-                            (table
-                              .getColumn(header.id)
-                              ?.getFilterValue() as string) ?? ""
-                          }
-                          onChange={(event) =>
-                            table
-                              .getColumn(header.id)
-                              ?.setFilterValue(event.target.value)
-                          }
-                          className="my-2 max-w-sm"
-                        />
+                      {!header.id.startsWith("actions") && (
+                        <>
+                          <Input
+                            placeholder="Search..."
+                            value={
+                              (table
+                                .getColumn(header.id)
+                                ?.getFilterValue() as string) ?? ""
+                            }
+                            onChange={(event) =>
+                              table
+                                .getColumn(header.id)
+                                ?.setFilterValue(event.target.value)
+                            }
+                            className="my-2 max-w-sm"
+                          />
+                        </>
                       )}
                     </TableHead>
                   );

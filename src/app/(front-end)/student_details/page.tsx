@@ -3,7 +3,6 @@ import React from "react";
 import clsx from "clsx";
 import useAppFormContext from "@/lib/hooks/useAppFormContext";
 import { useRouter } from "next/navigation";
-import { DataContext } from "@/lib/hooks/DataContextProvider";
 
 // Components
 import FormWrapper from "@/components/FormWrapper";
@@ -33,20 +32,19 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 // Server Actions
-import getInstrumentData from "@/lib/server_actions/getInstrumentData";
+import getInstrumentData from "@/lib/server_actions/front_end/getInstrumentData";
 
 // Helper Functions
 import generateInstrumentSelectMap from "@/lib/helpers/generateInstrumentSelectMap";
 
 // Types
-import { InstrumentSelectMap } from "@/lib/types";
+import { InstrumentSelectMap, SchoolGradeWithGrades } from "@/lib/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import getSchoolData from "@/lib/server_actions/front_end/getSchoolData";
+import getProgramsData from "@/lib/server_actions/front_end/getProgramsData";
 
 export default function StudentDetailsPage() {
   const router = useRouter();
-  const { trigger, formState, control, watch, setValue } = useAppFormContext();
-  const { errors } = formState;
-  const { student_school, student_details } = watch();
-  const { student_medical, instrument } = student_details;
 
   React.useEffect(() => {
     if (!student_school) {
@@ -54,83 +52,70 @@ export default function StudentDetailsPage() {
     }
   }, []);
 
-  const { schoolData, setInstrumentData } = React.useContext(DataContext);
-  const [instrumentSelectMap, setInstrumentSelectMap] = React.useState<
-    InstrumentSelectMap[]
-  >([]);
-  const [gradesMap, setGradesMap] = React.useState<string[]>([]);
+  // React hook form config
+  const { trigger, formState, control, watch, setValue } = useAppFormContext();
+  const { errors } = formState;
+  const { student_school, student_details, school_id } = watch();
+  const { student_medical, instrument } = student_details;
 
-  function generateGradesMap(object: any) {
-    console.log("Object passed to function", object);
-    const grades = Object.keys(object);
-    const result: string[] = [];
-    grades.forEach((grade) => {
-      if (object[grade] === true) {
-        result.push(grade);
-      }
+  // Get page data
+  const { data: schoolData, isPending } = useQuery({
+    queryKey: ["schoolData", student_school],
+    queryFn: () => getSchoolData(student_school),
+  });
+
+  // TODO - Need a better loading state
+  if (isPending) {
+    return <p>loading</p>;
+  }
+
+  // Destructure values from schoolData and set school_id
+  const { grades, instruments, enrolmentYear, schoolId } = schoolData;
+
+  // Prefetch data when instrument is changed
+  const queryClient = useQueryClient();
+  React.useEffect(() => {
+    // Prefetch Instrument Data
+    queryClient.prefetchQuery({
+      queryKey: ["instrumentData", instrument],
+      queryFn: () => getInstrumentData(instrument),
     });
-    return result;
-  }
 
-  function getEnrolmentYear() {
-    const today = new Date();
-    const month = today.getMonth() + 1;
-    let year = today.getFullYear();
-    if (month >= 10) {
-      year++;
-    }
-    return year;
-  }
+    // Prefetch Programs Data
+    // queryClient.prefetchQuery({
+    //   queryKey: ["programsData", school_id, instrument],
+    //   queryFn: () => getProgramsData(parseInt(school_id!), instrument),
+    // });
 
-  const enrolmentYear = getEnrolmentYear();
-
-  React.useEffect(() => {
-    if (!student_school) {
-      return;
-    }
-
-    async function runEffect() {
-      if (!schoolData) {
-        return;
-      }
-
-      const selectMap = generateInstrumentSelectMap(
-        schoolData.instrument_options
-      );
-      setInstrumentSelectMap(selectMap);
-
-      const gradesMap: any = generateGradesMap(schoolData.grades);
-      setGradesMap(gradesMap);
-    }
-
-    runEffect();
-  }, []);
-
-  React.useEffect(() => {
-    async function runEffect() {
-      const response: any = await getInstrumentData(instrument);
-      setInstrumentData(response);
-    }
-
+    // If instrument is changed the below values will be reset
     setValue("selected_program_id", "");
     setValue("instrument_options.purchased_model", "");
     setValue("accessories", {});
-
-    runEffect();
+    setValue("program_type", "Band");
   }, [instrument]);
 
+  // Fetch instrument data to set value of program type within validateStep function
+  const { data } = useQuery({
+    queryKey: ["instrumentData", instrument],
+    queryFn: () => getInstrumentData(instrument),
+    enabled: !!instrument,
+  });
+
+  // Check form fields before moving to tuition_type
   const validateStep = async () => {
-    // const isValid = await trigger(["student_first_name", "instrument"], {
     const isValid = await trigger(["student_details"], {
       shouldFocus: true,
     });
+
+    const { instrumentData } = data;
+    setValue("program_type", instrumentData?.program_type);
 
     if (isValid) {
       router.push("/tuition_type");
     }
   };
 
-  // Previous Step function
+  // Return to previous step function
   function previousStep() {
     router.push("/welcome");
   }
@@ -205,13 +190,13 @@ export default function StudentDetailsPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {gradesMap?.map((grade) => (
+                        {grades.map((item: any) => (
                           <SelectItem
-                            key={grade}
-                            value={`${grade} in ${enrolmentYear}`}
+                            key={item.grade.name}
+                            value={`${item.grade.name} in ${enrolmentYear}`}
                             className="ml-3"
                           >
-                            Grade {grade}
+                            {item.grade.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -240,12 +225,12 @@ export default function StudentDetailsPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {instrumentSelectMap?.map((section) => (
+                        {instruments.map((section: any) => (
                           <SelectGroup key={crypto.randomUUID()}>
                             <SelectLabel key={section.program}>
                               {section.program}
                             </SelectLabel>
-                            {section.children.map((option) => (
+                            {section.children.map((option: any) => (
                               <SelectItem
                                 value={option.label}
                                 key={option.label}

@@ -1,105 +1,53 @@
 "use client";
 import React from "react";
-import clsx from "clsx";
 import { useRouter } from "next/navigation";
 
 // Hooks
-import { DataContext } from "@/lib/hooks/DataContextProvider";
 import useAppFormContext from "@/lib/hooks/useAppFormContext";
 
 // Server Actions
-import getInstrumentData from "@/lib/server_actions/getInstrumentData";
+import getInstrumentData from "@/lib/server_actions/front_end/getInstrumentData";
 
 // Types
-import {
-  Accessory,
-  PurchaseOptions,
-  InstrumentData,
-  SelectedAccessory,
-} from "@/lib/types";
+import { SelectedAccessory } from "@/lib/types";
 
 // Components
 import FormWrapper from "@/components/FormWrapper";
 import FormActions from "@/components/FormActions";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { AccessoryOption } from "@/components/ui/accessory_option";
+import { useQuery } from "@tanstack/react-query";
 
 export default function InstrumentOptionsPage() {
   const router = useRouter();
+  // React hook form config
   const { watch, setValue } = useAppFormContext();
   const { student_school, student_details, accessories } = watch();
   const { instrument } = student_details;
 
-  const { instrumentData } = React.useContext(DataContext);
+  // Get page data
+  const { data, isPending } = useQuery({
+    queryKey: ["instrumentData", instrument],
+    queryFn: () => getInstrumentData(instrument),
+  });
 
-  // Instantiate accessoriesData to store accessoriesData from db
-  const [accessoriesData, setAccessoriesData] = React.useState<
-    Accessory[] | null
-  >(null);
+  if (isPending) {
+    return <p>loading...</p>;
+  }
 
-  // Create filterAndSort function to parse accessoriesData
-  const filterAndSort = (array: Accessory[] | null) => {
-    // remove items with status of "Hidden"
-    array?.filter((option) => option.status !== "Inactive");
-    const order: any = { true: 1, false: 2 };
-    // sort by is_reccomended
-    array?.sort((a: any, b: any) => {
-      return order[a.is_recommended] - order[b.is_recommended];
-    });
-    return array;
-  };
+  const { accessoriesOptions } = data;
 
-  // Create initAccessoriesObject function that initialzes the accessories object based on accessoriesData
-  const initAccessoriesObject = (accessories: Accessory[] | null) => {
-    if (!accessories) return;
-    const result: SelectedAccessory = {};
-    accessories.forEach((accessory: any) => {
-      const { name } = accessory;
-      result[name] = false;
-    });
-  };
-
-  // Fetch instrument data from db and assign filtered instrument accessories to accessoriesData
   React.useEffect(() => {
     if (!student_school) {
       router.replace("/welcome");
     }
-
-    if (!instrument) {
-      return;
-    }
-    async function runEffect() {
-      if (!instrumentData) {
-        return;
-      }
-
-      // const response: InstrumentData = await getInstrumentData(instrument);
-      const sortedAccessories = filterAndSort(instrumentData.accessories);
-      setAccessoriesData(sortedAccessories);
-
-      // Check for existing accessories value
-      if (accessories !== null) {
-        return;
-      }
-
-      // Otherwise set accessories to initAccessories
-      const initAccessories: SelectedAccessory = {};
-      sortedAccessories?.forEach((accessory: Accessory) => {
-        const { name } = accessory;
-        initAccessories[name] = false;
-      });
-
-      setValue("accessories", initAccessories);
-    }
-
-    runEffect();
   }, []);
 
   // A function that will be passed to AccessoryOption component
   const updateAccessoriesObject = (name: string, value: boolean) => {
     if (!accessories) return;
 
-    const updatedObject: any = { ...accessories };
+    const updatedObject: SelectedAccessory = { ...accessories };
     updatedObject[name] = value;
 
     setValue("accessories", updatedObject);
@@ -121,7 +69,7 @@ export default function InstrumentOptionsPage() {
       >
         <ScrollArea className="px-4 md:px-8 max-h-[calc(100%-160px)] lg:max-h-none overflow-auto">
           <div className="flex flex-col mt-6">
-            {accessoriesData?.map((data) => (
+            {accessoriesOptions?.map((data: any) => (
               <AccessoryOption
                 updateAccessoriesObject={updateAccessoriesObject}
                 accessories={accessories}

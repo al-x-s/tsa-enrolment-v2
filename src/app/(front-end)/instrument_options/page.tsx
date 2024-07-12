@@ -1,25 +1,16 @@
 "use client";
 import React from "react";
-import clsx from "clsx";
 import { useRouter } from "next/navigation";
 
 // Hooks
-import { DataContext } from "@/lib/hooks/DataContextProvider";
 import useAppFormContext from "@/lib/hooks/useAppFormContext";
 
 // Server Actions
-import getInstrumentData from "@/lib/server_actions/getInstrumentData";
-import getAllHireableInstruments from "@/lib/server_actions/getAllHireableInstruments";
-import getSchoolData from "@/lib/server_actions/getSchoolData";
+import getInstrumentData from "@/lib/server_actions/front_end/getInstrumentData";
+import getHireableTableData from "@/lib/server_actions/front_end/getHireableTableData";
 
 // Types
-import {
-  Accessory,
-  PurchaseOptions,
-  InstrumentData,
-  SchoolData,
-  HireableInstrumentInput,
-} from "@/lib/types";
+import { InstrumentModel } from "@prisma/client";
 
 // Components
 import FormWrapper from "@/components/FormWrapper";
@@ -35,13 +26,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   Table,
   TableBody,
@@ -69,21 +54,18 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import InputFormatted from "@/components/ui/input_formatted";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { InstrumentPurchaseOption } from "@/components/ui/instrument_purchase_option";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
-
-// Helper Functions
-import filterProgramsByInstrument from "@/lib/helpers/filterProgramsByInstrument";
-import { generateAllHireOptionsObject } from "@/lib/helpers/generateAllHireOptionsObject";
 
 // Rental Terms
 import {
   rentalTermsCheckboxes,
   RentalTermsDialogContent,
 } from "@/lib/terms_and_conditions/rentalTerms";
+import { useQuery } from "@tanstack/react-query";
 
 function CustomCheckbox({ ...props }) {
   return (
@@ -150,31 +132,20 @@ function FormFieldInput({ ...props }) {
 
 export default function InstrumentOptionsPage() {
   const router = useRouter();
+  // React hook form config
   const { trigger, formState, control, watch, setValue, setFocus } =
     useAppFormContext();
   const { errors } = formState;
-  const { student_school, instrument_options, student_details } = watch();
-  const instrument = student_details.instrument;
+  const {
+    student_school,
+    instrument_options,
+    student_details,
+    school_id,
+    program_type,
+  } = watch();
+  const { instrument } = student_details;
   const { purchased_model, hire_purchase_byo, agree_rental_terms } =
     instrument_options;
-  const { schoolData, instrumentData, allHireableInstruments } =
-    React.useContext(DataContext);
-
-  // Filter instruments by program category
-  function filterInstrumentsByProgram(
-    schoolData: SchoolData | null,
-    instrument: string
-  ) {
-    if (schoolData) {
-      const instruments = Object.keys(schoolData?.instrument_options);
-      const instrumentsByProgram = instruments.filter(
-        (inst) =>
-          schoolData?.instrument_options[inst].program ===
-          schoolData.instrument_options[instrument].program
-      );
-      return instrumentsByProgram;
-    }
-  }
 
   React.useEffect(() => {
     if (!student_school) {
@@ -187,16 +158,22 @@ export default function InstrumentOptionsPage() {
     }
   }, []);
 
-  const programInstruments = filterInstrumentsByProgram(schoolData, instrument);
+  // Get page data
+  const { data } = useQuery({
+    queryKey: ["instrumentData", instrument],
+    queryFn: () => getInstrumentData(instrument),
+  });
 
-  allHireableInstruments?.filter(
-    ({ name }) => programInstruments?.indexOf(name) !== -1
-  );
+  const { data: hireableTableData, isPending } = useQuery({
+    queryKey: ["getHireableTableData", instrument],
+    queryFn: () => getHireableTableData(parseInt(school_id!), program_type!),
+  });
 
-  // The hireableTableData will be used to show the user the cost of renting other instruments in their chosen program
-  const hireableTableData = generateAllHireOptionsObject(
-    allHireableInstruments
-  );
+  if (isPending) {
+    return <p>loading...</p>;
+  }
+
+  const { instrumentData, purchaseOptions } = data;
 
   // This is passed to the instrument_purchase_options to set the value of the purchased model when selected
   const selectPurchaseInstrument: React.MouseEventHandler<HTMLButtonElement> = (
@@ -208,21 +185,6 @@ export default function InstrumentOptionsPage() {
       });
     }
   };
-
-  // This function filters out any purchase options that have the status hidden, and then sorts the rest to put unavailable options last
-  const filterAndSort = (array: PurchaseOptions[] | undefined) => {
-    // remove items with status of "Hidden"
-    array?.filter((option) => option.status !== "Hidden");
-    const order: any = { Available: 1, "Sold Out": 2 };
-    array?.sort((a: any, b: any) => {
-      return order[a.status] - order[b.status];
-    });
-    return array;
-  };
-
-  const sorted_purchase_options = filterAndSort(
-    instrumentData?.purchase_options
-  );
 
   // ValidateStep functions
   const validateStep = async () => {
@@ -248,7 +210,7 @@ export default function InstrumentOptionsPage() {
       >
         {errors.instrument_options?.purchased_model?.message &&
           hire_purchase_byo === "purchase" && (
-            <p className="text-destructive ml-8 mb-2">
+            <p className="text-highlight ml-8 mb-2">
               {errors.instrument_options.purchased_model.message}
             </p>
           )}
@@ -543,7 +505,7 @@ export default function InstrumentOptionsPage() {
                 <h2 className="text-white text-2xl text-center mb-6 font-bold">
                   Choose an Instrument
                 </h2>
-                {sorted_purchase_options?.map((data) => (
+                {purchaseOptions?.map((data: InstrumentModel[]) => (
                   <InstrumentPurchaseOption
                     key={crypto.randomUUID()}
                     handleClick={selectPurchaseInstrument}

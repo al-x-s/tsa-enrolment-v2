@@ -89,9 +89,10 @@ function UserMenu({ ...props }) {
 const NavBar = ({ ...props }) => {
   const currentPath = usePathname();
   const links = [
-    { label: "Dashboard", href: "/admin" },
+    // { label: "Dashboard", href: "/admin" },
     { label: "Schools", href: "/admin/schools" },
     { label: "Programs", href: "/admin/programs" },
+    { label: "Grades", href: "/admin/grades" },
     { label: "Instruments", href: "/admin/instruments" },
     { label: "Accessories", href: "/admin/accessories" },
   ];
@@ -105,8 +106,8 @@ const NavBar = ({ ...props }) => {
         {links.map((link) => (
           <Link
             className={classnames({
-              "text-foreground": link.href === currentPath,
-              "text-muted-foreground": link.href !== currentPath,
+              "text-foreground": currentPath.startsWith(link.href),
+              "text-muted-foreground": !currentPath.startsWith(link.href),
               "hover:text-foreground transition-colors": true,
             })}
             key={link.href}

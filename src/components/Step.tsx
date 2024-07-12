@@ -1,18 +1,9 @@
 "use client";
 import React from "react";
-
-// import useAppFormContext from "@/lib/hooks/useAppFormContext";
 import clsx from "clsx";
+
 // Components
 import Link from "next/link";
-
-// import { FormDataSchema } from "@/lib/schema";
-
-// const validationSteps: any = {
-//   1: { student_school: true },
-//   2: { student_first_name: true, client_email: true, student_grade: true },
-//   3: { client_name: true, relationship: true, client_postcode: true },
-// };
 
 const stepOrder: { [key: string]: number } = {
   welcome: 1,
@@ -38,28 +29,6 @@ export default function Step({ step, segment }: StepProps) {
     } else {
       setIsDisabled(true);
     }
-
-    // ! I wrote this in an attempt to allow users to navigate forward and backwards based on validation of the form steps but the zod safeParseAsync was returning a success state with an empty object after the initial render....I tried, unsuccessfully, to fix it
-    // const segmentFields: any = validationSteps[previousPage];
-    // if (segmentFields === undefined || step.segment === segment) {
-    //   setIsDisabled(false);
-    //   return;
-    // }
-    // const segmentSchema: any = FormDataSchema.pick(segmentFields);
-    // const segmentKeys = Object.keys(segmentFields);
-    // async function validatePreviousStep() {
-    //   let inputValues = validationSteps[previousPage];
-    //   segmentKeys.forEach((key: any) => {
-    //     const value = getValues(key);
-    //     inputValues[key] = value;
-    //   });
-    //   console.log(step.number, "inputValues", inputValues);
-    //   const isValid = await segmentSchema.spa(inputValues);
-    //   console.log(step.number, "safeParse result", isValid.data);
-    //   console.log("isValid", isValid.success);
-    //   setIsDisabled(!isValid.success);
-    // }
-    // validatePreviousStep();
   }, [segment]);
 
   return (
