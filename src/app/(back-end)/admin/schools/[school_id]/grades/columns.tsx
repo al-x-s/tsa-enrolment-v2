@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 // Functions
 import { removeGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";
@@ -24,24 +24,31 @@ import { removeGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";
 // Types
 import { Grade } from "@prisma/client";
 
-const handleRemove = async (
-  school_id: number,
-  grade_id: number,
-  grade_name: string
-) => {
-  const response: any = await removeGrade(school_id, grade_id);
-  if (response.isSuccess) {
-    toast({
-      title: "Success!",
-      description: `${grade_name} removed`,
-    });
-  } else {
-    toast({
-      title: "Something went wrong...",
-      description: response.issues,
-    });
-  }
-};
+// Tanstack
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function useRemoveGrade() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: removeGrade,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["gradesInSchool", data.schoolId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["gradesNotInSchool", data.schoolId],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
 
 export const columns: ColumnDef<Grade & { school_id: number }>[] = [
   {
@@ -77,10 +84,31 @@ export const columns: ColumnDef<Grade & { school_id: number }>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
+      const { toast } = useToast();
       const grade = row.original as Grade & { school_id: number };
       const grade_id: number = grade.id;
       const school_id: number = grade.school_id;
       const grade_name: string = row.getValue("name");
+
+      const removeGrade = useRemoveGrade();
+
+      const handleRemove = async (
+        school_id: number,
+        grade_id: number,
+        grade_name: string
+      ) => {
+        removeGrade.mutate(
+          { school_id, grade_id },
+          {
+            onSuccess: () =>
+              toast({
+                title: "Success!",
+                description: `${grade_name} removed`,
+              }),
+          }
+        );
+      };
+
       return (
         <Dialog>
           <DialogTrigger asChild>

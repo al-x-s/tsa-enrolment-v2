@@ -1,8 +1,64 @@
 "use server";
 import prisma from "@/prisma/client";
 import z from "zod";
-import { Instrument } from "@/lib/types";
+import { Instrument, InstrumentModel } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import {
+  schoolInstrumentSchema,
+  instrumentSchema,
+  modelSchema,
+} from "@/lib/schema";
+
+async function getInstrumentById(
+  instrument_id: number
+): Promise<Instrument | undefined> {
+  const instrument = await prisma.instrument.findFirst({
+    where: {
+      id: instrument_id,
+    },
+  });
+
+  if (!instrument) {
+    return undefined;
+  }
+
+  return instrument;
+}
+
+async function getInstrumentModels(
+  instrument_id: number
+): Promise<(InstrumentModel & { instrument_id: number })[] | undefined> {
+  const instrument = await prisma.instrument.findFirst({
+    where: {
+      id: instrument_id,
+    },
+    include: {
+      models: true,
+    },
+  });
+
+  const result = instrument?.models.map((item: any) => ({
+    ...item,
+    instrument_id: instrument_id,
+  }));
+  if (result) {
+    return result;
+  }
+}
+
+async function getInstrumentModel(
+  model_id: number
+): Promise<InstrumentModel | undefined> {
+  const result = await prisma.instrumentModel.findFirst({
+    where: {
+      id: model_id,
+    },
+  });
+
+  if (result) {
+    return result;
+  }
+}
 
 async function getInstrumentsBySchool(school_id: number | undefined): Promise<
   | (Instrument & {
@@ -83,7 +139,13 @@ async function getInstrumentsNotInSchool(
   }
 }
 
-const removeInstrument = async (school_id: number, instrument_id: number) => {
+const removeInstrument = async ({
+  school_id,
+  instrument_id,
+}: {
+  school_id: number;
+  instrument_id: number;
+}) => {
   if (!instrument_id || !school_id) return;
 
   try {
@@ -96,21 +158,19 @@ const removeInstrument = async (school_id: number, instrument_id: number) => {
       },
     });
 
-    if (result) {
-      revalidatePath(`/admin/schools/${school_id}/instruments`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false };
-    }
+    return result;
   } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
+    throw error;
   }
 };
 
-const addInstrument = async (school_id: number, instrument_id: number) => {
+const addInstrument = async ({
+  school_id,
+  instrument_id,
+}: {
+  school_id: number;
+  instrument_id: number;
+}) => {
   if (!instrument_id || !school_id) return;
 
   try {
@@ -125,32 +185,22 @@ const addInstrument = async (school_id: number, instrument_id: number) => {
       },
     });
 
-    if (result) {
-      revalidatePath(`/admin/schools/${school_id}/instruments/add`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false };
-    }
+    return result;
   } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
+    throw error;
   }
 };
 
-const updateSchoolInstrument = async (
-  formData: any,
-  school_id: number,
-  instrument_id: number
-) => {
-  const formSchema = z.object({
-    enrolled: z.number(),
-    cap: z.number(),
-    status: z.enum(["Available", "Unavailable", "Hidden"]),
-  });
-
-  const parsed = formSchema.safeParse(formData);
+const updateSchoolInstrument = async ({
+  formData,
+  school_id,
+  instrument_id,
+}: {
+  formData: any;
+  school_id: number;
+  instrument_id: number;
+}) => {
+  const parsed = schoolInstrumentSchema.safeParse(formData);
 
   if (parsed.success) {
     // update db
@@ -169,28 +219,137 @@ const updateSchoolInstrument = async (
           status: formData.status,
         },
       });
-
-      if (result) {
-        revalidatePath(`/admin/schools/${school_id}/instruments`);
-        return { isSuccess: true };
-      } else {
-        return { isSuccess: false };
-      }
+      return result;
     } catch (error) {
-      return { isSuccess: false };
+      throw error;
     }
   } else {
-    return {
-      isSuccess: false,
-      issues: parsed.error.issues.map((issue) => issue.message),
-    };
+    throw Error;
+  }
+};
+
+async function deleteInstrument(instrument_id: number): Promise<any> {
+  try {
+    const result = await prisma.instrument.delete({
+      where: {
+        id: instrument_id,
+      },
+    });
+
+    if (result) {
+      revalidatePath("admin/instruments");
+      return { isSuccess: true };
+    }
+  } catch (error) {
+    console.error("Error deleting instrument", error);
+    return null;
+  }
+}
+
+async function deleteModel(model_id: number): Promise<any> {
+  try {
+    const result = await prisma.instrumentModel.delete({
+      where: {
+        id: model_id,
+      },
+    });
+
+    if (result) {
+      revalidatePath("admin/instruments");
+      return { isSuccess: true };
+    }
+  } catch (error) {
+    console.error("Error deleting model", error);
+    return null;
+  }
+}
+
+const updateInstrument = async ({
+  formData,
+  id,
+}: {
+  formData: any;
+  id: number;
+}) => {
+  const keys = Object.keys(formData);
+  const fieldName = keys[0];
+  const schema = instrumentSchema.pick({ [fieldName]: true });
+  const parsed = schema.safeParse(formData);
+
+  if (parsed.success) {
+    // update db
+    console.log("parsed successfully");
+    try {
+      const result = await prisma.instrument.update({
+        where: {
+          id: id,
+        },
+        data: {
+          [fieldName]: formData[fieldName],
+        },
+      });
+
+      if (result) {
+        revalidatePath(`/admin/instruments/${id}/`);
+        return result;
+      }
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    throw Error;
+  }
+};
+const updateInstrumentModel = async ({
+  formData,
+  id,
+}: {
+  formData: any;
+  id: number;
+}) => {
+  const parsed = modelSchema.safeParse(formData);
+
+  if (parsed.success) {
+    // update db
+    console.log("parsed successfully");
+    try {
+      const result = await prisma.instrumentModel.update({
+        where: {
+          id: id,
+        },
+        data: {
+          model: formData.model,
+          brand: formData.brand,
+          image: formData.image,
+          status: formData.status,
+          rrp: formData.rrp,
+          sale_price: formData.sale_price,
+        },
+      });
+
+      if (result) {
+        revalidatePath(`/admin/instruments/${id}/`);
+        return result;
+      }
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    throw Error;
   }
 };
 
 export {
   getInstrumentsBySchool,
   getInstrumentsNotInSchool,
+  getInstrumentById,
   addInstrument,
+  getInstrumentModels,
+  getInstrumentModel,
+  updateInstrumentModel,
   removeInstrument,
   updateSchoolInstrument,
+  deleteInstrument,
+  updateInstrument,
+  deleteModel,
 };

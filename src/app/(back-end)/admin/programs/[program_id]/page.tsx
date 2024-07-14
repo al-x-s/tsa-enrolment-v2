@@ -62,9 +62,32 @@ import {
 import Loading from "@/components/tables/Loading";
 import { programSchema } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+// Tanstack
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function useUpdateProgram() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: updateProgram,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["program", data.id],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
 
 const ProgramPage = ({ params }: any) => {
   const router = useRouter();
@@ -79,6 +102,34 @@ const ProgramPage = ({ params }: any) => {
       return data;
     },
   });
+
+  const { toast } = useToast();
+
+  const updateProgram = useUpdateProgram();
+
+  const onSubmit = async (formData: z.infer<typeof programSchema>) => {
+    updateProgram.mutate(
+      { formData, program_id },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: `Program updated`,
+          }),
+            reset({
+              name: formData.name,
+              description: formData.description,
+              type: formData.type,
+              classType: formData.classType,
+              tuition_fee: formData.tuition_fee,
+              rehearsal_fee: formData.rehearsal_fee,
+              enrol_fee: formData.enrol_fee,
+              program_status: formData.program_status,
+            });
+        },
+      }
+    );
+  };
 
   const form = useForm<z.infer<typeof programSchema>>({
     resolver: zodResolver(programSchema),
@@ -121,31 +172,6 @@ const ProgramPage = ({ params }: any) => {
     program_status,
     description,
   } = watch();
-  // const Comp = asChild ? Slot : "button";
-  const onSubmit = async (formData: z.infer<typeof programSchema>) => {
-    const response = await updateProgram(formData, program_id);
-    if (response.isSuccess) {
-      toast({
-        title: "Success!",
-        description: `Program successfully updated`,
-      });
-      reset({
-        name: formData.name,
-        description: formData.description,
-        type: formData.type,
-        classType: formData.classType,
-        tuition_fee: formData.tuition_fee,
-        rehearsal_fee: formData.rehearsal_fee,
-        enrol_fee: formData.enrol_fee,
-        program_status: formData.program_status,
-      });
-    } else {
-      toast({
-        title: "Something went wrong...",
-        description: response.issues,
-      });
-    }
-  };
 
   React.useEffect(() => {
     if (type === "Guitar" || type === "Keyboard") {
@@ -350,6 +376,9 @@ const ProgramPage = ({ params }: any) => {
                       />
                     </FormControl>
                     <FormMessage />
+                    <FormDescription>
+                      Note: The enrolment fee is shown on the Summary page
+                    </FormDescription>
                   </FormItem>
                 )}
               />

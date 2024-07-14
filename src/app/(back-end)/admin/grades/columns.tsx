@@ -1,20 +1,14 @@
 "use client";
-import Link from "next/link";
 
 // Tanstack Table
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  SortButton,
-  currencyFilter,
-  booleanFilter,
-  arrayFilter,
-} from "@/components/tables/tableUtils";
+import { SortButton, currencyFilter } from "@/components/tables/tableUtils";
 
 // Types
 import { Grade } from "@prisma/client";
 
 // Components
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +24,7 @@ import EditGrade from "./EditGrade";
 import { deleteGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";
 
 const handleDelete = async (grade_id: number, grade_name: string) => {
+  const { toast } = useToast();
   const response: any = await deleteGrade(grade_id);
   if (response.isSuccess) {
     toast({
@@ -49,17 +44,6 @@ export const columns: ColumnDef<Grade>[] = [
     accessorKey: "name",
     header: ({ column }) => {
       return <SortButton column={column} label="Name" />;
-    },
-    cell: ({ row }) => {
-      const grade = row.original as Grade;
-      const grade_id: number = grade.id;
-      const grade_name: string = row.getValue("name");
-      const href = `/admin/grades/${grade_id}/general`;
-      return (
-        <Link className="text-blue-500 hover:text-red-600" href={href}>
-          {grade_name}
-        </Link>
-      );
     },
   },
   {
@@ -111,7 +95,7 @@ export const columns: ColumnDef<Grade>[] = [
     },
   },
   {
-    id: "actions_remove",
+    id: "actions_delete",
     cell: ({ row }) => {
       const grade = row.original as Grade;
       const grade_id: number = grade.id;
@@ -120,12 +104,12 @@ export const columns: ColumnDef<Grade>[] = [
         <Dialog>
           <DialogTrigger asChild>
             <Button className="rounded" variant="destructive">
-              Remove
+              Delete
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Remove Grade</DialogTitle>
+              <DialogTitle>Delete Grade</DialogTitle>
             </DialogHeader>
             <p className="py2">Are you sure you want to delete {grade_name}?</p>
             <p className="py2">WARNING: This cannot be undone.</p>

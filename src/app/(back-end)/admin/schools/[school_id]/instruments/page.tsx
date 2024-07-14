@@ -37,7 +37,7 @@ const SchoolInstruments = ({ params }: any) => {
     isFetched,
     isPending,
   } = useQuery({
-    queryKey: ["instruments", school_id],
+    queryKey: ["instrumentsInSchool", school_id],
     queryFn: async () => {
       const data = await getInstrumentsBySchool(school_id);
       return data;

@@ -34,11 +34,12 @@ import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { gradeSchema } from "@/lib/schema";
 import { updateGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";
 
 const EditGrade = ({ ...props }) => {
+  const { toast } = useToast();
   const schema = gradeSchema.omit({ state_territory: true });
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),

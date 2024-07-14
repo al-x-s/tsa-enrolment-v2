@@ -71,7 +71,7 @@ const createAccessories = async () => {
   const accessories = [
     {
       name: "Music Stand",
-      price: 31.0,
+      price: 31,
       status: "Active",
       is_recommended: true,
       description_short: "Essential for home practice",
@@ -80,7 +80,7 @@ const createAccessories = async () => {
     },
     {
       name: "Clarinet Reeds",
-      price: 43.0,
+      price: 43,
       status: "Active",
       is_recommended: true,
       description_short: "Box of 10",
@@ -89,7 +89,7 @@ const createAccessories = async () => {
     },
     {
       name: "Mouthpiece Brush",
-      price: 5.0,
+      price: 5,
       is_recommended: false,
       status: "Active",
       description_short: "Narrow brush for cleaning mouthpiece",
@@ -98,7 +98,7 @@ const createAccessories = async () => {
     },
     {
       name: "Cleaning Snake",
-      price: 11.0,
+      price: 11,
       status: "Inactive",
       is_recommended: false,
       description_short: "Brush on a flexible pipe for instrument body",
@@ -107,7 +107,7 @@ const createAccessories = async () => {
     },
     {
       name: "Sustain Pedal",
-      price: 39.95,
+      price: 40,
       is_recommended: false,
       status: "Active",
       description_short: "Frequently used in piano music",
@@ -133,12 +133,7 @@ const createInstrumentModel = async () => {
         "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683152/CLARINET_-_YCL255_oigyk6.png",
       rrp: 1099.0,
       sale_price: 849.0,
-      features: [
-        "Yamaha YCL255",
-        "Nickel plated keys",
-        "Adjustable thumb rest",
-      ],
-      status: "Sold Out",
+      status: "Sold_Out",
     },
     {
       brand: "Jupiter",
@@ -147,11 +142,6 @@ const createInstrumentModel = async () => {
         "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683152/CLARINET_-_JCL700NA_cmwgfj.png",
       rrp: 895.0,
       sale_price: 685.0,
-      features: [
-        "Jupiter JCL700NA",
-        "Resin matte finish",
-        "Comes with stackable hard case",
-      ],
       status: "Available",
     },
     // TRUMPET
@@ -162,11 +152,6 @@ const createInstrumentModel = async () => {
         "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683153/TRUMPET_YTR2330_m4tckd.png",
       rrp: 1099.0,
       sale_price: 849.0,
-      features: [
-        "Yamaha YTR2330",
-        "Made with monel valves",
-        "Hard case included",
-      ],
       status: "Available",
     },
     {
@@ -176,12 +161,7 @@ const createInstrumentModel = async () => {
         "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683152/TRUMPET_-_SLTR355_vgcddl.png",
       rrp: 1299.0,
       sale_price: 849.0,
-      features: [
-        "Schagerl SLTR355",
-        "Gold-brass leadpipe",
-        "Stainless steel valves",
-      ],
-      status: "Sold Out",
+      status: "Sold_Out",
     },
     // KEYBOARD
     {
@@ -191,11 +171,6 @@ const createInstrumentModel = async () => {
         "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683150/KEYBOARD_-_PSRE373_sncs71.png",
       rrp: 379.99,
       sale_price: 319.0,
-      features: [
-        "Yamaha PSRE373",
-        "622 instrument voices",
-        "Built in effects and accompaniment",
-      ],
       status: "Available",
     },
   ];

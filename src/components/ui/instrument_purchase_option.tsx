@@ -7,7 +7,8 @@ import questionButton from "@/images/question-mark-with-circle.svg";
 import circleTick from "@/images/circle-tick.svg";
 
 // Types
-import { PurchaseOptions } from "@/lib/types";
+// import { PurchaseOptions } from "@/lib/types";
+import { InstrumentModel } from "@prisma/client";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -52,21 +53,11 @@ const buttonVariants = cva(
   }
 );
 
-// interface PurchaseOptions {
-//   brand: String;
-//   model: any;
-//   image: String;
-//   rrp: Number;
-//   sale_price: Number;
-//   status: String;
-//   features: String[];
-// }
-
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
-  purchase_options: PurchaseOptions;
+  purchase_options: InstrumentModel;
   selectedPurchaseModel: any;
   handleClick: any;
 }
@@ -87,10 +78,9 @@ const InstrumentPurchaseOption = React.forwardRef<
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
-    const { brand, model, image, rrp, sale_price, status, features } =
-      purchase_options;
+    const { brand, model, image, rrp, sale_price, status } = purchase_options;
 
-    const isSoldOut = status === "Sold Out" ? true : false;
+    const isSoldOut = status === "Sold_Out" ? true : false;
     return (
       <article
         className={clsx(
@@ -102,7 +92,7 @@ const InstrumentPurchaseOption = React.forwardRef<
         )}
       >
         <div className="flex flex-row justify-between">
-          <div className="w-[80%] flex flex-col justify-between">
+          <div className="w-[70%] flex flex-col justify-between ">
             <div
               className={clsx(
                 "rounded-ee-lg w-fit py-2 px-4 font-semibold text-center",
@@ -118,7 +108,7 @@ const InstrumentPurchaseOption = React.forwardRef<
               <div className="flex flex-row items-center mt-4 font-bold">
                 <h2
                   className={clsx(
-                    "text-xl my-1 font-ubuntu",
+                    "text-2xl my-1 font-ubuntu",
                     !isSoldOut ? "text-[#f1933e] font-extrabold" : ""
                   )}
                 >
@@ -130,17 +120,17 @@ const InstrumentPurchaseOption = React.forwardRef<
                   RRP $<span className="line-through">{`${rrp}`}</span>
                 </p>
               )}
-              {features.map((feature) => (
-                <div
-                  key={crypto.randomUUID()}
-                  className="flex flex-row items-center mt-2"
-                >
-                  <Image alt="tick inside a circle" src={circleTick} />
-                  <p className="ml-2">{feature}</p>
-                </div>
-              ))}
+
+              <div className="flex flex-row items-center mt-2">
+                <Image alt="tick inside a circle" src={circleTick} />
+                <p className="ml-2">Brand: {brand}</p>
+              </div>
+              <div className="flex flex-row items-center mt-2">
+                <Image alt="tick inside a circle" src={circleTick} />
+                <p className="ml-2">Model: {model}</p>
+              </div>
             </div>
-            <div className="flex justify-center">
+            <div className="flex justify-end pr-2">
               <Comp
                 className={clsx(
                   "px-6 py-2 my-4 rounded",
@@ -159,7 +149,8 @@ const InstrumentPurchaseOption = React.forwardRef<
               </Comp>
             </div>
           </div>
-          <div className="w-[20%] flex flex-col justify-center">
+
+          <div className="w-[30%] py-2">
             <Image
               src={image}
               alt={`Picture of ${brand} ${model}`}

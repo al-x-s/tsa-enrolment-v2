@@ -4,6 +4,7 @@ import { gradeSchema } from "@/lib/schema";
 import prisma from "@/prisma/client";
 import { Grade } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { QueryClient } from "@tanstack/react-query";
 
 async function getGradesBySchool(
   school_id: number | undefined
@@ -76,7 +77,13 @@ async function getGradesNotInSchool(
   }
 }
 
-const removeGrade = async (school_id: number, grade_id: number) => {
+const removeGrade = async ({
+  school_id,
+  grade_id,
+}: {
+  school_id: number;
+  grade_id: number;
+}) => {
   if (!grade_id || !school_id) return;
 
   try {
@@ -88,18 +95,9 @@ const removeGrade = async (school_id: number, grade_id: number) => {
         },
       },
     });
-
-    if (result) {
-      revalidatePath(`/admin/schools/${school_id}/grades`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false };
-    }
+    return result;
   } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
+    throw error;
   }
 };
 
@@ -125,7 +123,13 @@ const deleteGrade = async (grade_id: number) => {
   }
 };
 
-const addGrade = async (school_id: number, grade_id: number) => {
+const addGrade = async ({
+  school_id,
+  grade_id,
+}: {
+  school_id: number;
+  grade_id: number;
+}) => {
   if (!grade_id || !school_id) return;
 
   try {
@@ -139,18 +143,9 @@ const addGrade = async (school_id: number, grade_id: number) => {
         },
       },
     });
-
-    if (result) {
-      revalidatePath(`/admin/schools/${school_id}/grades/add`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false };
-    }
+    return result;
   } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
+    throw error;
   }
 };
 

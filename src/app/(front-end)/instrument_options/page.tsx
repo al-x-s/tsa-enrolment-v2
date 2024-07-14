@@ -173,6 +173,10 @@ export default function InstrumentOptionsPage() {
     return <p>loading...</p>;
   }
 
+  if (!data) {
+    return <p>Error retrieving data</p>;
+  }
+
   const { instrumentData, purchaseOptions } = data;
 
   // This is passed to the instrument_purchase_options to set the value of the purchased model when selected
@@ -505,7 +509,7 @@ export default function InstrumentOptionsPage() {
                 <h2 className="text-white text-2xl text-center mb-6 font-bold">
                   Choose an Instrument
                 </h2>
-                {purchaseOptions?.map((data: InstrumentModel[]) => (
+                {purchaseOptions?.map((data: InstrumentModel) => (
                   <InstrumentPurchaseOption
                     key={crypto.randomUUID()}
                     handleClick={selectPurchaseInstrument}

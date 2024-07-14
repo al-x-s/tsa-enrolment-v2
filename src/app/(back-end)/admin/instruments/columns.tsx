@@ -1,191 +1,123 @@
 "use client";
-
-import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Instrument } from "@prisma/client";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Instrument = {
-  id: number;
-  name: string;
-  purchase_options: object;
-  can_hire: boolean;
-  hire_cost: number;
-  hire_insurance: number;
-  accessories: object;
-};
+// Tanstack Table
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  SortButton,
+  currencyFilter,
+  booleanFilter,
+  arrayFilter,
+} from "@/components/tables/tableUtils";
 
 export const columns: ColumnDef<Instrument>[] = [
   {
-    accessorKey: "id",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          ID
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
-  {
-    id: "Category",
     accessorKey: "name",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Category
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Name" />;
     },
     cell: ({ row }) => {
-      const value: string = row.getValue("Category");
-      const href = `/admin/instruments/${value}`;
+      const instrument = row.original as Instrument;
+      const instrument_id: number = instrument.id;
+      const instrument_name: string = row.getValue("name");
+      const href = `/admin/instruments/${instrument_id}/general`;
       return (
         <Link className="text-blue-500 hover:text-red-600" href={href}>
-          {value}
+          {instrument_name}
         </Link>
       );
     },
   },
   {
-    id: "Models",
-    accessorKey: "purchase_options",
+    id: "Program Type",
+    accessorKey: "program_type",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Models
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const options: any = row.getValue("Models");
-
-      return options.map((option: any, index: number) => (
-        <Link
-          href={`/admin/programs/${option.model}`}
-          className="text-blue-500 hover:text-red-600"
-          key={crypto.randomUUID()}
-        >
-          {option.brand} {option.model}
-          {options.length - 1 === index ? "" : ", "}
-        </Link>
-      ));
+      return <SortButton column={column} label="Program Type" />;
     },
   },
   {
-    id: "Can Hire",
+    id: "Hireable",
     accessorKey: "can_hire",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Can Hire
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Can Hire?" />;
     },
     cell: ({ row }) => {
-      const data: boolean = row.getValue("Can Hire");
+      const data: boolean = row.getValue("Hireable");
       return <div>{data === true ? "Yes" : "No"}</div>;
     },
+    filterFn: booleanFilter(),
   },
   {
     id: "Hire Cost",
     accessorKey: "hire_cost",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Hire Cost
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Hire Cost" />;
     },
     cell: ({ row }) => {
-      const can_hire = row.getValue("Can Hire");
-      if (can_hire) {
-        const amount = parseFloat(row.getValue("Hire Cost"));
-        const formatted = new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(amount);
-        return <div>{formatted}</div>;
-      } else {
-        return <div></div>;
-      }
+      const amount = parseFloat(row.getValue("Hire Cost"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+
+      return <div>{formatted}</div>;
     },
+    filterFn: currencyFilter(),
   },
   {
     id: "Hire Insurance",
     accessorKey: "hire_insurance",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Hire Insurance
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Hire Insurance" />;
     },
     cell: ({ row }) => {
-      const can_hire = row.getValue("Can Hire");
-      if (can_hire) {
-        const amount = parseFloat(row.getValue("Hire Insurance"));
-        const formatted = new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(amount);
-        return <div>{formatted}</div>;
-      } else {
-        return <div></div>;
-      }
+      const amount = parseFloat(row.getValue("Hire Insurance"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+
+      return <div>{formatted}</div>;
     },
+    filterFn: currencyFilter(),
+  },
+  {
+    accessorKey: "models",
+    header: ({ column }) => {
+      return <SortButton column={column} label="Models" />;
+    },
+    cell: ({ row }) => {
+      const instrument = row.original as Instrument;
+      const options: any = row.getValue("models");
+      const id: number = instrument.id;
+
+      return options.map((option: any, index: number) => (
+        <Link
+          href={`/admin/instruments/${id}/models/${option.model.id}`}
+          className="text-blue-500 hover:text-red-600"
+          key={crypto.randomUUID()}
+        >
+          {`${option.brand} ${option.model}`}
+          {options.length - 1 === index ? "" : ", "}
+        </Link>
+      ));
+    },
+    filterFn: arrayFilter(["brand", "model"]),
   },
   {
     accessorKey: "accessories",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Accessories
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortButton column={column} label="Accessories" />;
     },
     cell: ({ row }) => {
+      const instrument = row.original as Instrument;
       const options: any = row.getValue("accessories");
+      const id: number = instrument.id;
 
       return options.map((option: any, index: number) => (
         <Link
-          href={`/admin/accessories/${option.name}`}
+          href={`/admin/instruments/${id}/accessories/${option.id}`}
           className="text-blue-500 hover:text-red-600"
           key={crypto.randomUUID()}
         >
@@ -194,5 +126,6 @@ export const columns: ColumnDef<Instrument>[] = [
         </Link>
       ));
     },
+    filterFn: arrayFilter(["name"]),
   },
 ];

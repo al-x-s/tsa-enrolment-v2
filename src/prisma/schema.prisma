@@ -110,14 +110,15 @@ model SchoolInstrument {
 model Instrument {
   id             Int                @id @default(autoincrement())
   name           String             @unique
-  program_type   String
+  program_type   ProgramType
   can_hire       Boolean
-  hire_cost      Int?
-  hire_insurance Int?
+  hire_cost      Int @default(0)
+  hire_insurance Int @default(0)
   accessories    Accessory[]
   schools        SchoolInstrument[]
   models         InstrumentModel[]
 }
+
 
 model SchoolProgram {
   school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
@@ -142,24 +143,6 @@ model Program {
   rehearsal_fee     Int
   enrol_fee      Int
   schools        SchoolProgram[]
-}
-
-enum ProgramType {
-  Band
-  String
-  Keyboard
-  Guitar
-}
-
-enum ClassType {
-  Group
-  Private
-  Rehearsal
-}
-
-enum ProgramStatus {
-  Active
-  Inactive
 }
 
 model SchoolGrade {
@@ -190,20 +173,43 @@ model InstrumentModel {
   instrument_category Instrument[]
   rrp                 Float
   sale_price          Float
-  features            String[]
+  
   brand               String
   image               String
   model               String        @unique
-  status              String        @default("Available")
+  status              ModelStatus        @default(Available)
+}
+
+enum ModelStatus {
+  Available
+  Sold_Out
 }
 
 model Accessory {
   id                Int          @id @default(autoincrement())
   name              String       @unique
   status            String
-  price             Decimal @db.Decimal(4, 2)
+  price             Int 
   is_recommended    Boolean
   description_short String
   description_long  String
   instruments       Instrument[]
+}
+
+enum ProgramType {
+  Band
+  String
+  Keyboard
+  Guitar
+}
+
+enum ClassType {
+  Group
+  Private
+  Rehearsal
+}
+
+enum ProgramStatus {
+  Active
+  Inactive
 }

@@ -91,7 +91,7 @@ export const columns: ColumnDef<School>[] = [
         </Link>
       ));
     },
-    filterFn: arrayFilter(),
+    filterFn: arrayFilter(["program.name"]),
   },
   {
     id: "Instrument Rental Available",

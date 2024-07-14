@@ -18,43 +18,39 @@ import { Button } from "@/components/ui/button";
 import { SortButton } from "@/components/tables/tableUtils";
 
 // Functions
-import { addGrade } from "../../../../../../../lib/server_actions/back_end/dbQueries_GRADE";
+import { addInstrument } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
 
 // Types
 import { Instrument } from "@prisma/client";
-import { toast } from "@/components/ui/use-toast";
-import { addInstrument } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
+import { useToast } from "@/components/ui/use-toast";
+
+// Tanstack
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const columnHelper = createColumnHelper<Instrument & { school_id: number }>();
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-// export type Grade = {
-//   id: number;
-//   category: string;
-//   name: string;
-//   order: number;
-//   state_territory: string;
-// };
+function useAddInstrument() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-const handleAdd = async (
-  school_id: number,
-  instrument_id: number,
-  instrument_name: string
-) => {
-  const response: any = await addInstrument(school_id, instrument_id);
-  if (response.isSuccess) {
-    toast({
-      title: "Success!",
-      description: `${instrument_name} added`,
-    });
-  } else {
-    toast({
-      title: "Something went wrong...",
-      description: response.issues,
-    });
-  }
-};
+  return useMutation({
+    mutationFn: addInstrument,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["instrumentsNotInSchool", data.schoolId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["instrumentsInSchool", data.schoolId],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...!",
+        description: error.message,
+      });
+    },
+  });
+}
 
 export const columns: ColumnDef<Instrument & { school_id: number }>[] = [
   {
@@ -88,6 +84,29 @@ export const columns: ColumnDef<Instrument & { school_id: number }>[] = [
       const instrument_id: number = instrument.id;
       const school_id: number = instrument.school_id;
       const instrument_name: string = row.getValue("name");
+
+      const { toast } = useToast();
+
+      const addInstrument = useAddInstrument();
+
+      const handleAdd = async (
+        school_id: number,
+        instrument_id: number,
+        instrument_name: string
+      ) => {
+        addInstrument.mutate(
+          { school_id, instrument_id },
+          {
+            onSuccess: () => {
+              toast({
+                title: "Success!",
+                description: `${instrument_name} added`,
+              });
+            },
+          }
+        );
+      };
+
       return (
         <Dialog>
           <DialogTrigger asChild>

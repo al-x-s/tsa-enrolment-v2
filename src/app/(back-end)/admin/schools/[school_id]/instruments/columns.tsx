@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import EditInstrument from "./EditInstrument";
 
 // Functions
@@ -25,24 +25,31 @@ import { removeInstrument } from "@/lib/server_actions/back_end/dbQueries_INSTRU
 // Types
 import { Instrument } from "@prisma/client";
 
-const handleRemove = async (
-  school_id: number,
-  instrument_id: number,
-  instrument_name: string
-) => {
-  const response: any = await removeInstrument(school_id, instrument_id);
-  if (response.isSuccess) {
-    toast({
-      title: "Success!",
-      description: `${instrument_name} removed`,
-    });
-  } else {
-    toast({
-      title: "Something went wrong...",
-      description: response.issues,
-    });
-  }
-};
+// Tanstack
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function useRemoveInstrument() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: removeInstrument,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["instrumentsInSchool", data.schoolId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["instrumentsNotInSchool", data.schoolId],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
 
 export const columns: ColumnDef<
   Instrument & {
@@ -132,6 +139,29 @@ export const columns: ColumnDef<
       const instrument_id: number = instrument.id;
       const school_id: number = instrument.school_id;
       const instrument_name: string = row.getValue("name");
+
+      const { toast } = useToast();
+
+      const removeInstrument = useRemoveInstrument();
+
+      const handleRemove = async (
+        school_id: number,
+        instrument_id: number,
+        instrument_name: string
+      ) => {
+        removeInstrument.mutate(
+          { school_id, instrument_id },
+          {
+            onSuccess: () => {
+              toast({
+                title: "Success!",
+                description: `${instrument_name} removed`,
+              });
+            },
+          }
+        );
+      };
+
       return (
         <Dialog>
           <DialogTrigger asChild>

@@ -37,7 +37,7 @@ const SchoolPrograms = ({ params }: any) => {
     isFetched,
     isPending,
   } = useQuery({
-    queryKey: ["programs", school_id],
+    queryKey: ["programsInSchool", school_id],
     queryFn: async () => {
       const data = await getProgramsBySchool(school_id);
       return data;

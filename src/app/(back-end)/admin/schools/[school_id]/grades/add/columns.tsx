@@ -22,38 +22,35 @@ import { addGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";
 
 // Types
 import { Grade } from "@prisma/client";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+
+// Tanstack
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const columnHelper = createColumnHelper<Grade & { school_id: number }>();
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-// export type Grade = {
-//   id: number;
-//   category: string;
-//   name: string;
-//   order: number;
-//   state_territory: string;
-// };
+function useAddGrade() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-const handleAdd = async (
-  school_id: number,
-  grade_id: number,
-  grade_name: string
-) => {
-  const response: any = await addGrade(school_id, grade_id);
-  if (response.isSuccess) {
-    toast({
-      title: "Success!",
-      description: `${grade_name} added`,
-    });
-  } else {
-    toast({
-      title: "Something went wrong...",
-      description: response.issues,
-    });
-  }
-};
+  return useMutation({
+    mutationFn: addGrade,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["gradesNotInSchool", data.schoolId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["gradesInSchool", data.schoolId],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
 
 export const columns: ColumnDef<Grade & { school_id: number }>[] = [
   {
@@ -89,10 +86,30 @@ export const columns: ColumnDef<Grade & { school_id: number }>[] = [
   columnHelper.display({
     id: "actions",
     cell: ({ row }) => {
+      const { toast } = useToast();
       const grade = row.original as Grade & { school_id: number };
       const grade_id: number = grade.id;
       const school_id: number = grade.school_id;
       const grade_name: string = row.getValue("name");
+
+      const addTodo = useAddGrade();
+
+      const handleAddGrade = (
+        school_id: number,
+        grade_id: number,
+        grade_name: string
+      ) => {
+        addTodo.mutate(
+          { school_id, grade_id },
+          {
+            onSuccess: () =>
+              toast({
+                title: "Success!",
+                description: `${grade_name} added`,
+              }),
+          }
+        );
+      };
       return (
         <Dialog>
           <DialogTrigger asChild>
@@ -115,7 +132,9 @@ export const columns: ColumnDef<Grade & { school_id: number }>[] = [
               <DialogClose asChild>
                 <Button
                   variant="default"
-                  onClick={() => handleAdd(school_id, grade_id, grade_name)}
+                  onClick={() =>
+                    handleAddGrade(school_id, grade_id, grade_name)
+                  }
                 >
                   Yes
                 </Button>

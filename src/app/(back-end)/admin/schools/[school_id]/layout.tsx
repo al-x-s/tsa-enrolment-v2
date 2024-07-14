@@ -22,7 +22,7 @@ export default async function SchoolDetailsLayout({ params, children }: any) {
 
   // pre-fetch data
   await queryClient.prefetchQuery({
-    queryKey: ["grades", school_id],
+    queryKey: ["gradesInSchool", school_id],
     queryFn: async () => {
       const data = await getGradesBySchool(school_id);
       return data;
@@ -30,7 +30,7 @@ export default async function SchoolDetailsLayout({ params, children }: any) {
   });
 
   await queryClient.prefetchQuery({
-    queryKey: ["instruments", school_id],
+    queryKey: ["instrumentsInSchool", school_id],
     queryFn: async () => {
       const data = await getInstrumentsBySchool(school_id);
       return data;
@@ -38,7 +38,7 @@ export default async function SchoolDetailsLayout({ params, children }: any) {
   });
 
   await queryClient.prefetchQuery({
-    queryKey: ["programs", school_id],
+    queryKey: ["programsInSchool", school_id],
     queryFn: async () => {
       const data = await getProgramsBySchool(school_id);
       return data;

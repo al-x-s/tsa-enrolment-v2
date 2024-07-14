@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import EditProgram from "./EditProgram";
 
 // Functions
@@ -25,24 +25,31 @@ import { removeProgram } from "@/lib/server_actions/back_end/dbQueries_PROGRAM";
 // Types
 import { Program } from "@prisma/client";
 
-const handleRemove = async (
-  school_id: number,
-  program_id: number,
-  program_name: string
-) => {
-  const response: any = await removeProgram(school_id, program_id);
-  if (response.isSuccess) {
-    toast({
-      title: "Success!",
-      description: `${program_name} removed`,
-    });
-  } else {
-    toast({
-      title: "Something went wrong...",
-      description: response.issues,
-    });
-  }
-};
+// Tanstack
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function useRemoveProgram() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: removeProgram,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["programsInSchool", data.schoolId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["programsNotInSchool", data.schoolId],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
 
 export const columns: ColumnDef<
   Program & {
@@ -123,6 +130,28 @@ export const columns: ColumnDef<
       const program_id: number = program.id;
       const school_id: number = program.school_id;
       const program_name: string = row.getValue("name");
+      const { toast } = useToast();
+
+      const removeProgram = useRemoveProgram();
+
+      const handleRemove = async (
+        school_id: number,
+        program_id: number,
+        program_name: string
+      ) => {
+        removeProgram.mutate(
+          { school_id, program_id },
+          {
+            onSuccess: () => {
+              toast({
+                title: "Success!",
+                description: `${program_name} removed`,
+              });
+            },
+          }
+        );
+      };
+
       return (
         <Dialog>
           <DialogTrigger asChild>

@@ -1,6 +1,7 @@
 import React from "react";
 import prisma from "@/prisma/client";
-import { Instrument, columns } from "./columns";
+import { Instrument } from "@prisma/client";
+import { columns } from "./columns";
 import { DataTable } from "@/components/tables/data-table";
 import Link from "next/link";
 
@@ -8,7 +9,11 @@ async function getData(): Promise<Instrument[]> {
   try {
     const instruments = await prisma.instrument.findMany({
       include: {
+        models: true,
         accessories: true,
+      },
+      orderBy: {
+        name: "asc",
       },
     });
 
@@ -27,13 +32,14 @@ const InstrumentsPage = async () => {
         <h1 className="text-3xl font-semibold">Instruments</h1>
       </div>
       <div className="mx-auto w-full max-w-6xl items-start gap-6">
-        <Link
-          className="h-10 px-4 py-2 rounded font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  bg-blue-700 hover:bg-blue-900 text-white"
-          href="/admin/instruments/add-new"
-        >
-          Add New Instrument
-        </Link>
-        <DataTable columns={columns} data={data} />
+        <DataTable columns={columns} data={data}>
+          <Link
+            className="h-10 px-4 py-2 rounded font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  bg-sky-700 hover:bg-sky-900 text-white"
+            href="/admin/schools/create"
+          >
+            Create New Instrument
+          </Link>
+        </DataTable>
       </div>
     </div>
   );

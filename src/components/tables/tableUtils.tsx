@@ -67,12 +67,16 @@ function booleanFilter() {
   };
 }
 
-function arrayFilter() {
+function arrayFilter(keys: string[]) {
   return (row: any, columnId: string, filterValue: string) => {
-    const programs: any = row.getValue(columnId);
-    return programs.some((program: any) =>
-      program.program.name.toLowerCase().includes(filterValue.toLowerCase())
-    );
+    const arrays: any = row.getValue(columnId);
+    return arrays.some((object: any) => {
+      const values = keys
+        .map((key) => key.split(".").reduce((obj, k) => obj && obj[k], object))
+        .filter(Boolean);
+      const combinedValue = values.join(" ");
+      return combinedValue.toLowerCase().includes(filterValue.toLowerCase());
+    });
   };
 }
 

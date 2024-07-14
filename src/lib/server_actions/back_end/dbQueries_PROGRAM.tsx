@@ -93,7 +93,13 @@ async function getProgramsNotInSchool(
   }
 }
 
-const removeProgram = async (school_id: number, program_id: number) => {
+const removeProgram = async ({
+  school_id,
+  program_id,
+}: {
+  school_id: number;
+  program_id: number;
+}) => {
   if (!program_id || !school_id) return;
 
   try {
@@ -105,18 +111,9 @@ const removeProgram = async (school_id: number, program_id: number) => {
         },
       },
     });
-
-    if (result) {
-      revalidatePath(`/admin/schools/${school_id}/programs`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false };
-    }
+    return result;
   } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
+    throw error;
   }
 };
 
@@ -142,7 +139,13 @@ const deleteProgram = async (program_id: number) => {
   }
 };
 
-const addProgram = async (school_id: number, program_id: number) => {
+const addProgram = async ({
+  school_id,
+  program_id,
+}: {
+  school_id: number;
+  program_id: number;
+}) => {
   if (!program_id || !school_id) return;
 
   try {
@@ -156,26 +159,21 @@ const addProgram = async (school_id: number, program_id: number) => {
         },
       },
     });
-
-    if (result) {
-      revalidatePath(`/admin/schools/${school_id}/programs/add`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false };
-    }
+    return result;
   } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
+    throw error;
   }
 };
 
-const updateSchoolProgram = async (
-  formData: any,
-  school_id: number,
-  program_id: number
-) => {
+const updateSchoolProgram = async ({
+  formData,
+  school_id,
+  program_id,
+}: {
+  formData: any;
+  school_id: number;
+  program_id: number;
+}) => {
   const formSchema = z.object({
     status: z.enum(["Active", "Inactive"]),
   });
@@ -198,24 +196,22 @@ const updateSchoolProgram = async (
         },
       });
 
-      if (result) {
-        revalidatePath(`/admin/schools/${school_id}/programs`);
-        return { isSuccess: true };
-      } else {
-        return { isSuccess: false };
-      }
+      return result;
     } catch (error) {
-      return { isSuccess: false };
+      throw error;
     }
   } else {
-    return {
-      isSuccess: false,
-      issues: parsed.error.issues.map((issue) => issue.message),
-    };
+    throw Error;
   }
 };
 
-const updateProgram = async (formData: any, program_id: number) => {
+const updateProgram = async ({
+  formData,
+  program_id,
+}: {
+  formData: any;
+  program_id: number;
+}) => {
   const parsed = programSchema.safeParse(formData);
 
   if (parsed.success) {
@@ -240,17 +236,52 @@ const updateProgram = async (formData: any, program_id: number) => {
 
       if (result) {
         revalidatePath(`/admin/programs/${program_id}`);
-        return { isSuccess: true };
-      } else {
-        return { isSuccess: false };
+        return result;
       }
     } catch (error) {
-      return { isSuccess: false };
+      throw error;
+    }
+  } else {
+    throw Error;
+  }
+};
+
+const createProgram = async (formData: z.infer<typeof programSchema>) => {
+  const parsed = programSchema.safeParse(formData);
+
+  if (parsed.success) {
+    try {
+      const result = await prisma.program.create({
+        data: {
+          name: formData.name,
+          description: formData.description,
+          type: formData.type,
+          classType: formData.classType,
+          tuition_fee: formData.tuition_fee,
+          rehearsal_fee: formData.rehearsal_fee,
+          enrol_fee: formData.enrol_fee,
+          program_status: formData.program_status,
+        },
+      });
+
+      if (result) {
+        return {
+          isSuccess: true,
+          redirect: `/admin/programs`,
+        };
+      } else {
+        return { isSuccess: false, issues: "Failed to create grade" };
+      }
+    } catch (error) {
+      return {
+        isSuccess: false,
+        issues: error,
+      };
     }
   } else {
     return {
       isSuccess: false,
-      issues: parsed.error.issues.map((issue) => issue.message),
+      issues: "Failed to parse",
     };
   }
 };
@@ -264,4 +295,5 @@ export {
   deleteProgram,
   updateSchoolProgram,
   updateProgram,
+  createProgram,
 };

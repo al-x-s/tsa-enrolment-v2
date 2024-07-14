@@ -36,11 +36,13 @@ import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
 import { gradeSchema } from "@/lib/schema";
 import { useRouter } from "next/navigation";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { createGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";
 
 const CreateGradeForm = () => {
   const router = useRouter();
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof gradeSchema>>({
     resolver: zodResolver(gradeSchema),
     defaultValues: {
@@ -52,7 +54,7 @@ const CreateGradeForm = () => {
   });
 
   const { formState, handleSubmit } = form;
-  const { isDirty, isSubmitting } = formState;
+  const { isSubmitting } = formState;
 
   const onSubmit = async (formData: z.infer<typeof gradeSchema>) => {
     const response = await createGrade(formData);
@@ -70,10 +72,7 @@ const CreateGradeForm = () => {
     <Card className="max-w-[500px]">
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <CardHeader>
-            <CardTitle>Create New Grade</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <FormField
               control={form.control}
               name="name"
@@ -85,7 +84,7 @@ const CreateGradeForm = () => {
                   <FormControl>
                     <Input className="max-w-[300px]" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-destructive" />
                 </FormItem>
               )}
             />
@@ -125,7 +124,7 @@ const CreateGradeForm = () => {
               render={({ field }) => (
                 <FormItem className="md:w-1/2 pb-6">
                   <div className="flex items-baseline justify-between">
-                    <FormLabel>Class Type</FormLabel>
+                    <FormLabel>State or Territory</FormLabel>
                   </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
@@ -172,6 +171,14 @@ const CreateGradeForm = () => {
                     />
                   </FormControl>
                   <FormMessage />
+                  <FormDescription>
+                    This is the order that this grade will appear in relative to
+                    other grades available at a school. If the grade is "Year 1"
+                    set the order to "1", or for "Year 2" set it to "2". If the
+                    grade is "Kindergarten", set to "0". Any Pre-School values
+                    should be below 0, and similarly Tertiary values should in
+                    most cases be above 12.
+                  </FormDescription>
                 </FormItem>
               )}
             />

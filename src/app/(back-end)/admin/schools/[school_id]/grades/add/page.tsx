@@ -34,7 +34,11 @@ const AddSchoolGrades = ({ params }: any) => {
     isFetched,
     isPending,
   } = useQuery({
-    queryKey: ["gradesNotInSchool", school_id, school_details?.state_territory],
+    queryKey: [
+      "gradesNotInSchool",
+      school_id,
+      school_details?.state_territory!,
+    ],
     queryFn: async () => {
       const data = await getGradesNotInSchool(
         school_id,

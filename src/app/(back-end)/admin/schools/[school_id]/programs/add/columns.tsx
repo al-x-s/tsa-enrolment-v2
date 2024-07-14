@@ -3,7 +3,6 @@ import Link from "next/link";
 
 // Components
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,43 +17,39 @@ import { Button } from "@/components/ui/button";
 import { SortButton } from "@/components/tables/tableUtils";
 
 // Functions
-import { addGrade } from "../../../../../../../lib/server_actions/back_end/dbQueries_GRADE";
+import { addProgram } from "@/lib/server_actions/back_end/dbQueries_PROGRAM";
 
 // Types
 import { Program } from "@prisma/client";
-import { toast } from "@/components/ui/use-toast";
-import { addProgram } from "@/lib/server_actions/back_end/dbQueries_PROGRAM";
+import { useToast } from "@/components/ui/use-toast";
+
+// Tanstack
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const columnHelper = createColumnHelper<Program & { school_id: number }>();
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-// export type Grade = {
-//   id: number;
-//   category: string;
-//   name: string;
-//   order: number;
-//   state_territory: string;
-// };
+function useAddProgram() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-const handleAdd = async (
-  school_id: number,
-  program_id: number,
-  program_name: string
-) => {
-  const response: any = await addProgram(school_id, program_id);
-  if (response.isSuccess) {
-    toast({
-      title: "Success!",
-      description: `${program_name} added`,
-    });
-  } else {
-    toast({
-      title: "Something went wrong...",
-      description: response.issues,
-    });
-  }
-};
+  return useMutation({
+    mutationFn: addProgram,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["programsNotInSchool", data.schoolId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["programsInSchool", data.schoolId],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong ...!",
+        description: error.message,
+      });
+    },
+  });
+}
 
 export const columns: ColumnDef<Program & { school_id: number }>[] = [
   {
@@ -95,6 +90,29 @@ export const columns: ColumnDef<Program & { school_id: number }>[] = [
       const program_id: number = program.id;
       const school_id: number = program.school_id;
       const program_name: string = row.getValue("name");
+
+      const { toast } = useToast();
+
+      const addProgram = useAddProgram();
+
+      const handleAdd = async (
+        school_id: number,
+        program_id: number,
+        program_name: string
+      ) => {
+        addProgram.mutate(
+          { school_id, program_id },
+          {
+            onSuccess: () => {
+              toast({
+                title: "Success!",
+                description: `${program_name} added`,
+              });
+            },
+          }
+        );
+      };
+
       return (
         <Dialog>
           <DialogTrigger asChild>

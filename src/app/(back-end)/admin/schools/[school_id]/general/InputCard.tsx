@@ -33,9 +33,32 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { updateSchool } from "@/lib/server_actions/back_end/dbQueries_SCHOOL";
-import { formSchema } from "./schema";
+import { schoolSchema } from "@/lib/schema";
 import { School } from "@prisma/client";
 import { useToast } from "@/components/ui/use-toast";
+
+// Tanstack
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function useUpdateSchool() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: updateSchool,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["school", data.id],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
 
 const InputCard = ({ ...props }) => {
   const fieldName = props.fieldName as keyof Pick<
@@ -45,7 +68,7 @@ const InputCard = ({ ...props }) => {
   const value: any = props.data?.[fieldName];
   const defaultValue: any = { [fieldName]: value };
 
-  const schema = formSchema.pick({ [fieldName]: true });
+  const schema = schoolSchema.pick({ [fieldName]: true });
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: defaultValue,
@@ -56,20 +79,21 @@ const InputCard = ({ ...props }) => {
 
   const { toast } = useToast();
 
+  const updateSchool = useUpdateSchool();
+
   const onSubmit = async (formData: z.infer<typeof schema>) => {
-    const response = await updateSchool(formData, props.school_id);
-    if (response.isSuccess) {
-      toast({
-        title: "Success!",
-        description: `${props.title} successfully updated`,
-      });
-      reset({ [fieldName]: formData[fieldName] });
-    } else {
-      toast({
-        title: "Something went wrong...",
-        description: response.issues,
-      });
-    }
+    updateSchool.mutate(
+      { formData, id: props.school_id },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: `${props.title} updated`,
+          }),
+            reset({ [fieldName]: formData[fieldName] });
+        },
+      }
+    );
   };
 
   return (

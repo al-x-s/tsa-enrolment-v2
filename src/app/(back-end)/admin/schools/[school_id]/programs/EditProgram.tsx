@@ -30,12 +30,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Input } from "@/components/ui/input";
-
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
 import { updateSchoolProgram } from "@/lib/server_actions/back_end/dbQueries_PROGRAM";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+
+// Tanstack
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function useUpdateSchoolProgram() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: updateSchoolProgram,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["programsInSchool", data.schoolId],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
 
 const EditProgram = ({ ...props }) => {
   const formSchema = z.object({
@@ -52,24 +73,22 @@ const EditProgram = ({ ...props }) => {
   const { formState, handleSubmit, reset } = form;
   const { isDirty, isSubmitting } = formState;
 
+  const { toast } = useToast();
+
+  const updateSchoolProgram = useUpdateSchoolProgram();
+
   const onSubmit = async (formData: z.infer<typeof formSchema>) => {
-    console.log("submitted");
-    const response: any = await updateSchoolProgram(
-      formData,
-      props.school_id,
-      props.program_id
+    updateSchoolProgram.mutate(
+      { formData, school_id: props.school_id, program_id: props.program_id },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: `${props.program_name} updated`,
+          });
+        },
+      }
     );
-    if (response.isSuccess) {
-      toast({
-        title: "Success!",
-        description: `${props.program_name} updated`,
-      });
-    } else {
-      toast({
-        title: "Something went wrong...",
-        description: response.issues,
-      });
-    }
   };
 
   return (

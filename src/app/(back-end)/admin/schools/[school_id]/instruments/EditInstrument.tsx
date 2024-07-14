@@ -35,17 +35,36 @@ import { School } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
 import { updateSchoolInstrument } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+
+// Tanstack
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { schoolInstrumentSchema } from "@/lib/schema";
+
+function useUpdateSchoolInstrument() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: updateSchoolInstrument,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["instrumentsInSchool", data.schoolId],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
 
 const EditInstrument = ({ ...props }) => {
-  const formSchema = z.object({
-    enrolled: z.number(),
-    cap: z.number(),
-    status: z.enum(["Available", "Unavailable", "Hidden"]),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const { toast } = useToast();
+  const form = useForm<z.infer<typeof schoolInstrumentSchema>>({
+    resolver: zodResolver(schoolInstrumentSchema),
     defaultValues: {
       enrolled: props.enrolled,
       cap: props.cap,
@@ -56,24 +75,24 @@ const EditInstrument = ({ ...props }) => {
   const { formState, handleSubmit, reset } = form;
   const { isDirty, isSubmitting } = formState;
 
-  const onSubmit = async (formData: z.infer<typeof formSchema>) => {
-    console.log("submitted");
-    const response: any = await updateSchoolInstrument(
-      formData,
-      props.school_id,
-      props.instrument_id
+  const updateSchoolInstrument = useUpdateSchoolInstrument();
+
+  const onSubmit = async (formData: z.infer<typeof schoolInstrumentSchema>) => {
+    updateSchoolInstrument.mutate(
+      {
+        formData,
+        school_id: props.school_id,
+        instrument_id: props.instrument_id,
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: `${props.instrument_name} updated`,
+          });
+        },
+      }
     );
-    if (response.isSuccess) {
-      toast({
-        title: "Success!",
-        description: `${props.instrument_name} updated`,
-      });
-    } else {
-      toast({
-        title: "Something went wrong...",
-        description: response.issues,
-      });
-    }
   };
 
   return (

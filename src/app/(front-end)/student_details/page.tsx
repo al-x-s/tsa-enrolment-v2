@@ -107,6 +107,10 @@ export default function StudentDetailsPage() {
       shouldFocus: true,
     });
 
+    if (!data) {
+      return;
+    }
+
     const { instrumentData } = data;
     setValue("program_type", instrumentData?.program_type);
 

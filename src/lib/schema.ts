@@ -299,6 +299,25 @@ export const signInSchema = z.object({
   otp: z.string().optional(),
 });
 
+// Back End Schemas
+
+export const schoolSchema = z.object({
+  name: z.string().min(1, "School name must contain at least 1 character"),
+  state_territory: z.enum([
+    "ACT",
+    "NSW",
+    "NT",
+    "QLD",
+    "SA",
+    "TAS",
+    "VIC",
+    "WA",
+  ]),
+  facility_hire: z.number(),
+  resource_levy: z.number(),
+  offers_instrument_rental: z.boolean(),
+});
+
 export const programSchema = z.object({
   name: z.string(),
   description: z.string(),
@@ -311,7 +330,7 @@ export const programSchema = z.object({
 });
 
 export const gradeSchema = z.object({
-  name: z.string().min(1, "The name must have a minimum length of 1 character"),
+  name: z.string().min(1, "Grade name must contain at least 1 character"),
   category: z.enum(["Pre", "Primary", "Secondary", "Tertiary"]),
   order: z.number(),
   state_territory: z.enum([
@@ -324,4 +343,27 @@ export const gradeSchema = z.object({
     "VIC",
     "WA",
   ]),
+});
+
+export const instrumentSchema = z.object({
+  name: z.string().min(1, "Grade name must contain at least 1 character"),
+  program_type: z.enum(["Band", "String", "Guitar", "Keyboard"]),
+  can_hire: z.boolean(),
+  hire_cost: z.number(),
+  hire_insurance: z.number(),
+});
+
+export const schoolInstrumentSchema = z.object({
+  enrolled: z.number(),
+  cap: z.number(),
+  status: z.enum(["Available", "Unavailable", "Hidden"]),
+});
+
+export const modelSchema = z.object({
+  model: z.string().min(1, "Model name must contain at least 1 character"),
+  brand: z.string().min(1, "Brand name must contain at least 1 character"),
+  image: z.string(),
+  status: z.enum(["Available", "Sold_Out"]),
+  rrp: z.number(),
+  sale_price: z.number(),
 });

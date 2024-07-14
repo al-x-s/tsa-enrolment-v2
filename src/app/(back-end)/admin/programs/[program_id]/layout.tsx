@@ -7,7 +7,7 @@ export default async function ProgramDetailsLayout({ params, children }: any) {
   const queryClient = new QueryClient();
 
   const program_details = await queryClient.fetchQuery({
-    queryKey: ["programs", program_id],
+    queryKey: ["program", program_id],
     queryFn: async () => {
       const data = await getProgram(program_id);
       return data;
@@ -21,7 +21,7 @@ export default async function ProgramDetailsLayout({ params, children }: any) {
           Program - {program_details?.name}
         </h1>
       </div>
-      <div className="mx-auto grid w-full max-w-7xl items-start gap-6 md:grid-cols-[400px_1fr] lg:grid-cols-[500px_1fr]">
+      <div className="mx-auto grid w-full max-w-7xl items-start gap-6 md:grid-cols-[1fr_400px] lg:grid-cols-[1fr_500px]">
         {children}
       </div>
     </div>

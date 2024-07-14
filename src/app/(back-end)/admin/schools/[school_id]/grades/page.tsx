@@ -37,7 +37,7 @@ const SchoolGrades = ({ params }: any) => {
     isFetched,
     isPending,
   } = useQuery({
-    queryKey: ["grades", school_id],
+    queryKey: ["gradesInSchool", school_id],
     queryFn: async () => {
       const data = await getGradesBySchool(school_id);
       return data;
@@ -54,7 +54,7 @@ const SchoolGrades = ({ params }: any) => {
       queryKey: [
         "gradesNotInSchool",
         school_id,
-        school_details?.state_territory,
+        school_details?.state_territory!,
       ],
       queryFn: async () => {
         const data = await getGradesNotInSchool(
@@ -64,7 +64,7 @@ const SchoolGrades = ({ params }: any) => {
         return data;
       },
     });
-  }, [school_id, queryClient]);
+  }, [school_details]);
 
   if (isPending) {
     return <Loading />;

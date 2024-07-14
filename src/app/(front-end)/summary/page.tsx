@@ -289,6 +289,11 @@ export default function SummaryPage() {
   if (isPending) {
     return <p>loading</p>;
   }
+
+  if (!data) {
+    return;
+  }
+
   const { instrumentData, accessoriesOptions } = data;
 
   const userData: UserData | undefined = {
