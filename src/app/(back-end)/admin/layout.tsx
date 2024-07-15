@@ -16,6 +16,8 @@ import ReactQueryProvider from "@/lib/hooks/ReactQueryProviders";
 // Styles
 import "@/app/globals.css";
 import NavBar from "./NavBar";
+import getUser from "@/lib/server_actions/getUser";
+import { is2faEnabled } from "@/lib/server_actions/twoFactorAuthentication";
 
 export const metadata = {
   title: "TSA Enrolment",
@@ -34,13 +36,29 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = await validateRequest();
+  const queryClient = new QueryClient();
+
+  // fetch page data
+  const { user } = await queryClient.fetchQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const data = await getUser();
+      return data;
+    },
+  });
 
   if (!user) {
     return redirect("/login");
   }
 
-  const queryClient = new QueryClient();
+  // pre-fetch data
+  await queryClient.prefetchQuery({
+    queryKey: ["isUser2faEnabled"],
+    queryFn: async () => {
+      const data = await is2faEnabled();
+      return data;
+    },
+  });
 
   return (
     <html lang="en" className="h-full">

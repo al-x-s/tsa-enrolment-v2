@@ -4,6 +4,7 @@ import { error } from "console";
 import { decodeHex } from "oslo/encoding";
 import { TOTPController } from "oslo/otp";
 import prisma from "@/prisma/client";
+import { redirect } from "next/navigation";
 
 export async function enable2fa(otp: string, hashedSecret: string) {
   const { user } = await validateRequest();
@@ -55,10 +56,10 @@ export async function disable2fa() {
   }
 }
 
-export async function is2faEnabled() {
+export async function is2faEnabled(): Promise<boolean> {
   const { user } = await validateRequest();
   if (!user) {
-    return error("Access Denied");
+    return redirect("admin/login");
   }
 
   try {
@@ -66,11 +67,12 @@ export async function is2faEnabled() {
       where: { username: user.username },
     });
 
-    const is2faEnabled = existingUser?.mfa_secret_hash === null ? false : true;
+    const result: boolean =
+      existingUser?.mfa_secret_hash === null ? false : true;
 
-    return is2faEnabled;
+    return result;
   } catch (error) {
     console.log(error);
-    return error;
+    throw error;
   }
 }

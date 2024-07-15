@@ -7,9 +7,9 @@ import {
   disable2fa,
   is2faEnabled,
 } from "@/lib/server_actions/twoFactorAuthentication";
-import type { Session, User } from "lucia";
+
 import qrcode from "qrcode";
-import Image from "next/image";
+import z from "zod";
 import { encodeHex } from "oslo/encoding";
 
 import { Button } from "@/components/ui/button";
@@ -42,48 +42,241 @@ import {
 import { createTOTPKeyURI } from "oslo/otp";
 import { HMAC } from "oslo/crypto";
 
-function UserName() {
+import { useQuery } from "@tanstack/react-query";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  updateUser,
+  updateUsername,
+} from "@/lib/server_actions/back_end/dbQueries_USER";
+import { useToast } from "@/components/ui/use-toast";
+
+// Tanstack
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function useUpdateUser() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: updateUser,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["user"],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
+
+function UserName({ ...props }) {
+  const { toast } = useToast();
+  const updateUser = useUpdateUser();
+  const { username, id } = props.user;
+  const usernameSchema = z.object({
+    username: z.string().min(1, "Name must contain at least 1 character"),
+  });
+  const form = useForm({
+    resolver: zodResolver(usernameSchema),
+    defaultValues: {
+      username: username,
+    },
+  });
+
+  const { reset, handleSubmit, formState } = form;
+  const { isDirty, isSubmitting } = formState;
+
+  const onSubmit = async (formData: z.infer<typeof usernameSchema>) => {
+    updateUser.mutate(
+      { formData, user_id: id, field: "username" },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: `Username updated`,
+          }),
+            reset({ username: formData.username });
+        },
+      }
+    );
+  };
+
   return (
     <Card id="user-name" x-chunk="dashboard-04-chunk-1">
-      <CardHeader>
-        <CardTitle>User Name</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form>
-          <Input placeholder="Update your user name here ..." />
+      <Form {...form}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <CardHeader>
+            <CardTitle>User Name</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem className="w-full pb-6">
+                  <FormControl>
+                    <Input className="max-w-[300px]" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+          <CardFooter className="border-t px-6 py-4 flex flex-row justify-between">
+            <p className="italic">Update your username</p>
+            <div>
+              {isDirty && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => reset()}
+                >
+                  Cancel
+                </Button>
+              )}
+
+              <Button disabled={!isDirty || isSubmitting} type="submit">
+                Update
+              </Button>
+            </div>
+          </CardFooter>
         </form>
-      </CardContent>
-      <CardFooter className="border-t px-6 py-4">
-        <Button>Save</Button>
-      </CardFooter>
+      </Form>
     </Card>
   );
 }
 
-function MFA({ ...props }) {
+function ChangePassword({ ...props }) {
+  const { id } = props.user;
+  const passwordSchema = z.object({
+    current: z.string(),
+    new: z.string(),
+    new_confirm: z.string(),
+  });
+
+  const form = useForm({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      current: "",
+      new: "",
+      new_confirm: "",
+    },
+  });
+
+  const { handleSubmit } = form;
+
+  const onSubmit = () => {
+    updateUser.mutate(
+      { formData, user_id: id, field: "password" },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: `Username updated`,
+          }),
+            reset({ username: formData.username });
+        },
+      }
+    );
+  };
+
+  return (
+    <>
+      <section className="pb-6">
+        <h1 className="font-bold pb-6">Change Password</h1>
+        <Form {...form}>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="current"
+              render={({ field }) => (
+                <FormItem className="w-full pb-2">
+                  <FormLabel>Current Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      className="max-w-[300px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="new"
+              render={({ field }) => (
+                <FormItem className="w-full pb-2">
+                  <FormLabel>New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      className="max-w-[300px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="new_confirm"
+              render={({ field }) => (
+                <FormItem className="w-full pb-4">
+                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      className="max-w-[300px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-fit">
+              Update Password
+            </Button>
+          </form>
+        </Form>
+      </section>
+    </>
+  );
+}
+
+function Security({ ...props }) {
   const [mfa, setMfa] = React.useState(false);
   const [openEnableMfa, setOpenEnableMfa] = React.useState(false);
   const [openDisableMfa, setOpenDisableMfa] = React.useState(false);
 
   React.useEffect(() => {
-    const runOnMount = async () => {
-      const isMfaEnabled: any = await is2faEnabled();
-      setMfa(isMfaEnabled);
-    };
-    runOnMount();
+    setMfa(props.mfa);
   });
 
   const twoFactorAuthToggle = (e: boolean) => {
     if (e === true) {
-      // open set 2fa dialog
       setOpenEnableMfa(true);
-      // if mfa is successfully set up
-      // setMfa(true);
     } else if (e === false) {
-      // open are sure you want to disable 2fa dialog
       setOpenDisableMfa(true);
-      // if answer is yes
-      // setMfa(false);
     }
   };
   return (
@@ -96,24 +289,7 @@ function MFA({ ...props }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <section className="pb-6">
-            <h1 className="font-bold pb-2">Change Password</h1>
-            <form className="flex flex-col gap-4">
-              <Input
-                placeholder="Current Password"
-                type="password"
-                className="max-w-80"
-              />
-              <Input
-                placeholder="New Password"
-                type="password"
-                className="max-w-80"
-              />
-              <Button type="submit" className="w-fit">
-                Confirm New Password
-              </Button>
-            </form>
-          </section>
+          <ChangePassword user={props.user} />
           <section className="border-t pt-6">
             <h1 className="font-bold pb-2">Two Factor Authentication (2FA)</h1>
             {mfa === false && (
@@ -273,20 +449,28 @@ function DisableMfaDialog({ ...props }) {
 }
 
 const MyAccountPage = () => {
-  const [user, setUser] = React.useState<User | null>(null);
+  // Fetch page data
+  const { data, isError, isPending } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const data = await getUser();
+      return data;
+    },
+  });
 
-  React.useEffect(() => {
-    async function fetchUser() {
-      const { user } = await getUser();
-      if (!user) {
-        return;
-      } else {
-        setUser(user);
-      }
-    }
+  const { data: mfa } = useQuery({
+    queryKey: ["isUser2faEnabled"],
+    queryFn: async () => {
+      const data = await is2faEnabled();
+      return data;
+    },
+  });
 
-    fetchUser();
-  }, []);
+  if (isPending || isError) {
+    return;
+  }
+
+  const { user } = data;
 
   return (
     <div className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
@@ -304,8 +488,8 @@ const MyAccountPage = () => {
           <Link href="#security">Security</Link>
         </nav>
         <div className="grid gap-6">
-          <UserName />
-          <MFA username={user?.username} />
+          <UserName user={user} />
+          <Security user={user} mfa={mfa} />
         </div>
       </div>
     </div>
