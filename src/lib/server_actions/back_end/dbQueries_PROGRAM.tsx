@@ -126,7 +126,7 @@ const deleteProgram = async (program_id: number) => {
     });
 
     if (result) {
-      revalidatePath(`/admin/programs`);
+      revalidatePath("/admin/programs");
       return { isSuccess: true };
     } else {
       return { isSuccess: false };

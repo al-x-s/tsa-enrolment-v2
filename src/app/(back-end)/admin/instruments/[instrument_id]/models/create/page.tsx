@@ -10,17 +10,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // React Hook Form
 import { useForm } from "react-hook-form";
 
-// React Query
-import { useQuery } from "@tanstack/react-query";
-
-// Tanstack Table
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 // DB Queries
-import { deleteModel } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
 import {
-  getInstrumentModel,
-  updateInstrumentModel,
+  createInstrumentModel,
+  getInstrumentImages,
 } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
 
 //Schemas
@@ -31,6 +24,9 @@ import clsx from "clsx";
 
 // Images
 import circleTick from "@/images/circle-tick.svg";
+
+// Cloudinary Upload Widget
+import { CldImage, CldUploadWidget } from "next-cloudinary";
 
 // Components
 import { Input } from "@/components/ui/input";
@@ -61,6 +57,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import BrowseImages from "../BrowseImages";
 import {
   Dialog,
   DialogContent,
@@ -71,20 +69,65 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Loading from "@/components/tables/Loading";
+
+function useUpdateModels() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createInstrumentModel,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["getInstrumentModels", data.id],
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Something went wrong...",
+        description: error.message,
+      });
+    },
+  });
+}
 
 const ModelPage = ({ params }: any) => {
   const router = useRouter();
+  const { toast } = useToast();
   const instrument_id = parseInt(decodeURI(params.instrument_id));
 
-  const onSubmit = async (formData: z.infer<typeof modelSchema>) => {};
+  const {
+    data: images,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["getInstrumentImages"],
+    queryFn: async () => {
+      const data = await getInstrumentImages();
+      return data;
+    },
+  });
+
+  const updateModels = useUpdateModels();
+
+  const onSubmit = async (formData: z.infer<typeof modelSchema>) => {
+    updateModels.mutate(
+      { formData, instrument_id },
+      {
+        onSuccess: (response) => {
+          router.push(response.redirect!);
+        },
+      }
+    );
+  };
 
   const form = useForm<z.infer<typeof modelSchema>>({
     resolver: zodResolver(modelSchema),
     defaultValues: {
       model: "",
       brand: "",
-      image: "",
+      image: "instrument_placeholder_gtt7km",
       status: "Available",
       rrp: 0,
       sale_price: 0,
@@ -96,6 +139,10 @@ const ModelPage = ({ params }: any) => {
   const { model, brand, image, status, rrp, sale_price } = watch();
 
   const isSoldOut = status === "Sold_Out" ? true : false;
+
+  if (isPending || isError) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -146,7 +193,7 @@ const ModelPage = ({ params }: any) => {
                     render={({ field }) => (
                       <FormItem className="md:w-1/2 pb-6">
                         <div className="flex items-baseline justify-between">
-                          <FormLabel>Program Type</FormLabel>
+                          <FormLabel>Status</FormLabel>
                         </div>
                         <Select
                           onValueChange={field.onChange}
@@ -231,23 +278,68 @@ const ModelPage = ({ params }: any) => {
                           <FormLabel className="text-black">Image</FormLabel>
                         </div>
                         <FormControl>
-                          <Input className="max-w-[300px]" {...field} />
+                          <Input
+                            className="max-w-[300px]"
+                            {...field}
+                            disabled
+                          />
                         </FormControl>
                         <FormMessage />
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              type="button"
+                              className="border grey 1px p-3 rounded shadow"
+                            >
+                              Browse Images
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <BrowseImages
+                              images={images}
+                              image_public_id={image}
+                              setValue={setValue}
+                            />
+                          </DialogContent>
+                        </Dialog>
+                        <CldUploadWidget
+                          options={{ sources: ["local", "url"] }}
+                          signatureEndpoint={"/api/sign-image"}
+                          onSuccess={(result: any, { widget }) => {
+                            setValue("image", result?.info.public_id, {
+                              shouldDirty: true,
+                            });
+                            widget.close();
+                          }}
+                          uploadPreset="instrument_option"
+                        >
+                          {({ open }) => {
+                            return (
+                              <Button
+                                className={"border grey 1px p-3 rounded shadow"}
+                                onClick={() => open()}
+                                type="button"
+                                variant="secondary"
+                              >
+                                Upload an Image
+                              </Button>
+                            );
+                          }}
+                        </CldUploadWidget>
                       </FormItem>
                     )}
                   />
                 </CardContent>
                 <CardFooter className="border-t px-6 py-4 flex flex-row justify-between">
-                  <p className="italic">Click to save changes</p>
+                  <p className="italic">Click to create model</p>
                   <div>
                     {isDirty && (
                       <Button variant="secondary" onClick={() => reset()}>
-                        Cancel
+                        Reset Form
                       </Button>
                     )}
                     <Button disabled={!isDirty || isSubmitting} type="submit">
-                      Save
+                      Create Model
                     </Button>
                   </div>
                 </CardFooter>
@@ -318,12 +410,11 @@ const ModelPage = ({ params }: any) => {
                 </div>
 
                 <div className="w-[30%] py-2">
-                  <Image
+                  <CldImage
+                    width="93"
+                    height="300"
                     src={image}
-                    alt={`Picture of ${brand} ${model}`}
-                    width={93}
-                    height={300}
-                    style={{ objectFit: "contain" }}
+                    alt="Picture of instrument"
                   />
                 </div>
               </div>

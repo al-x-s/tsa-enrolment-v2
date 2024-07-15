@@ -138,7 +138,7 @@ model Program {
   description    String
   type           ProgramType
   classType      ClassType
-  program_status ProgramStatus
+  program_status ActiveOrInactive
   tuition_fee     Int
   rehearsal_fee     Int
   enrol_fee      Int
@@ -188,7 +188,7 @@ enum ModelStatus {
 model Accessory {
   id                Int          @id @default(autoincrement())
   name              String       @unique
-  status            String
+  status            ActiveOrInactive
   price             Int 
   is_recommended    Boolean
   description_short String
@@ -209,7 +209,7 @@ enum ClassType {
   Rehearsal
 }
 
-enum ProgramStatus {
+enum ActiveOrInactive {
   Active
   Inactive
 }

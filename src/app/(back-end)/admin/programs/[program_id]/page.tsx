@@ -176,6 +176,7 @@ const ProgramPage = ({ params }: any) => {
   React.useEffect(() => {
     if (type === "Guitar" || type === "Keyboard") {
       setValue("rehearsal_fee", 0);
+      setValue("classType", "Group");
     }
   }, [type]);
 
@@ -518,7 +519,7 @@ const ProgramPage = ({ params }: any) => {
                     </TableCell>
                   </TableRow>
                 )}
-                {type === ("Band" || "String") && (
+                {(type === "Band" || type === "String") && (
                   <TableRow>
                     <TableCell className="font-medium w-60">
                       Rehearsal Fee

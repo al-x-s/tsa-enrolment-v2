@@ -94,7 +94,7 @@ export const columns: ColumnDef<Instrument>[] = [
 
       return options.map((option: any, index: number) => (
         <Link
-          href={`/admin/instruments/${id}/models/${option.model.id}`}
+          href={`/admin/instruments/${id}/models/${option.id}`}
           className="text-blue-500 hover:text-red-600"
           key={crypto.randomUUID()}
         >
@@ -117,7 +117,7 @@ export const columns: ColumnDef<Instrument>[] = [
 
       return options.map((option: any, index: number) => (
         <Link
-          href={`/admin/instruments/${id}/accessories/${option.id}`}
+          href={`/admin/accessories/${option.id}`}
           className="text-blue-500 hover:text-red-600"
           key={crypto.randomUUID()}
         >

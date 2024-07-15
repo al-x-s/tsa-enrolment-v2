@@ -48,11 +48,15 @@ function UserMenu({ ...props }) {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <User className="mr-2 h-4 w-4" />
-            <Link href="/admin/my_account">Profile</Link>
+            <Link href="/admin/my_account" className="w-full">
+              User Name
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
-            <Link href="/admin/my_account">Settings</Link>
+            <Link href="/admin/my_account" className="w-full">
+              Settings
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         {isAdmin && (
@@ -62,11 +66,13 @@ function UserMenu({ ...props }) {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <UserPlus className="mr-2 h-4 w-4" />
-                <Link href="/admin/user_permissions">Create New User</Link>
+                <Link href="/admin/user_permissions" className="w-full">
+                  Create New User
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Lock className="mr-2 h-4 w-4" />
-                <Link href="/admin/user_permissions">
+                <Link href="/admin/user_permissions" className="w-full">
                   Edit User Permissions
                 </Link>
               </DropdownMenuItem>

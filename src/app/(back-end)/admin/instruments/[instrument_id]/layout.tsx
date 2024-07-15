@@ -5,6 +5,7 @@ import { getGradesBySchool } from "@/lib/server_actions/back_end/dbQueries_GRADE
 
 import {
   getInstrumentById,
+  getInstrumentImages,
   getInstrumentModels,
   getInstrumentsBySchool,
 } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
@@ -50,6 +51,14 @@ export default async function InstrumentDetailsLayout({
     queryKey: ["accessoriesByInstrument", instrument_id],
     queryFn: async () => {
       const data = await getAccessoriesByInstrument(instrument_id);
+      return data;
+    },
+  });
+
+  await queryClient.prefetchQuery({
+    queryKey: ["getInstrumentImages"],
+    queryFn: async () => {
+      const data = await getInstrumentImages();
       return data;
     },
   });

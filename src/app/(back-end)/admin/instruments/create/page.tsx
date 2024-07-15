@@ -34,31 +34,38 @@ import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
-import { schoolSchema } from "@/lib/schema";
+import { instrumentSchema, schoolSchema } from "@/lib/schema";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { createSchool } from "@/lib/server_actions/back_end/dbQueries_SCHOOL";
 import { Checkbox } from "@/components/ui/checkbox";
+import { createInstrument } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
 
-const CreateSchoolForm = () => {
+const CreateInstrumentForm = () => {
   const router = useRouter();
   const { toast } = useToast();
-  const form = useForm<z.infer<typeof schoolSchema>>({
-    resolver: zodResolver(schoolSchema),
+  const form = useForm<z.infer<typeof instrumentSchema>>({
+    resolver: zodResolver(instrumentSchema),
     defaultValues: {
       name: "",
-      state_territory: "NSW",
-      facility_hire: 0,
-      resource_levy: 0,
-      offers_instrument_rental: false,
+      program_type: "Band",
+      can_hire: true,
+      hire_cost: 0,
+      hire_insurance: 0,
     },
   });
 
-  const { formState, handleSubmit } = form;
+  const { formState, handleSubmit, watch, setValue } = form;
   const { isSubmitting } = formState;
+  const { can_hire } = watch();
 
-  const onSubmit = async (formData: z.infer<typeof schoolSchema>) => {
-    const response = await createSchool(formData);
+  React.useEffect(() => {
+    setValue("hire_cost", 0);
+    setValue("hire_insurance", 0);
+  }, [can_hire]);
+
+  const onSubmit = async (formData: z.infer<typeof instrumentSchema>) => {
+    const response = await createInstrument(formData);
     if (response.isSuccess) {
       router.push(response.redirect!);
     } else {
@@ -92,11 +99,11 @@ const CreateSchoolForm = () => {
 
             <FormField
               control={form.control}
-              name="state_territory"
+              name="program_type"
               render={({ field }) => (
                 <FormItem className="md:w-1/2 pb-6">
                   <div className="flex items-baseline justify-between">
-                    <FormLabel>State or Territory</FormLabel>
+                    <FormLabel>Program Type</FormLabel>
                   </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
@@ -105,20 +112,13 @@ const CreateSchoolForm = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {[
-                        "ACT",
-                        "NSW",
-                        "NT",
-                        "QLD",
-                        "SA",
-                        "TAS",
-                        "VIC",
-                        "WA",
-                      ].map((item: any) => (
-                        <SelectItem key={item} value={item} className="ml-3">
-                          {item}
-                        </SelectItem>
-                      ))}
+                      {["Band", "Keyboard", "String", "Guitar"].map(
+                        (item: any) => (
+                          <SelectItem key={item} value={item} className="ml-3">
+                            {item}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -126,61 +126,12 @@ const CreateSchoolForm = () => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="facility_hire"
-              render={({ field }) => (
-                <FormItem className="w-full pb-6">
-                  <div className="flex items-baseline justify-between">
-                    <FormLabel className="text-black">Facility Hire</FormLabel>
-                  </div>
-                  <FormControl>
-                    <Input
-                      className="max-w-[300px]"
-                      type="number"
-                      {...field}
-                      onChange={(event) => field.onChange(+event.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <FormDescription>
-                    The per term facility hire fee charged to parents. Set to 0
-                    if none.
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="resource_levy"
-              render={({ field }) => (
-                <FormItem className="w-full pb-6">
-                  <div className="flex items-baseline justify-between">
-                    <FormLabel className="text-black">Resource Levy</FormLabel>
-                  </div>
-                  <FormControl>
-                    <Input
-                      className="max-w-[300px]"
-                      type="number"
-                      {...field}
-                      onChange={(event) => field.onChange(+event.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <FormDescription>
-                    The per term resource levy charged to parents. Set to 0 if
-                    none.
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-
             <FormLabel className="text-black">
-              Offers Instrument Rental
+              Is the instrument hireable?
             </FormLabel>
             <FormField
               control={form.control}
-              name="offers_instrument_rental"
+              name="can_hire"
               render={({ field }) => (
                 <FormItem className="w-full pb-6 pt-2">
                   <FormControl>
@@ -191,22 +142,78 @@ const CreateSchoolForm = () => {
                     />
                   </FormControl>
                   <FormLabel className="">
-                    Check this box if the school offers instrument rental
+                    Check this box if this instrument can be hired
                   </FormLabel>
 
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {can_hire && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="hire_cost"
+                  render={({ field }) => (
+                    <FormItem className="w-full pb-6">
+                      <div className="flex items-baseline justify-between">
+                        <FormLabel className="text-black">Hire Cost</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Input
+                          className="max-w-[300px]"
+                          type="number"
+                          {...field}
+                          onChange={(event) =>
+                            field.onChange(+event.target.value)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      <FormDescription>
+                        The per month cost to hire the instrument
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hire_insurance"
+                  render={({ field }) => (
+                    <FormItem className="w-full pb-6">
+                      <div className="flex items-baseline justify-between">
+                        <FormLabel className="text-black">
+                          Insurance Cost
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Input
+                          className="max-w-[300px]"
+                          type="number"
+                          {...field}
+                          onChange={(event) =>
+                            field.onChange(+event.target.value)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      <FormDescription>
+                        The per month cost to insure the instrument
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
           </CardContent>
           <CardFooter className="border-t px-6 py-4 flex flex-row gap-4 justify-between">
             <p className="italic">
-              Click Create School to connect it to Grades, Programs, and
-              Instruments
+              Click Create Instrument to connect it to Models and Accessories
             </p>
 
             <Button disabled={isSubmitting} type="submit">
-              Create School
+              Create Instrument
             </Button>
           </CardFooter>
         </form>
@@ -215,17 +222,17 @@ const CreateSchoolForm = () => {
   );
 };
 
-const CreateGrade = () => {
+const CreateInstrument = () => {
   return (
     <div className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
       <div className="mx-auto grid w-full max-w-6xl gap-2">
-        <h1 className="text-3xl font-semibold">Create New School</h1>
+        <h1 className="text-3xl font-semibold">Create New Instrument</h1>
       </div>
       <div className="mx-auto w-full max-w-6xl items-start gap-6">
-        <CreateSchoolForm />
+        <CreateInstrumentForm />
       </div>
     </div>
   );
 };
 
-export default CreateGrade;
+export default CreateInstrument;

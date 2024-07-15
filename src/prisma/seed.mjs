@@ -129,8 +129,7 @@ const createInstrumentModel = async () => {
     {
       brand: "Yamaha",
       model: "YCL255",
-      image:
-        "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683152/CLARINET_-_YCL255_oigyk6.png",
+      image: "CLARINET_-_YCL255_oigyk6",
       rrp: 1099.0,
       sale_price: 849.0,
       status: "Sold_Out",
@@ -138,8 +137,7 @@ const createInstrumentModel = async () => {
     {
       brand: "Jupiter",
       model: "JCL700NA",
-      image:
-        "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683152/CLARINET_-_JCL700NA_cmwgfj.png",
+      image: "CLARINET_-_JCL700NA_cmwgfj",
       rrp: 895.0,
       sale_price: 685.0,
       status: "Available",
@@ -148,8 +146,7 @@ const createInstrumentModel = async () => {
     {
       brand: "Yamaha",
       model: "YTR2330",
-      image:
-        "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683153/TRUMPET_YTR2330_m4tckd.png",
+      image: "TRUMPET_YTR2330_m4tckd",
       rrp: 1099.0,
       sale_price: 849.0,
       status: "Available",
@@ -157,8 +154,7 @@ const createInstrumentModel = async () => {
     {
       brand: "Schagerl",
       model: "SLTR355",
-      image:
-        "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683152/TRUMPET_-_SLTR355_vgcddl.png",
+      image: "TRUMPET_-_SLTR355_vgcddl",
       rrp: 1299.0,
       sale_price: 849.0,
       status: "Sold_Out",
@@ -167,8 +163,7 @@ const createInstrumentModel = async () => {
     {
       brand: "Yamaha",
       model: "PSRE373",
-      image:
-        "https://res.cloudinary.com/dgji2hj3t/image/upload/v1713683150/KEYBOARD_-_PSRE373_sncs71.png",
+      image: "KEYBOARD_-_PSRE373_sncs71",
       rrp: 379.99,
       sale_price: 319.0,
       status: "Available",

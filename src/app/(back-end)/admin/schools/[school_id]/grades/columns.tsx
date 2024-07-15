@@ -118,7 +118,7 @@ export const columns: ColumnDef<Grade & { school_id: number }>[] = [
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Remove Year</DialogTitle>
+              <DialogTitle>Remove Grade</DialogTitle>
             </DialogHeader>
             <p>
               Are you sure you want to remove {grade_name} from this school?

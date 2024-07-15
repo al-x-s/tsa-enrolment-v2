@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CldImage } from "next-cloudinary";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -151,12 +152,11 @@ const InstrumentPurchaseOption = React.forwardRef<
           </div>
 
           <div className="w-[30%] py-2">
-            <Image
+            <CldImage
+              width="93"
+              height="300"
               src={image}
               alt={`Picture of ${brand} ${model}`}
-              width={93}
-              height={300}
-              style={{ objectFit: "contain" }}
             />
           </div>
         </div>

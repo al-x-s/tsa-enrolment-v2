@@ -6,7 +6,7 @@ import Image from "next/image";
 import questionButton from "@/images/question-mark-with-circle.svg";
 
 // Types
-import { Accessory } from "@/lib/types";
+import { Accessory } from "@prisma/client";
 
 // Components
 import { Button } from "@/components/ui/button";

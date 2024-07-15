@@ -35,7 +35,7 @@ const InstrumentsPage = async () => {
         <DataTable columns={columns} data={data}>
           <Link
             className="h-10 px-4 py-2 rounded font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  bg-sky-700 hover:bg-sky-900 text-white"
-            href="/admin/schools/create"
+            href="/admin/instruments/create"
           >
             Create New Instrument
           </Link>

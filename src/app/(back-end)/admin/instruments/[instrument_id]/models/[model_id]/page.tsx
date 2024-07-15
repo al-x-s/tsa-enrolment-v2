@@ -17,7 +17,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // DB Queries
-import { deleteModel } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
+import {
+  deleteModel,
+  getInstrumentImages,
+} from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
 import {
   getInstrumentModel,
   updateInstrumentModel,
@@ -74,6 +77,10 @@ import {
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/tables/Loading";
 
+// Cloudinary Upload Widget
+import { CldImage, CldUploadWidget } from "next-cloudinary";
+import BrowseImages from "../BrowseImages";
+
 function useUpdateModel() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -81,7 +88,6 @@ function useUpdateModel() {
   return useMutation({
     mutationFn: updateInstrumentModel,
     onSuccess: (data: any) => {
-      console.log(data);
       queryClient.invalidateQueries({
         queryKey: ["getInstrumentModel", data.id],
       });
@@ -102,12 +108,25 @@ const ModelPage = ({ params }: any) => {
   const [formInitialized, setFormInitialized] = React.useState(false);
 
   // Fetch page data
-  const { data: model_details, isPending } = useQuery({
+  const { data: model_details } = useQuery({
     queryKey: ["getInstrumentModel", model_id],
     queryFn: async () => {
       const data = await getInstrumentModel(model_id);
       return data;
     },
+  });
+
+  const {
+    data: images,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["getInstrumentImages"],
+    queryFn: async () => {
+      const data = await getInstrumentImages();
+      return data;
+    },
+    enabled: !!model_details,
   });
 
   const { toast } = useToast();
@@ -175,7 +194,7 @@ const ModelPage = ({ params }: any) => {
 
   const isSoldOut = status === "Sold_Out" ? true : false;
 
-  if (isPending || !formInitialized) {
+  if (isPending || isError || !formInitialized) {
     return <Loading />;
   }
 
@@ -230,7 +249,7 @@ const ModelPage = ({ params }: any) => {
                     render={({ field }) => (
                       <FormItem className="md:w-1/2 pb-6">
                         <div className="flex items-baseline justify-between">
-                          <FormLabel>Program Type</FormLabel>
+                          <FormLabel>Status</FormLabel>
                         </div>
                         <Select
                           onValueChange={field.onChange}
@@ -322,6 +341,47 @@ const ModelPage = ({ params }: any) => {
                           />
                         </FormControl>
                         <FormMessage />
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              type="button"
+                              className="border grey 1px p-3 rounded shadow"
+                            >
+                              Browse Images
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <BrowseImages
+                              images={images}
+                              image_public_id={image}
+                              setValue={setValue}
+                            />
+                          </DialogContent>
+                        </Dialog>
+                        <CldUploadWidget
+                          options={{ sources: ["local", "url"] }}
+                          signatureEndpoint={"/api/sign-image"}
+                          onSuccess={(result: any, { widget }) => {
+                            setValue("image", result?.info.public_id, {
+                              shouldDirty: true,
+                            });
+                            widget.close();
+                          }}
+                          uploadPreset="instrument_option"
+                        >
+                          {({ open }) => {
+                            return (
+                              <Button
+                                className={"border grey 1px p-3 rounded shadow"}
+                                onClick={() => open()}
+                                type="button"
+                                variant="secondary"
+                              >
+                                Upload an Image
+                              </Button>
+                            );
+                          }}
+                        </CldUploadWidget>
                       </FormItem>
                     )}
                   />
@@ -343,120 +403,124 @@ const ModelPage = ({ params }: any) => {
             </Form>
           </Card>
 
-          <div className="px-4 bg-gradient-to-br from-theme-600 to-theme-900 max-w-[500px]">
-            <div className="ml-2 py-6">
-              <h1 className="text-2xl font-bold text-white">
-                What The User See's
-              </h1>
-            </div>
-            <article
-              className={clsx(
-                "border-4 rounded-lg mb-4 h-fit max-w-[400px] border-[#979797]",
-                isSoldOut ? "bg-[#B0AFAF]" : "bg-[#E6D3F9]"
-              )}
-            >
-              <div className="flex flex-row justify-between">
-                <div className="w-[70%] flex flex-col justify-between ">
-                  <div
-                    className={clsx(
-                      "rounded-ee-lg w-fit py-2 px-4 font-semibold text-center bg-[#9689A4]",
-                      isSoldOut ? "text-[#161616]" : "text-white"
-                    )}
-                  >
-                    {brand} {isSoldOut ? " - Sold Out" : ""}
-                  </div>
-                  <div className="px-4">
-                    <div className="flex flex-row items-center mt-4 font-bold">
-                      <h2
-                        className={clsx(
-                          "text-2xl my-1 font-ubuntu",
-                          !isSoldOut ? "text-[#f1933e] font-extrabold" : ""
-                        )}
-                      >
-                        {isSoldOut ? `$${rrp}` : `On Sale $${sale_price}`}
-                      </h2>
-                    </div>
-                    {!isSoldOut && (
-                      <p className="pb-1 font-light">
-                        RRP $<span className="line-through">{`${rrp}`}</span>
-                      </p>
-                    )}
-
-                    <div className="flex flex-row items-center mt-2">
-                      <Image alt="tick inside a circle" src={circleTick} />
-                      <p className="ml-2">Brand: {brand}</p>
-                    </div>
-                    <div className="flex flex-row items-center mt-2">
-                      <Image alt="tick inside a circle" src={circleTick} />
-                      <p className="ml-2">Model: {model}</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-end pr-2">
+          <div>
+            <div className="px-4 py-2 bg-gradient-to-br from-theme-600 to-theme-900 max-w-[500px] mb-4 rounded">
+              <div className="ml-2 py-6">
+                <h1 className="text-2xl font-bold text-white">
+                  What The User See's
+                </h1>
+              </div>
+              <article
+                className={clsx(
+                  "border-4 rounded-lg mb-4 h-fit max-w-[400px] border-[#979797]",
+                  isSoldOut ? "bg-[#B0AFAF]" : "bg-[#E6D3F9]"
+                )}
+              >
+                <div className="flex flex-row justify-between">
+                  <div className="w-[70%] flex flex-col justify-between ">
                     <div
                       className={clsx(
-                        "px-6 py-2 my-4 rounded",
-                        isSoldOut
-                          ? "bg-[#979797] text-[#161616]"
-                          : "text-white bg-gradient-to-br from-theme-600 to bg-theme-900"
+                        "rounded-ee-lg w-fit py-2 px-4 font-semibold text-center bg-[#9689A4]",
+                        isSoldOut ? "text-[#161616]" : "text-white"
                       )}
                     >
-                      {isSoldOut ? "Unavailable" : `Select ${brand}`}
+                      {brand} {isSoldOut ? " - Sold Out" : ""}
+                    </div>
+                    <div className="px-4">
+                      <div className="flex flex-row items-center mt-4 font-bold">
+                        <h2
+                          className={clsx(
+                            "text-2xl my-1 font-ubuntu",
+                            !isSoldOut ? "text-[#f1933e] font-extrabold" : ""
+                          )}
+                        >
+                          {isSoldOut ? `$${rrp}` : `On Sale $${sale_price}`}
+                        </h2>
+                      </div>
+                      {!isSoldOut && (
+                        <p className="pb-1 font-light">
+                          RRP $<span className="line-through">{`${rrp}`}</span>
+                        </p>
+                      )}
+
+                      <div className="flex flex-row items-center mt-2">
+                        <Image alt="tick inside a circle" src={circleTick} />
+                        <p className="ml-2">Brand: {brand}</p>
+                      </div>
+                      <div className="flex flex-row items-center mt-2">
+                        <Image
+                          alt="tick inside a circle"
+                          src={circleTick}
+                          priority
+                        />
+                        <p className="ml-2">Model: {model}</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-end pr-2">
+                      <div
+                        className={clsx(
+                          "px-6 py-2 my-4 rounded",
+                          isSoldOut
+                            ? "bg-[#979797] text-[#161616]"
+                            : "text-white bg-gradient-to-br from-theme-600 to bg-theme-900"
+                        )}
+                      >
+                        {isSoldOut ? "Unavailable" : `Select ${brand}`}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="w-[30%] py-2">
-                  <Image
-                    src={image}
-                    alt={`Picture of ${brand} ${model}`}
-                    width={93}
-                    height={300}
-                    style={{ objectFit: "contain" }}
-                  />
+                  <div className="w-[30%] py-2">
+                    <CldImage
+                      width="93"
+                      height="300"
+                      src={image}
+                      alt={`Picture of instrument`}
+                    />
+                  </div>
                 </div>
-              </div>
-            </article>
+              </article>
+            </div>
+            <Card className="mb-4 rounded">
+              <CardHeader>
+                <CardTitle>Delete Model</CardTitle>
+              </CardHeader>
+              <CardContent className="mb-6">
+                Delete the model and any data associated with it
+              </CardContent>
+              <CardFooter className="border-t px-6 py-4 flex flex-row justify-between">
+                <p className="italic">
+                  WARNING: Deleting a model cannot be undone.
+                </p>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="rounded" variant="destructive">
+                      Delete Model
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Confirm Deletion</DialogTitle>
+                    </DialogHeader>
+                    <p>Are you sure you want to delete {model}?</p>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="secondary">Cancel</Button>
+                      </DialogClose>
+                      <DialogClose asChild>
+                        <Button
+                          variant="default"
+                          onClick={() => handleDelete(model_id)}
+                        >
+                          Yes
+                        </Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardFooter>
+            </Card>
           </div>
-
-          <Card className="mb-4 rounded">
-            <CardHeader>
-              <CardTitle>Delete Model</CardTitle>
-            </CardHeader>
-            <CardContent className="mb-6">
-              Delete the model and any data associated with it
-            </CardContent>
-            <CardFooter className="border-t px-6 py-4 flex flex-row justify-between">
-              <p className="italic">
-                WARNING: Deleting a model cannot be undone.
-              </p>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="rounded" variant="destructive">
-                    Delete Model
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Confirm Deletion</DialogTitle>
-                  </DialogHeader>
-                  <p>Are you sure you want to delete {model}?</p>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="secondary">Cancel</Button>
-                    </DialogClose>
-                    <DialogClose asChild>
-                      <Button
-                        variant="default"
-                        onClick={() => handleDelete(model_id)}
-                      >
-                        Yes
-                      </Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </CardFooter>
-          </Card>
         </div>
       </div>
     </>

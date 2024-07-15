@@ -367,3 +367,16 @@ export const modelSchema = z.object({
   rrp: z.number(),
   sale_price: z.number(),
 });
+
+export const accessorySchema = z.object({
+  name: z.string().min(1, "Name must contain at least 1 character"),
+  status: z.enum(["Active", "Inactive"]),
+  price: z.number(),
+  is_recommended: z.boolean(),
+  description_short: z
+    .string()
+    .min(1, "Short description must contain at least 1 character"),
+  description_long: z
+    .string()
+    .min(1, "Long description must contain at least 1 character"),
+});

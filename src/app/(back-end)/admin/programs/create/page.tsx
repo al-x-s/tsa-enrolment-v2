@@ -113,6 +113,7 @@ const CreateProgramPage = () => {
   React.useEffect(() => {
     if (type === "Guitar" || type === "Keyboard") {
       setValue("rehearsal_fee", 0);
+      setValue("classType", "Group");
     }
   }, [type]);
 
@@ -336,15 +337,15 @@ const CreateProgramPage = () => {
               />
             </CardContent>
             <CardFooter className="border-t px-6 py-4 flex flex-row justify-between">
-              <p className="italic">Click to save changes</p>
+              <p className="italic">Click to create program</p>
               <div>
                 {isDirty && (
                   <Button variant="secondary" onClick={() => reset()}>
-                    Cancel
+                    Reset Form
                   </Button>
                 )}
                 <Button disabled={!isDirty || isSubmitting} type="submit">
-                  Save
+                  Create
                 </Button>
               </div>
             </CardFooter>
@@ -444,7 +445,7 @@ const CreateProgramPage = () => {
                     </TableCell>
                   </TableRow>
                 )}
-                {type === ("Band" || "String") && (
+                {(type === "Band" || type === "String") && (
                   <TableRow>
                     <TableCell className="font-medium w-60">
                       Rehearsal Fee

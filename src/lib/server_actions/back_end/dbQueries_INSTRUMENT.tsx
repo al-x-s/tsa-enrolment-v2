@@ -300,6 +300,7 @@ const updateInstrument = async ({
     throw Error;
   }
 };
+
 const updateInstrumentModel = async ({
   formData,
   id,
@@ -339,6 +340,137 @@ const updateInstrumentModel = async ({
   }
 };
 
+const createInstrumentModel = async ({
+  formData,
+  instrument_id,
+}: {
+  formData: any;
+  instrument_id: number;
+}) => {
+  const parsed = modelSchema.safeParse(formData);
+
+  if (parsed.success) {
+    // update db
+    console.log("parsed successfully");
+    try {
+      const result = await prisma.instrumentModel.create({
+        data: {
+          model: formData.model,
+          brand: formData.brand,
+          image: formData.image,
+          status: formData.status,
+          rrp: formData.rrp,
+          sale_price: formData.sale_price,
+          instrument_category: {
+            connect: {
+              id: instrument_id,
+            },
+          },
+        },
+      });
+
+      if (result) {
+        return {
+          isSuccess: true,
+          id: instrument_id,
+          redirect: `/admin/instruments/${instrument_id}/models`,
+        };
+      } else {
+        return { isSuccess: false, issues: "Failed to create model" };
+      }
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    throw Error;
+  }
+};
+
+const createInstrument = async (formData: z.infer<typeof instrumentSchema>) => {
+  const parsed = instrumentSchema.safeParse(formData);
+
+  if (parsed.success) {
+    // update db
+    console.log("parsed successfully");
+    try {
+      const result = await prisma.instrument.create({
+        data: {
+          name: formData.name,
+          program_type: formData.program_type,
+          can_hire: formData.can_hire,
+          hire_cost: formData.hire_cost,
+          hire_insurance: formData.hire_insurance,
+        },
+      });
+
+      if (result) {
+        return {
+          isSuccess: true,
+          redirect: `/admin/instruments/${result.id}/general`,
+        };
+      } else {
+        return { isSuccess: false, issues: "Failed to create model" };
+      }
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    throw Error;
+  }
+};
+
+async function getInstrumentImages() {
+  const instrumentModels = await prisma.instrumentModel.findMany({
+    select: {
+      image: true,
+      brand: true,
+      model: true,
+      instrument_category: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  const uniqueImages = new Set();
+  const result: {
+    instrument_name: string;
+    images: {
+      image: string;
+      brand: string;
+      model: string;
+    }[];
+  }[] = [];
+
+  instrumentModels.forEach((curr) => {
+    const instrumentName = curr.instrument_category[0].name;
+    const imageData = {
+      image: curr.image,
+      brand: curr.brand,
+      model: curr.model,
+    };
+
+    if (!uniqueImages.has(imageData.image)) {
+      uniqueImages.add(imageData.image);
+
+      const existingInstrument = result.find(
+        (i) => i.instrument_name === instrumentName
+      );
+      if (existingInstrument) {
+        existingInstrument.images.push(imageData);
+      } else {
+        result.push({
+          instrument_name: instrumentName,
+          images: [imageData],
+        });
+      }
+    }
+  });
+
+  return result;
+}
+
 export {
   getInstrumentsBySchool,
   getInstrumentsNotInSchool,
@@ -346,6 +478,9 @@ export {
   addInstrument,
   getInstrumentModels,
   getInstrumentModel,
+  getInstrumentImages,
+  createInstrument,
+  createInstrumentModel,
   updateInstrumentModel,
   removeInstrument,
   updateSchoolInstrument,

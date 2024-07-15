@@ -23,22 +23,6 @@ import { Button } from "@/components/ui/button";
 import EditGrade from "./EditGrade";
 import { deleteGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";
 
-const handleDelete = async (grade_id: number, grade_name: string) => {
-  const { toast } = useToast();
-  const response: any = await deleteGrade(grade_id);
-  if (response.isSuccess) {
-    toast({
-      title: "Success!",
-      description: `${grade_name} removed`,
-    });
-  } else {
-    toast({
-      title: "Something went wrong...",
-      description: response.issues,
-    });
-  }
-};
-
 export const columns: ColumnDef<Grade>[] = [
   {
     accessorKey: "name",
@@ -97,9 +81,26 @@ export const columns: ColumnDef<Grade>[] = [
   {
     id: "actions_delete",
     cell: ({ row }) => {
+      const { toast } = useToast();
       const grade = row.original as Grade;
       const grade_id: number = grade.id;
       const grade_name: string = row.getValue("name");
+
+      const handleDelete = async (grade_id: number, grade_name: string) => {
+        const response: any = await deleteGrade(grade_id);
+        if (response.isSuccess) {
+          toast({
+            title: "Success!",
+            description: `${grade_name} removed`,
+          });
+        } else {
+          toast({
+            title: "Something went wrong...",
+            description: response.issues,
+          });
+        }
+      };
+
       return (
         <Dialog>
           <DialogTrigger asChild>
