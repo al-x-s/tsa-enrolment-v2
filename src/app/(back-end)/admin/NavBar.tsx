@@ -32,7 +32,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 function UserMenu({ ...props }) {
   const isAdmin = props.role === "admin" ? true : false;
@@ -40,21 +45,23 @@ function UserMenu({ ...props }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{props.userName}</Button>
+        <Button variant="outline" className="ml-auto">
+          {props.userName}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
+          <DropdownMenuItem asChild>
             <Link href="/admin/my_account" className="w-full">
+              <User className="mr-2 h-4 w-4" />
               User Name
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
+          <DropdownMenuItem asChild>
             <Link href="/admin/my_account" className="w-full">
+              <Settings className="mr-2 h-4 w-4" />
               Settings
             </Link>
           </DropdownMenuItem>
@@ -64,15 +71,15 @@ function UserMenu({ ...props }) {
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Admin</DropdownMenuLabel>
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserPlus className="mr-2 h-4 w-4" />
+              <DropdownMenuItem asChild>
                 <Link href="/admin/user_permissions" className="w-full">
+                  <UserPlus className="mr-2 h-4 w-4" />
                   Create New User
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Lock className="mr-2 h-4 w-4" />
+              <DropdownMenuItem asChild>
                 <Link href="/admin/user_permissions" className="w-full">
+                  <Lock className="mr-2 h-4 w-4" />
                   Edit User Permissions
                 </Link>
               </DropdownMenuItem>
@@ -104,58 +111,68 @@ const NavBar = ({ ...props }) => {
   ];
 
   return (
-    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 py-4 md:px-6">
-      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-        <Link href="/admin">
-          <Image src={logo} alt="TSA Logo" className="max-w-14"></Image>
-        </Link>
-        {links.map((link) => (
-          <Link
-            className={classnames({
-              "text-foreground": currentPath.startsWith(link.href),
-              "text-muted-foreground": !currentPath.startsWith(link.href),
-              "hover:text-foreground transition-colors": true,
-            })}
-            key={link.href}
-            href={link.href}
-          >
-            {link.label}
+    <div className="w-full flex align-middle justify-center">
+      <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 py-4 md:px-6 max-w-[1400px] w-full justify-self-center">
+        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6 ">
+          <Link href="/admin">
+            <Image src={logo} alt="TSA Logo" className="max-w-14"></Image>
           </Link>
-        ))}
-      </nav>
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left">
-          <nav className="grid gap-6 text-lg font-medium">
-            <Link href="/admin">
-              <Image
-                src={logo}
-                alt="TSA Logo"
-                className="max-w-14 py-2"
-              ></Image>
+          {links.map((link) => (
+            <Link
+              className={classnames({
+                "text-foreground": currentPath.startsWith(link.href),
+                "text-muted-foreground": !currentPath.startsWith(link.href),
+                "hover:text-foreground transition-colors": true,
+              })}
+              key={link.href}
+              href={link.href}
+            >
+              {link.label}
             </Link>
-            {links.map((link) => (
-              <Link
-                className={classnames({
-                  "text-foreground": link.href === currentPath,
-                  "text-muted-foreground": link.href !== currentPath,
-                  "hover:text-foreground transition-colors": true,
-                })}
-                key={link.href}
-                href={link.href}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </SheetContent>
-      </Sheet>
-      <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+          ))}
+        </nav>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="shrink-0 md:hidden"
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle navigation menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left">
+            <nav className="grid gap-6 text-lg font-medium">
+              <SheetClose asChild>
+                <Link href="/admin">
+                  <Image
+                    src={logo}
+                    alt="TSA Logo"
+                    className="max-w-14 py-2"
+                  ></Image>
+                </Link>
+              </SheetClose>
+              {links.map((link) => (
+                <SheetClose asChild key={link.href}>
+                  <Link
+                    className={classnames({
+                      "text-foreground": link.href === currentPath,
+                      "text-muted-foreground": link.href !== currentPath,
+                      "hover:text-foreground transition-colors": true,
+                    })}
+                    href={link.href}
+                  >
+                    {link.label}
+                  </Link>
+                </SheetClose>
+              ))}
+            </nav>
+          </SheetContent>
+        </Sheet>
+        <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+          {/*
+
         <form className="ml-auto flex-1 sm:flex-initial">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -166,9 +183,11 @@ const NavBar = ({ ...props }) => {
             />
           </div>
         </form>
-        <UserMenu userName={props.userName} role={props.role} />
-      </div>
-    </header>
+      */}
+          <UserMenu userName={props.userName} role={props.role} />
+        </div>
+      </header>
+    </div>
   );
 };
 
