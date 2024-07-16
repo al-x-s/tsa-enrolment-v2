@@ -75,7 +75,7 @@ const SummaryTable = ({
 
   return (
     <article className="bg-[#E6D3F9] p-2 rounded-sm ">
-      <h2 className="text-center font-semibold">Term Fee's</h2>
+      <h2 className="text-center font-semibold">Term Fees</h2>
       <Table className="mb-4">
         <TableCaption className="text-left px-2">
           &#8224; The school levy is used to purchase musical equipment and

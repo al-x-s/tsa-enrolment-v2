@@ -51,23 +51,13 @@ function WelcomeMessage({ ...props }) {
   return (
     <div>
       <p className="text-white pb-4 leading-8">
-        Thank you for expressing an interest in your child joining the{" "}
-        <span className="font-semibold">{props.student_school}</span> band
-        program. Teaching Services Australia works closely with your child's
-        school to provide an inclusive and equitable instrumental tuition
-        program and welcome you as you embark upon this journey with us.
+        Welcome to the online enrolment platform for Teaching Services
+        Australia. We work closely with{" "}
+        <span className="font-semibold">{props.student_school}</span> to provide
+        an inclusive and engaging instrumental tuition program.
       </p>
       <p className="text-white pb-4 leading-8">
-        For many students, band is the first exposure they have to instrumental
-        music. Whether they join band as a fun, social experience or as a
-        stepping stone to more serious music making, we aim to give all students
-        the skills and knowledge necessary to succeed on their instrument and
-        hope to inspire them to delve further into the rewarding world of music
-        and the benefits it offers.
-      </p>
-      <p className="text-white pb-4 leading-8">
-        If you're ready to proceed with the enrolment please read and agree to
-        the{" "}
+        Before you continue please read and agree to the{" "}
         <Dialog>
           <DialogTrigger asChild>
             <Link href="" className="text-[#F6BD60] underline">
@@ -94,8 +84,8 @@ function WelcomeMessage({ ...props }) {
               </DialogClose>
             </DialogFooter>
           </DialogContent>
-        </Dialog>{" "}
-        then press the next step button below.
+        </Dialog>
+        .
       </p>
       <FormField
         control={props.control}
@@ -130,26 +120,30 @@ function WelcomeMessage({ ...props }) {
       />
 
       <p className="text-white pb-4 leading-8">
-        If you'd like more information before proceeding we'd encourage you to
-        visit{" "}
+        If you'd like more information before proceeding please visit our
+        website{" "}
         <Link
           href="www.teachingservices.com.au"
           className="text-[#F6BD60] underline"
         >
           www.teachingservices.com.au
         </Link>{" "}
-        . If you'd prefer you can contact us by emailing{" "}
+        , or contact us by phone or email:
+      </p>
+      <p className="text-white pb-4 leading-4">
+        <span className="font-bold">Phone</span>:{" "}
+        <Link href="tel:(02)96517333" className="text-[#F6BD60] underline">
+          (02) 9651 7333
+        </Link>{" "}
+      </p>
+      <p className="text-white pb-4 leading-4">
+        <span className="font-bold">Email</span>:{" "}
         <Link
           href="mailto:enrolments@teachingservices.com.au"
           className="text-[#F6BD60] underline"
         >
           enrolments@teachingservices.com.au
         </Link>{" "}
-        or speak with us on{" "}
-        <Link href="tel:(02)96517333" className="text-[#F6BD60] underline">
-          9651 7333
-        </Link>{" "}
-        (ext #2).
       </p>
     </div>
   );

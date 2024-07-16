@@ -287,7 +287,7 @@ export default function SummaryPage() {
   });
 
   if (isPending) {
-    return <p>loading</p>;
+    return;
   }
 
   if (!data) {
@@ -355,8 +355,8 @@ export default function SummaryPage() {
               Payments are processed at the beginning of each term or if you are
               enrolling during the term it will be processed immediately. If you
               are enrolling for the next calendar year you will not be charged
-              for tuition or for any associated instrument costs until the term
-              is beginning.
+              for tuition or for any associated instrument costs until the
+              middle of January.
             </p>
 
             <h1 className="mt-4 text-white text-xl font-semibold text-center">

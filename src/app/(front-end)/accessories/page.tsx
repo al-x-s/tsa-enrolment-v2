@@ -26,22 +26,23 @@ export default function InstrumentOptionsPage() {
   const { instrument } = student_details;
 
   // Get page data
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ["instrumentData", instrument],
     queryFn: () => getInstrumentData(instrument),
   });
 
-  if (isPending) {
-    return <p>Loading...</p>;
+  if (isPending || isError) {
+    return;
   }
 
-  const { accessoriesOptions } = data!;
-
-  React.useEffect(() => {
+  if (data === null) {
     if (!student_school) {
       router.replace("/welcome");
     }
-  }, []);
+    return;
+  }
+
+  const { accessoriesOptions } = data;
 
   // A function that will be passed to AccessoryOption component
   const updateAccessoriesObject = (name: string, value: boolean) => {

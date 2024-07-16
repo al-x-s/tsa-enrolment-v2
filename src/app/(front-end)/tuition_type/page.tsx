@@ -53,7 +53,7 @@ export default function TuitionTypePage() {
   });
 
   if (isPending) {
-    return <p>loading...</p>;
+    return;
   }
 
   // Desctructure schoolData

@@ -170,7 +170,7 @@ export default function InstrumentOptionsPage() {
   });
 
   if (isPending) {
-    return <p>loading...</p>;
+    return;
   }
 
   if (!data) {
@@ -445,6 +445,9 @@ export default function InstrumentOptionsPage() {
                     className="w-full mb-6"
                   />
                 </div>
+                <FormLabel className="text-white font-semibold">
+                  Instrument Insurance
+                </FormLabel>
                 <FormField
                   control={control}
                   name="instrument_options.inst_is_insured"
@@ -458,7 +461,7 @@ export default function InstrumentOptionsPage() {
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel className="text-white font-semibold">
-                          Would you like to add instrument insurance?
+                          Tick this box to include instrument insurance
                         </FormLabel>
                         <FormDescription className="text-white italic">
                           Recommended by TSA

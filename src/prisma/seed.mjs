@@ -1,8 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Argon2id } from "oslo/password";
 
-// const { PrismaClient } = require("@prisma/client");
-// const { categories, products } = require("./data.js");
 const prisma = new PrismaClient();
 
 async function initAdmin() {
@@ -15,7 +13,7 @@ async function initAdmin() {
   const admin = await prisma.user.create({
     data: {
       id: crypto.randomUUID(),
-      username: "Ben",
+      username: "John",
       email: process.env.INIT_ADMIN_EMAIL,
       password_hash,
       role: "admin",
@@ -30,7 +28,7 @@ async function initUser() {
   const admin = await prisma.user.create({
     data: {
       id: crypto.randomUUID(),
-      username: "Steve",
+      username: "Jane",
       email: process.env.INIT_USER_EMAIL,
       password_hash,
       role: "user",

@@ -5,7 +5,7 @@ import Link from "next/link";
 export function GeneralTermsDialogContent() {
   return (
     <ScrollArea className="text-left h-[60vh] md:h-[50vh] px-2 md:px-8 mb-1">
-      <p className="text-lg text-theme-grey font-semibold mb-2">1. Fee's</p>
+      <p className="text-lg text-theme-grey font-semibold mb-2">1. Fees</p>
       <p className="leading-8 mb-4">
         Fees are payable at the commencement of each term and include all
         tutorials/band rehearsals and performances for the term. If a public

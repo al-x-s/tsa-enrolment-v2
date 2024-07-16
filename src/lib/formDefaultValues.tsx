@@ -54,7 +54,7 @@ export const formDefaultValues: z.infer<typeof FormDataSchema> = {
       6: false,
       7: false,
     },
-    inst_is_insured: false,
+    inst_is_insured: true,
     // Purchase options (optional)
     purchased_model: "",
   },

@@ -64,9 +64,8 @@ export default function StudentDetailsPage() {
     queryFn: () => getSchoolData(student_school),
   });
 
-  // TODO - Need a better loading state
   if (isPending) {
-    return <p>loading</p>;
+    return;
   }
 
   // Destructure values from schoolData and set school_id
