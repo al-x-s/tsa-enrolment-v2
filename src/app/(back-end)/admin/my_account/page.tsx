@@ -61,6 +61,8 @@ import { useToast } from "@/components/ui/use-toast";
 
 // Tanstack
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import { TypedArray } from "oslo";
 
 function useUpdateUser() {
   const queryClient = useQueryClient();
@@ -160,34 +162,41 @@ function UserName({ ...props }) {
 }
 
 function ChangePassword({ ...props }) {
+  const updateUser = useUpdateUser();
+  const { toast } = useToast();
   const { id } = props.user;
-  const passwordSchema = z.object({
-    current: z.string(),
-    new: z.string(),
-    new_confirm: z.string(),
-  });
+  const passwordSchema = z
+    .object({
+      current: z.string(),
+      new_password: z.string(),
+      confirm_password: z.string(),
+    })
+    .refine((data) => data.new_password === data.confirm_password, {
+      message: "New password and confirmation do not match",
+      path: ["new_confirm"],
+    });
 
   const form = useForm({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
       current: "",
-      new: "",
-      new_confirm: "",
+      new_password: "",
+      confirm_password: "",
     },
   });
 
-  const { handleSubmit } = form;
+  const { getFieldState, handleSubmit, reset } = form;
 
-  const onSubmit = () => {
+  const onSubmit = (formData: z.infer<typeof passwordSchema>) => {
     updateUser.mutate(
       { formData, user_id: id, field: "password" },
       {
         onSuccess: () => {
           toast({
             title: "Success!",
-            description: `Username updated`,
+            description: `Password updated`,
           }),
-            reset({ username: formData.username });
+            reset({ current: "", new_password: "", confirm_password: "" });
         },
       }
     );
@@ -215,13 +224,13 @@ function ChangePassword({ ...props }) {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-destructive" />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="new"
+              name="new_password"
               render={({ field }) => (
                 <FormItem className="w-full pb-2">
                   <FormLabel>New Password</FormLabel>
@@ -232,26 +241,33 @@ function ChangePassword({ ...props }) {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-destructive" />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="new_confirm"
-              render={({ field }) => (
-                <FormItem className="w-full pb-4">
-                  <FormLabel>Confirm New Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      className="max-w-[300px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              name="confirm_password"
+              render={({ field }) => {
+                const state = getFieldState("confirm_password");
+                return (
+                  <FormItem className="w-full pb-4">
+                    <FormLabel
+                      className={cn(state.error && "text-destructive")}
+                    >
+                      Confirm New Password
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        className="max-w-[300px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-destructive" />
+                  </FormItem>
+                );
+              }}
             />
             <Button type="submit" className="w-fit">
               Update Password
@@ -264,6 +280,7 @@ function ChangePassword({ ...props }) {
 }
 
 function Security({ ...props }) {
+  const { username } = props.user;
   const [mfa, setMfa] = React.useState(false);
   const [openEnableMfa, setOpenEnableMfa] = React.useState(false);
   const [openDisableMfa, setOpenDisableMfa] = React.useState(false);
@@ -315,7 +332,7 @@ function Security({ ...props }) {
         openEnableMfa={openEnableMfa}
         setOpenEnableMfa={setOpenEnableMfa}
         setMfa={setMfa}
-        username={props.username}
+        username={username}
       />
       <DisableMfaDialog
         openDisableMfa={openDisableMfa}
@@ -334,17 +351,19 @@ function EnableMfaDialog({ ...props }) {
   const [qrCode, setQRCODE] = React.useState<string | undefined>(undefined);
 
   React.useEffect(() => {
-    const issuer = "TSA-Enrolment-Admin";
     async function generateQRCode() {
-      const accountName = await props.username;
-      const secret = await new HMAC("SHA-1").generateKey();
-      const uri = createTOTPKeyURI(issuer, accountName, secret!);
-      const result = await qrcode.toDataURL(uri);
+      const issuer = "TSA-Enrolment-Admin";
+      const secret: ArrayBuffer | TypedArray = await new HMAC(
+        "SHA-1"
+      ).generateKey();
+      const uri = createTOTPKeyURI(issuer, props.username, secret!);
+      const result: string = await qrcode.toDataURL(uri);
       setQRCODE(result);
       setSecret(secret);
     }
+
     generateQRCode();
-  }, [props?.username]);
+  }, [props.username]);
 
   async function validate2fa() {
     // STEP 1 tests that the optcode is validated by the secret

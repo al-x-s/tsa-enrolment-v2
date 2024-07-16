@@ -380,3 +380,9 @@ export const accessorySchema = z.object({
     .string()
     .min(1, "Long description must contain at least 1 character"),
 });
+
+export const userSchema = z.object({
+  username: z.string().min(1, "Name must contain at least 1 character"),
+  email: z.string().email(),
+  role: z.string(),
+});

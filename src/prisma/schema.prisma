@@ -14,9 +14,10 @@ model User {
   email           String    @unique
   password_hash   String
   mfa_secret_hash String?
-  role            String    @default("user")
+  role            String @default("user")   
   sessions        Session[]
 }
+
 
 model Session {
   id        String   @id
