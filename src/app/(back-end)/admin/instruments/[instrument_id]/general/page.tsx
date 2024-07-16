@@ -1,38 +1,29 @@
 "use client";
-import React from "react";
-import InputCard from "./InputCard";
-import { useQuery } from "@tanstack/react-query";
 import Loading from "@/components/tables/Loading";
-import {
-  deleteSchool,
-  getSchoolById,
-} from "@/lib/server_actions/back_end/dbQueries_SCHOOL";
-
-// Components
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
   Dialog,
-  DialogContent,
   DialogClose,
-  DialogDescription,
+  DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import {
   deleteInstrument,
   getInstrumentById,
 } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import InputCard from "./InputCard";
 
 const SchoolGeneral = ({ params }: any) => {
   const router = useRouter();

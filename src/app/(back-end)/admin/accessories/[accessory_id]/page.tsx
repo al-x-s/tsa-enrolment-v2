@@ -1,10 +1,20 @@
 "use client";
 import React from "react";
+
+// Next
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+// Zod and React Hook Form
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
+
+// Images
 import circleTick from "@/images/circle-tick.svg";
+
+// Components
+import { Input } from "@/components/ui/input";
 import clsx from "clsx";
 import {
   Form,
@@ -53,29 +63,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQuery } from "@tanstack/react-query";
+import Loading from "@/components/tables/Loading";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+
+// Schema
+import { accessorySchema, programSchema } from "@/lib/schema";
+
+// React Query and Queries
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   deleteProgram,
   getProgram,
   updateProgram,
 } from "@/lib/server_actions/back_end/dbQueries_PROGRAM";
-import Loading from "@/components/tables/Loading";
-import { accessorySchema, programSchema } from "@/lib/schema";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-
-// Tanstack
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   deleteAccessory,
   getAccessory,
   updateAccessory,
 } from "@/lib/server_actions/back_end/dbQueries_ACCESSORY";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
 
 function useUpdateAccessory() {
   const queryClient = useQueryClient();

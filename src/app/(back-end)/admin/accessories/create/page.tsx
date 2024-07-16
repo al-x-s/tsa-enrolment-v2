@@ -1,10 +1,20 @@
 "use client";
 import React from "react";
+
+// Next
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+// Zod and React Hook Form
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
+
+// Styling
 import clsx from "clsx";
+
+// Components
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormItem,
@@ -31,25 +41,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
 import Loading from "@/components/tables/Loading";
-import { accessorySchema, programSchema } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// Tanstack
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+// Schema
+import { accessorySchema, programSchema } from "@/lib/schema";
+
+// React Query and Queries
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   createAccessory,
   deleteAccessory,
   getAccessory,
   updateAccessory,
 } from "@/lib/server_actions/back_end/dbQueries_ACCESSORY";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const AccessoryPage = () => {
   const router = useRouter();

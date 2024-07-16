@@ -1,10 +1,8 @@
-import React from "react";
-import prisma from "@/prisma/client";
-import { columns } from "./columns";
-import { Grade } from "@prisma/client";
 import { DataTable } from "@/components/tables/data-table";
+import prisma from "@/prisma/client";
+import { Grade } from "@prisma/client";
 import Link from "next/link";
-
+import { columns } from "./columns";
 async function getData(): Promise<Grade[]> {
   try {
     const grades = await prisma.grade.findMany({

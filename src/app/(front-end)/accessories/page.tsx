@@ -32,10 +32,10 @@ export default function InstrumentOptionsPage() {
   });
 
   if (isPending) {
-    return <p>loading...</p>;
+    return <p>Loading...</p>;
   }
 
-  const { accessoriesOptions } = data;
+  const { accessoriesOptions } = data!;
 
   React.useEffect(() => {
     if (!student_school) {

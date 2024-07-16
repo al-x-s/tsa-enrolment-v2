@@ -1,16 +1,20 @@
 "use client";
-
-import { ColumnDef } from "@tanstack/react-table";
+// Next
 import Link from "next/link";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+// Types
+import { Accessory } from "@prisma/client";
+
+// Tanstack Table
+import { ColumnDef } from "@tanstack/react-table";
+
+// Components
 import {
   arrayFilter,
   booleanFilter,
   currencyFilter,
   SortButton,
 } from "@/components/tables/tableUtils";
-import { Accessory } from "@prisma/client";
 
 export const columns: ColumnDef<Accessory>[] = [
   {

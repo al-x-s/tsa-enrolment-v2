@@ -2,6 +2,7 @@
 
 import prisma from "@/prisma/client";
 import { generateAllHireOptionsObject } from "../../helpers/generateAllHireOptionsObject";
+import { ProgramType } from "@prisma/client";
 
 type HireableTableData = {
   hire_cost: number | null;
@@ -17,7 +18,10 @@ export default async function getHireableTableData(
     where: {
       schoolId: school_id,
       status: "Available",
-      instrument: { can_hire: true, program_type: program_type },
+      instrument: {
+        can_hire: true,
+        program_type: program_type as ProgramType,
+      },
     },
     select: {
       instrument: {

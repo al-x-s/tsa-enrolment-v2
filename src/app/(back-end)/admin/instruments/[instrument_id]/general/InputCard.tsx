@@ -1,50 +1,41 @@
 "use client";
-import React from "react";
-import z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormDescription,
-  FormMessage,
-  FormField,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-// import { updateSchool } from "@/lib/server_actions/back_end/dbQueries_SCHOOL";
-import { updateInstrument } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
-import { instrumentSchema } from "@/lib/schema";
-import { Instrument } from "@prisma/client";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-
-// Tanstack
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { instrumentSchema } from "@/lib/schema";
+import { updateInstrument } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Instrument } from "@prisma/client";
+import { useMutation, QueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import z from "zod";
 
 function useUpdateInstrument() {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-
+  const queryClient = new QueryClient();
   return useMutation({
     mutationFn: updateInstrument,
     onSuccess: (data: any) => {

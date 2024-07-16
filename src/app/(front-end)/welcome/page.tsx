@@ -190,7 +190,7 @@ export default function WelcomePage() {
     setValue("instrument_options.purchased_model", "");
     setValue("accessories", {});
     setValue("school_id", "");
-    setValue("program_type", "");
+    setValue("program_type", "Band");
 
     // schoolData is prefetched
     queryClient.prefetchQuery({

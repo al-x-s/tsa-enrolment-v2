@@ -1,9 +1,13 @@
-import React from "react";
-import prisma from "@/prisma/client";
-import { columns } from "./columns";
-import { Accessory } from "@prisma/client";
-import { DataTable } from "@/components/tables/data-table";
+// Next
 import Link from "next/link";
+
+// Prisma
+import prisma from "@/prisma/client";
+import { Accessory } from "@prisma/client";
+
+// Tanstack Table
+import { DataTable } from "@/components/tables/data-table";
+import { columns } from "./columns";
 
 async function getData(): Promise<Accessory[]> {
   try {

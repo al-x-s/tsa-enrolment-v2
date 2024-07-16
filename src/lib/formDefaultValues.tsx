@@ -82,5 +82,5 @@ export const formDefaultValues: z.infer<typeof FormDataSchema> = {
   },
   // CONTEXT VARIABLES
   school_id: "",
-  program_type: "",
+  program_type: "Band",
 };

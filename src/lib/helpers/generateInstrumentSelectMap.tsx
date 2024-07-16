@@ -1,8 +1,12 @@
 // Types
-import { InstrumentStatus, Option, InstrumentSelectMap } from "@/lib/types";
+import {
+  Option,
+  InstrumentSelectMap,
+  SchoolInstrumentWithInstrument,
+} from "@/lib/types";
 
 export default function generateInstrumentSelectMap(
-  data: InstrumentStatus[] | undefined
+  data: SchoolInstrumentWithInstrument[] | undefined
 ): InstrumentSelectMap[] {
   // Produces an array with each program category available at school
   const programs: string[] = [];
