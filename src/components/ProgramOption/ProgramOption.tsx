@@ -63,7 +63,9 @@ const ProgramOption = ({
       </div>
       <div className="flex justify-center">
         <ProgramOptionButton
-          programData={programData}
+          id={programId}
+          program_status={status}
+          classType={classType}
           handleClick={handleClick}
           {...props}
         />
