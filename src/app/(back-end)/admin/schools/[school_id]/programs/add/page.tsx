@@ -4,7 +4,7 @@ import Link from "next/link";
 
 // Tanstack Table
 import { useQuery } from "@tanstack/react-query";
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@/components/DataTable/data-table";
 import { columns } from "./columns";
 
 // DB Queries
@@ -14,7 +14,7 @@ import { getProgramsNotInSchool } from "@/lib/server_actions/back_end/dbQueries_
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
-import Loading from "@/components/tables/Loading";
+import Loading from "@/components/DataTable/Loading";
 
 const AddSchoolPrograms = ({ params }: any) => {
   const school_id = parseInt(decodeURI(params.school_id));

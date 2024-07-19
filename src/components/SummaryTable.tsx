@@ -68,10 +68,14 @@ const SummaryTable = ({
   }, 0);
 
   // Getting the cost of any purchased instrument
-  const purchasedInstrument = instrumentData?.models?.filter(
-    (instrument) => instrument.model === purchased_model
-  );
-  const { brand, sale_price } = purchasedInstrument![0];
+  let brand, sale_price;
+  if (purchased_model) {
+    const purchasedInstrument = instrumentData?.models?.filter(
+      (instrument) => instrument.model === purchased_model
+    );
+    brand = purchasedInstrument[0].brand;
+    sale_price = purchasedInstrument[0].sale_price;
+  }
 
   return (
     <article className="bg-[#E6D3F9] p-2 rounded-sm ">
@@ -144,7 +148,7 @@ const SummaryTable = ({
         </>
       )}
 
-      <h2 className="text-center font-semibold">Additional Cost's</h2>
+      <h2 className="text-center font-semibold">Additional Costs</h2>
       <Table className="mb-4">
         <TableCaption className="text-left px-2">
           * The enrolment fee covers the cost of the method book which students

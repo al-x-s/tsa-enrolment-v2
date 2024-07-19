@@ -10,7 +10,7 @@ import getInstrumentData from "@/lib/server_actions/front_end/getInstrumentData"
 import getHireableTableData from "@/lib/server_actions/front_end/getHireableTableData";
 
 // Types
-import { InstrumentModel } from "@prisma/client";
+import { Model } from "@prisma/client";
 
 // Components
 import FormWrapper from "@/components/FormWrapper";
@@ -56,7 +56,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { InstrumentPurchaseOption } from "@/components/ui/instrument_purchase_option";
+import { ModelOption } from "@/components/ModelOption/ModelOption";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 
@@ -512,8 +512,8 @@ export default function InstrumentOptionsPage() {
                 <h2 className="text-white text-2xl text-center mb-6 font-bold">
                   Choose an Instrument
                 </h2>
-                {purchaseOptions?.map((data: InstrumentModel) => (
-                  <InstrumentPurchaseOption
+                {purchaseOptions?.map((data: Model) => (
+                  <ModelOption
                     key={crypto.randomUUID()}
                     handleClick={selectPurchaseInstrument}
                     selectedPurchaseModel={purchased_model}

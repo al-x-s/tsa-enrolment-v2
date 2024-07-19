@@ -2,7 +2,7 @@ import React from "react";
 import prisma from "@/prisma/client";
 import { columns } from "./columns";
 import { Program } from "@prisma/client";
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@/components/DataTable/data-table";
 import Link from "next/link";
 
 async function getData(): Promise<Program[]> {

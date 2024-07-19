@@ -1,12 +1,36 @@
 "use server";
 import z from "zod";
+import {
+  deleteEntity,
+  createEntity,
+  updateEntity,
+  parseFormData,
+  addOrRemoveConnection,
+} from "@/lib/helpers/dbHelpers";
+import { DeleteResult } from "@/lib/types";
 import { gradeSchema } from "@/lib/schema";
 import prisma from "@/prisma/client";
 import { Grade } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { QueryClient } from "@tanstack/react-query";
 
-async function getGradesBySchool(
+export async function getGrades(): Promise<Grade[]> {
+  try {
+    const grades = await prisma.grade.findMany({
+      include: {
+        schools: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
+
+    return grades;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getGradesBySchool(
   school_id: number | undefined
 ): Promise<(Grade & { school_id: number })[] | undefined> {
   if (!school_id) return undefined;
@@ -38,7 +62,7 @@ async function getGradesBySchool(
   }
 }
 
-async function getGradesNotInSchool(
+export async function getGradesNotInSchool(
   school_id: number,
   state_territory: string
 ): Promise<(Grade & { school_id: number })[] | undefined> {
@@ -77,145 +101,65 @@ async function getGradesNotInSchool(
   }
 }
 
-const removeGrade = async ({
+export const removeGrade = async ({
   school_id,
   grade_id,
 }: {
   school_id: number;
   grade_id: number;
 }) => {
-  if (!grade_id || !school_id) return;
-
-  try {
-    const result = await prisma.schoolGrade.delete({
-      where: {
-        gradeId_schoolId: {
-          gradeId: grade_id,
-          schoolId: school_id,
-        },
-      },
-    });
-    return result;
-  } catch (error) {
-    throw error;
-  }
+  return await addOrRemoveConnection({
+    model: prisma.school,
+    foreign_key: "grades",
+    row_id: school_id,
+    connection_id: grade_id,
+    action: "disconnect",
+  });
 };
 
-const deleteGrade = async (grade_id: number) => {
-  try {
-    const result = await prisma.grade.delete({
-      where: {
-        id: grade_id,
-      },
-    });
-
-    if (result) {
-      revalidatePath(`/admin/grades`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false };
-    }
-  } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
-  }
-};
-
-const addGrade = async ({
+export const addGrade = async ({
   school_id,
   grade_id,
 }: {
   school_id: number;
   grade_id: number;
 }) => {
-  if (!grade_id || !school_id) return;
-
-  try {
-    const result = await prisma.schoolGrade.create({
-      data: {
-        school: {
-          connect: { id: school_id },
-        },
-        grade: {
-          connect: { id: grade_id },
-        },
-      },
-    });
-    return result;
-  } catch (error) {
-    throw error;
-  }
+  return await addOrRemoveConnection({
+    model: prisma.school,
+    foreign_key: "grades",
+    row_id: school_id,
+    connection_id: grade_id,
+    action: "connect",
+  });
 };
 
-const createGrade = async (formData: z.infer<typeof gradeSchema>) => {
-  try {
-    const result = await prisma.grade.create({
-      data: {
-        name: formData.name,
-        category: formData.category,
-        order: formData.order,
-        state_territory: formData.state_territory,
-      },
-    });
+export async function deleteGrade(grade_id: number): Promise<DeleteResult> {
+  return await deleteEntity(prisma.grade, grade_id, "admin/grades");
+}
 
-    if (result) {
-      revalidatePath(`/admin/grades`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false, issues: "Failed to create grade" };
-    }
-  } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
+export const createGrade = async (formData: z.infer<typeof gradeSchema>) => {
+  const parsedData = parseFormData(formData, gradeSchema);
+  const result = await createEntity(prisma.grade, parsedData, "/admin/grades");
+  if (result) {
+    revalidatePath("/admin/grades");
   }
+  return result;
 };
 
-const updateGrade = async (formData: any, grade_id: number) => {
+export const updateGrade = async (formData: any, grade_id: number) => {
   const schema = gradeSchema.omit({ state_territory: true });
-  const parsed = schema.safeParse(formData);
+  const parsedData = parseFormData(formData, schema);
 
-  if (parsed.success) {
-    // update db
-    console.log("parsed successfully");
-    try {
-      const result = await prisma.grade.update({
-        where: {
-          id: grade_id,
-        },
-        data: {
-          name: formData.name,
-          category: formData.category,
-          order: formData.order,
-        },
-      });
-
-      if (result) {
-        revalidatePath(`/admin/grades`);
-        return { isSuccess: true };
-      } else {
-        return { isSuccess: false };
-      }
-    } catch (error) {
-      return { isSuccess: false };
-    }
+  const result = await updateEntity(
+    prisma.grade,
+    parsedData,
+    grade_id,
+    "/admin/grades"
+  );
+  if (result) {
+    revalidatePath(`/admin/grades`);
+    return { isSuccess: true };
   } else {
-    return {
-      isSuccess: false,
-      issues: parsed.error.issues.map((issue) => issue.message),
-    };
+    return { isSuccess: false };
   }
-};
-
-export {
-  getGradesBySchool,
-  getGradesNotInSchool,
-  addGrade,
-  createGrade,
-  updateGrade,
-  removeGrade,
-  deleteGrade,
 };

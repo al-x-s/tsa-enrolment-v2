@@ -11,10 +11,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 // DB Queries
-import {
-  createInstrumentModel,
-  getInstrumentImages,
-} from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
+import { getInstrumentImages } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
+import { createModel } from "@/lib/server_actions/back_end/dbQueries_MODEL";
 
 //Schemas
 import { modelSchema } from "@/lib/schema";
@@ -70,14 +68,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import Loading from "@/components/tables/Loading";
+import Loading from "@/components/DataTable/Loading";
+import {
+  BrandAndStatus,
+  DetailsRow,
+  ModelOptionWrapper,
+  ModelPricing,
+} from "@/components/ModelOption";
 
 function useUpdateModels() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createInstrumentModel,
+    mutationFn: createModel,
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({
         queryKey: ["getInstrumentModels", data.id],
@@ -353,47 +357,28 @@ const ModelPage = ({ params }: any) => {
                 What The User See's
               </h1>
             </div>
-            <article
-              className={clsx(
-                "border-4 rounded-lg mb-4 h-fit max-w-[400px] border-[#979797]",
-                isSoldOut ? "bg-[#B0AFAF]" : "bg-[#E6D3F9]"
-              )}
+            <ModelOptionWrapper
+              isSoldOut={isSoldOut}
+              selectedPurchaseModel="demo"
+              model={model}
             >
               <div className="flex flex-row justify-between">
                 <div className="w-[70%] flex flex-col justify-between ">
-                  <div
-                    className={clsx(
-                      "rounded-ee-lg w-fit py-2 px-4 font-semibold text-center bg-[#9689A4]",
-                      isSoldOut ? "text-[#161616]" : "text-white"
-                    )}
-                  >
-                    {brand} {isSoldOut ? " - Sold Out" : ""}
-                  </div>
+                  <BrandAndStatus
+                    brand={brand}
+                    isSoldOut={isSoldOut}
+                    selectedPurchaseModel="demo"
+                    model={model}
+                  />
                   <div className="px-4">
-                    <div className="flex flex-row items-center mt-4 font-bold">
-                      <h2
-                        className={clsx(
-                          "text-2xl my-1 font-ubuntu",
-                          !isSoldOut ? "text-[#f1933e] font-extrabold" : ""
-                        )}
-                      >
-                        {isSoldOut ? `$${rrp}` : `On Sale $${sale_price}`}
-                      </h2>
-                    </div>
-                    {!isSoldOut && (
-                      <p className="pb-1 font-light">
-                        RRP $<span className="line-through">{`${rrp}`}</span>
-                      </p>
-                    )}
+                    <ModelPricing
+                      isSoldOut={isSoldOut}
+                      rrp={rrp}
+                      sale_price={sale_price}
+                    />
 
-                    <div className="flex flex-row items-center mt-2">
-                      <Image alt="tick inside a circle" src={circleTick} />
-                      <p className="ml-2">Brand: {brand}</p>
-                    </div>
-                    <div className="flex flex-row items-center mt-2">
-                      <Image alt="tick inside a circle" src={circleTick} />
-                      <p className="ml-2">Model: {model}</p>
-                    </div>
+                    <DetailsRow label="Brand" value={brand} />
+                    <DetailsRow label="Model" value={model} />
                   </div>
                   <div className="flex justify-end pr-2">
                     <div
@@ -418,7 +403,7 @@ const ModelPage = ({ params }: any) => {
                   />
                 </div>
               </div>
-            </article>
+            </ModelOptionWrapper>
           </div>
         </div>
       </div>

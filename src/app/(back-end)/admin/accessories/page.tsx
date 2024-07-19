@@ -6,7 +6,7 @@ import prisma from "@/prisma/client";
 import { Accessory } from "@prisma/client";
 
 // Tanstack Table
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@/components/DataTable/data-table";
 import { columns } from "./columns";
 
 async function getData(): Promise<Accessory[]> {

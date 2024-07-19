@@ -1,7 +1,7 @@
 import React from "react";
 import prisma from "@/prisma/client";
 import { School, columns } from "./columns";
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@/components/DataTable/data-table";
 import Link from "next/link";
 
 async function getData(): Promise<School[]> {

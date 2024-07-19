@@ -9,7 +9,7 @@ import {
   currencyFilter,
   booleanFilter,
   arrayFilter,
-} from "@/components/tables/tableUtils";
+} from "@/components/DataTable/tableUtils";
 
 export const columns: ColumnDef<Instrument>[] = [
   {

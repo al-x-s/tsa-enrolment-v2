@@ -1,27 +1,10 @@
-import { DataTable } from "@/components/tables/data-table";
-import prisma from "@/prisma/client";
-import { Grade } from "@prisma/client";
+import { DataTable } from "@/components/DataTable/data-table";
 import Link from "next/link";
 import { columns } from "./columns";
-async function getData(): Promise<Grade[]> {
-  try {
-    const grades = await prisma.grade.findMany({
-      include: {
-        schools: true,
-      },
-      orderBy: {
-        name: "asc",
-      },
-    });
-
-    return JSON.parse(JSON.stringify(grades));
-  } catch (error) {
-    return JSON.parse(JSON.stringify(error));
-  }
-}
+import { getGrades } from "@/lib/server_actions/back_end/dbQueries_GRADE";
 
 const GradesPage = async () => {
-  const data = await getData();
+  const data = await getGrades();
 
   return (
     <div className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">

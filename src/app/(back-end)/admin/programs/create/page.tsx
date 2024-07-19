@@ -32,17 +32,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+  ProgramOptionWrapper,
+  ClassTypeAndStatus,
+  ProgramOptionTitle,
+  ProgramOptionDescription,
+  WhatsIncluded,
+  ProgramOptionDialogTable,
+} from "@/components/ProgramOption";
 import {
   Table,
   TableBody,
@@ -357,52 +355,25 @@ const CreateProgramPage = () => {
         <div className="ml-2 py-6">
           <h1 className="text-2xl font-bold text-white">What The User See's</h1>
         </div>
-        <article
-          className={clsx(
-            "border-4 rounded-lg mb-4 border-[#979797]",
-            program_status === "Inactive" ? "bg-[#B0AFAF]" : "bg-[#E6D3F9]"
-          )}
+        <ProgramOptionWrapper
+          isSelected={false}
+          program_status={program_status}
         >
-          <div className="flex justify-between items-center">
-            <div
-              className={clsx(
-                "rounded-ee-lg w-fit py-2 px-4 font-semibold text-center bg-[#9689A4]",
-                program_status === "Inactive" ? "text-[#161616]" : "text-white"
-              )}
-            >
-              {classType}
-            </div>
-            {program_status === "Inactive" && (
-              <h2 className="mr-2 text-right font-medium">
-                Not currently enrolling
-              </h2>
-            )}
-          </div>
-
+          <ClassTypeAndStatus
+            program_status={program_status}
+            isSelected={false}
+            classType={classType}
+          />
           <div className="px-4">
             <div className="flex flex-row items-center mt-4 font-bold">
-              <h2 className="text-xl my-1 font-ubuntu">
-                ${tuition_fee + rehearsal_fee} + school levy per term
-              </h2>
+              <ProgramOptionTitle
+                tuition_fee={tuition_fee}
+                levyFee={10}
+                rehearsal_fee={rehearsal_fee}
+              />
             </div>
-            <p className="pb-1 font-light">{description}</p>
-            {classType !== "Rehearsal" && (
-              <div className="flex flex-row items-center mt-2">
-                <Image alt="tick inside a circle" src={circleTick} />
-                <p className="ml-2">One {classType} lesson per week</p>
-              </div>
-            )}
-
-            {type === ("Band" || "String") && (
-              <div className="flex flex-row items-center mt-2">
-                <Image alt="tick inside a circle" src={circleTick} />
-                <p className="ml-2">One Rehearsal per week</p>
-              </div>
-            )}
-            <div className="flex flex-row items-center mt-2">
-              <Image alt="tick inside a circle" src={circleTick} />
-              <p className="ml-2">Access to the Online Resource Library</p>
-            </div>
+            <ProgramOptionDescription description={description} />
+            <WhatsIncluded classType={classType} type={type} />
           </div>
           <div className="flex justify-center">
             <Button
@@ -420,55 +391,19 @@ const CreateProgramPage = () => {
                 : `Select ${classType}`}
             </Button>
           </div>
-        </article>
+        </ProgramOptionWrapper>
         <Card className="mb-4">
           <CardHeader>
             <CardTitle>{classType} Tuition</CardTitle>
             <CardDescription>Price breakdown.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Item</TableHead>
-                  <TableHead className="text-right">Price Per Term</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tuition_fee !== 0 && (
-                  <TableRow>
-                    <TableCell className="font-medium w-60">
-                      Tuition Fee
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {`${tuition_fee}`}
-                    </TableCell>
-                  </TableRow>
-                )}
-                {(type === "Band" || type === "String") && (
-                  <TableRow>
-                    <TableCell className="font-medium w-60">
-                      Rehearsal Fee
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {rehearsal_fee === 0 ? "Included" : rehearsal_fee}
-                    </TableCell>
-                  </TableRow>
-                )}
-                <TableRow>
-                  <TableCell className="font-medium">School Levy</TableCell>
-                  <TableCell className="text-right">(ie $10)</TableCell>
-                </TableRow>
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell>Total Per Term</TableCell>
-                  <TableCell className="text-right">
-                    ${tuition_fee + rehearsal_fee} + school levy
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
+            <ProgramOptionDialogTable
+              levyFee={10}
+              type={type}
+              tuition_fee={tuition_fee}
+              rehearsal_fee={rehearsal_fee}
+            />
           </CardContent>
         </Card>
       </div>

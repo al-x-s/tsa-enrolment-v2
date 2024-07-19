@@ -1,7 +1,9 @@
 "use server";
 import prisma from "@/prisma/client";
 import z from "zod";
-import { Instrument, InstrumentModel } from "@prisma/client";
+import { DeleteResult } from "@/lib/types";
+import { deleteEntity } from "@/lib/helpers/dbHelpers";
+import { Instrument, Model } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import {
   schoolInstrumentSchema,
@@ -9,14 +11,12 @@ import {
   modelSchema,
 } from "@/lib/schema";
 
-async function getInstrumentById(
+import { findOne } from "@/lib/helpers/dbHelpers";
+
+export async function getInstrumentById(
   instrument_id: number
 ): Promise<Instrument | undefined> {
-  const instrument = await prisma.instrument.findFirst({
-    where: {
-      id: instrument_id,
-    },
-  });
+  const instrument = await findOne(prisma.instrument, { id: instrument_id });
 
   if (!instrument) {
     return undefined;
@@ -25,9 +25,9 @@ async function getInstrumentById(
   return instrument;
 }
 
-async function getInstrumentModels(
+export async function getInstrumentModels(
   instrument_id: number
-): Promise<(InstrumentModel & { instrument_id: number })[] | undefined> {
+): Promise<(Model & { instrument_id: number })[] | undefined> {
   const instrument = await prisma.instrument.findFirst({
     where: {
       id: instrument_id,
@@ -46,21 +46,9 @@ async function getInstrumentModels(
   }
 }
 
-async function getInstrumentModel(
-  model_id: number
-): Promise<InstrumentModel | undefined> {
-  const result = await prisma.instrumentModel.findFirst({
-    where: {
-      id: model_id,
-    },
-  });
-
-  if (result) {
-    return result;
-  }
-}
-
-async function getInstrumentsBySchool(school_id: number | undefined): Promise<
+export async function getInstrumentsBySchool(
+  school_id: number | undefined
+): Promise<
   | (Instrument & {
       school_id: number;
       status: string;
@@ -104,7 +92,7 @@ async function getInstrumentsBySchool(school_id: number | undefined): Promise<
   }
 }
 
-async function getInstrumentsNotInSchool(
+export async function getInstrumentsNotInSchool(
   school_id: number
 ): Promise<(Instrument & { school_id: number })[] | undefined> {
   if (!school_id) return undefined;
@@ -139,7 +127,7 @@ async function getInstrumentsNotInSchool(
   }
 }
 
-const removeInstrument = async ({
+export const removeInstrument = async ({
   school_id,
   instrument_id,
 }: {
@@ -164,7 +152,7 @@ const removeInstrument = async ({
   }
 };
 
-const addInstrument = async ({
+export const addInstrument = async ({
   school_id,
   instrument_id,
 }: {
@@ -191,7 +179,7 @@ const addInstrument = async ({
   }
 };
 
-const updateSchoolInstrument = async ({
+export const updateSchoolInstrument = async ({
   formData,
   school_id,
   instrument_id,
@@ -228,43 +216,17 @@ const updateSchoolInstrument = async ({
   }
 };
 
-async function deleteInstrument(instrument_id: number): Promise<any> {
-  try {
-    const result = await prisma.instrument.delete({
-      where: {
-        id: instrument_id,
-      },
-    });
-
-    if (result) {
-      revalidatePath("admin/instruments");
-      return { isSuccess: true };
-    }
-  } catch (error) {
-    console.error("Error deleting instrument", error);
-    return null;
-  }
+export async function deleteInstrument(
+  instrument_id: number
+): Promise<DeleteResult> {
+  return await deleteEntity(
+    prisma.instrument,
+    instrument_id,
+    "admin/instruments"
+  );
 }
 
-async function deleteModel(model_id: number): Promise<any> {
-  try {
-    const result = await prisma.instrumentModel.delete({
-      where: {
-        id: model_id,
-      },
-    });
-
-    if (result) {
-      revalidatePath("admin/instruments");
-      return { isSuccess: true };
-    }
-  } catch (error) {
-    console.error("Error deleting model", error);
-    return null;
-  }
-}
-
-const updateInstrument = async ({
+export const updateInstrument = async ({
   formData,
   id,
 }: {
@@ -301,92 +263,9 @@ const updateInstrument = async ({
   }
 };
 
-const updateInstrumentModel = async ({
-  formData,
-  id,
-}: {
-  formData: any;
-  id: number;
-}) => {
-  const parsed = modelSchema.safeParse(formData);
-
-  if (parsed.success) {
-    // update db
-    console.log("parsed successfully");
-    try {
-      const result = await prisma.instrumentModel.update({
-        where: {
-          id: id,
-        },
-        data: {
-          model: formData.model,
-          brand: formData.brand,
-          image: formData.image,
-          status: formData.status,
-          rrp: formData.rrp,
-          sale_price: formData.sale_price,
-        },
-      });
-
-      if (result) {
-        revalidatePath(`/admin/instruments/${id}/`);
-        return result;
-      }
-    } catch (error) {
-      throw error;
-    }
-  } else {
-    throw Error;
-  }
-};
-
-const createInstrumentModel = async ({
-  formData,
-  instrument_id,
-}: {
-  formData: any;
-  instrument_id: number;
-}) => {
-  const parsed = modelSchema.safeParse(formData);
-
-  if (parsed.success) {
-    // update db
-    console.log("parsed successfully");
-    try {
-      const result = await prisma.instrumentModel.create({
-        data: {
-          model: formData.model,
-          brand: formData.brand,
-          image: formData.image,
-          status: formData.status,
-          rrp: formData.rrp,
-          sale_price: formData.sale_price,
-          instrument_category: {
-            connect: {
-              id: instrument_id,
-            },
-          },
-        },
-      });
-
-      if (result) {
-        return {
-          isSuccess: true,
-          id: instrument_id,
-          redirect: `/admin/instruments/${instrument_id}/models`,
-        };
-      } else {
-        return { isSuccess: false, issues: "Failed to create model" };
-      }
-    } catch (error) {
-      throw error;
-    }
-  } else {
-    throw Error;
-  }
-};
-
-const createInstrument = async (formData: z.infer<typeof instrumentSchema>) => {
+export const createInstrument = async (
+  formData: z.infer<typeof instrumentSchema>
+) => {
   const parsed = instrumentSchema.safeParse(formData);
 
   if (parsed.success) {
@@ -419,8 +298,8 @@ const createInstrument = async (formData: z.infer<typeof instrumentSchema>) => {
   }
 };
 
-async function getInstrumentImages() {
-  const instrumentModels = await prisma.instrumentModel.findMany({
+export async function getInstrumentImages() {
+  const models = await prisma.model.findMany({
     select: {
       image: true,
       brand: true,
@@ -443,7 +322,7 @@ async function getInstrumentImages() {
     }[];
   }[] = [];
 
-  instrumentModels.forEach((curr) => {
+  models.forEach((curr) => {
     const instrumentName = curr.instrument_category[0].name;
     const imageData = {
       image: curr.image,
@@ -470,21 +349,3 @@ async function getInstrumentImages() {
 
   return result;
 }
-
-export {
-  getInstrumentsBySchool,
-  getInstrumentsNotInSchool,
-  getInstrumentById,
-  addInstrument,
-  getInstrumentModels,
-  getInstrumentModel,
-  getInstrumentImages,
-  createInstrument,
-  createInstrumentModel,
-  updateInstrumentModel,
-  removeInstrument,
-  updateSchoolInstrument,
-  deleteInstrument,
-  updateInstrument,
-  deleteModel,
-};

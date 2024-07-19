@@ -1,223 +1,125 @@
 "use server";
 import z from "zod";
-import { accessorySchema, gradeSchema } from "@/lib/schema";
+import {
+  deleteEntity,
+  createEntity,
+  updateEntity,
+  parseFormData,
+  addOrRemoveConnection,
+  getItemByCondition,
+  findOne,
+} from "@/lib/helpers/dbHelpers";
+import { DeleteResult } from "@/lib/types";
+import { accessorySchema } from "@/lib/schema";
 import prisma from "@/prisma/client";
 import { Accessory } from "@prisma/client";
-import { revalidatePath } from "next/cache";
-import { QueryClient } from "@tanstack/react-query";
 
-async function getAccessory(accessory_id: number): Promise<Accessory> {
+export async function getAccessory(accessory_id: number): Promise<Accessory> {
   try {
-    const accessory = await prisma.accessory.findFirst({
-      where: {
-        id: accessory_id,
-      },
-    });
-
-    return JSON.parse(JSON.stringify(accessory));
+    const accessory = await findOne(prisma.accessory, { id: accessory_id });
+    return accessory;
   } catch (error) {
-    return JSON.parse(JSON.stringify(error));
+    throw error;
   }
 }
 
-async function getAccessoriesByInstrument(
+export async function getAccessoriesByInstrument(
   instrument_id: number
-): Promise<(Accessory & { instrument_id: number })[] | undefined> {
-  try {
-    const accessories = await prisma.accessory.findMany({
-      where: {
-        instruments: {
-          some: { id: instrument_id },
-        },
-      },
-    });
-    // return accessories;
-    const result = accessories.map((item) => ({
-      ...item,
-      instrument_id,
-    }));
-    if (result) {
-      return result;
-    }
-  } catch (error) {
-    console.error("Error fetching accessories", error);
-    return undefined;
-  }
+): Promise<(Accessory & { instrument_id: number })[]> {
+  const result = await getItemByCondition<Accessory>({
+    model: prisma.accessory,
+    condition: "some",
+    relatedEntity: "instruments",
+    relatedEntityId: instrument_id,
+  });
+  return result.map((item: Accessory & { relatedEntityId: number }) => ({
+    ...item,
+    instrument_id: item.relatedEntityId,
+  }));
 }
 
-async function getAccessoriesNotLinkedToInstrument(
+export async function getAccessoriesNotLinkedToInstrument(
   instrument_id: number
-): Promise<(Accessory & { instrument_id: number })[] | undefined> {
-  try {
-    const accessories = await prisma.accessory.findMany({
-      where: {
-        instruments: {
-          none: { id: instrument_id },
-        },
-      },
-    });
-
-    const result = accessories.map((item) => ({
-      ...item,
-      instrument_id,
-    }));
-    if (result) {
-      return result;
-    }
-  } catch (error) {
-    console.error(
-      "Error fetching grades not associated with instrument",
-      error
-    );
-    return undefined;
-  }
+): Promise<(Accessory & { instrument_id: number })[]> {
+  const result = await getItemByCondition<Accessory>({
+    model: prisma.accessory,
+    condition: "none",
+    relatedEntity: "instruments",
+    relatedEntityId: instrument_id,
+  });
+  return result.map((item: Accessory & { relatedEntityId: number }) => ({
+    ...item,
+    instrument_id: item.relatedEntityId,
+  }));
 }
 
-const removeAccessory = async ({
+export const removeAccessory = async ({
   instrument_id,
   accessory_id,
 }: {
   instrument_id: number;
   accessory_id: number;
 }) => {
-  try {
-    const result = await prisma.instrument.update({
-      where: { id: instrument_id },
-      data: {
-        accessories: {
-          disconnect: { id: accessory_id },
-        },
-      },
-      include: {
-        accessories: true,
-      },
-    });
-    return result;
-  } catch (error) {
-    throw error;
-  }
+  return await addOrRemoveConnection({
+    model: prisma.instrument,
+    foreign_key: "accessories",
+    row_id: instrument_id,
+    connection_id: accessory_id,
+    action: "disconnect",
+  });
 };
 
-const deleteAccessory = async (accessory_id: number) => {
-  try {
-    const result = await prisma.accessory.delete({
-      where: {
-        id: accessory_id,
-      },
-    });
-
-    if (result) {
-      revalidatePath(`/admin/accessories`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false };
-    }
-  } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
-  }
-};
-
-const addAccessory = async ({
+export const addAccessory = async ({
   instrument_id,
   accessory_id,
 }: {
   instrument_id: number;
   accessory_id: number;
 }) => {
-  try {
-    const result = await prisma.instrument.update({
-      where: { id: instrument_id },
-      data: {
-        accessories: {
-          connect: { id: accessory_id },
-        },
-      },
-      include: {
-        accessories: true,
-      },
-    });
-    return result;
-  } catch (error) {
-    throw error;
-  }
+  return await addOrRemoveConnection({
+    model: prisma.instrument,
+    foreign_key: "accessories",
+    row_id: instrument_id,
+    connection_id: accessory_id,
+    action: "connect",
+  });
 };
 
-const createAccessory = async (formData: z.infer<typeof accessorySchema>) => {
-  try {
-    const result = await prisma.accessory.create({
-      data: {
-        name: formData.name,
-        status: formData.status,
-        price: formData.price,
-        is_recommended: formData.is_recommended,
-        description_short: formData.description_short,
-        description_long: formData.description_long,
-      },
-    });
+export async function deleteAccessory(
+  accessory_id: number
+): Promise<DeleteResult> {
+  return await deleteEntity(
+    prisma.accessory,
+    accessory_id,
+    "admin/accessories"
+  );
+}
 
-    if (result) {
-      revalidatePath(`/admin/accessories`);
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false, issues: "Failed to create Accessory" };
-    }
-  } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
-  }
+export const createAccessory = async (
+  formData: z.infer<typeof accessorySchema>
+) => {
+  const parsedData = parseFormData(formData, accessorySchema);
+  const result = await createEntity(
+    prisma.accessory,
+    parsedData,
+    "/admin/accessories"
+  );
+  return result;
 };
 
-const updateAccessory = async ({
+export const updateAccessory = async ({
   formData,
   accessory_id,
 }: {
-  formData: any;
+  formData: z.infer<typeof accessorySchema>;
   accessory_id: number;
 }) => {
-  const parsed = accessorySchema.safeParse(formData);
-
-  if (parsed.success) {
-    // update db
-    console.log("parsed successfully");
-    try {
-      const result = await prisma.accessory.update({
-        where: {
-          id: accessory_id,
-        },
-        data: {
-          name: formData.name,
-          status: formData.status,
-          price: formData.price,
-          is_recommended: formData.is_recommended,
-          description_short: formData.description_short,
-          description_long: formData.description_long,
-        },
-      });
-
-      if (result) {
-        revalidatePath(`/admin/accessories/${accessory_id}`);
-        return result;
-      }
-    } catch (error) {
-      throw error;
-    }
-  } else {
-    throw Error;
-  }
-};
-
-export {
-  getAccessoriesByInstrument,
-  getAccessoriesNotLinkedToInstrument,
-  addAccessory,
-  getAccessory,
-  createAccessory,
-  updateAccessory,
-  removeAccessory,
-  deleteAccessory,
+  const parsedData = parseFormData(formData, accessorySchema);
+  const result = await updateEntity(
+    prisma.accessory,
+    parsedData,
+    accessory_id,
+    "/admin/accessories"
+  );
+  return result;
 };

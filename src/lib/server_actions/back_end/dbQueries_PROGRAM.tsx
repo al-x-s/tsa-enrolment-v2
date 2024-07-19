@@ -2,6 +2,8 @@
 import prisma from "@/prisma/client";
 import z from "zod";
 // import { Program } from "@/lib/types";
+import { deleteEntity } from "@/lib/helpers/dbHelpers";
+import { DeleteResult } from "@/lib/types";
 import { Program } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { programSchema } from "@/lib/schema";
@@ -117,27 +119,31 @@ const removeProgram = async ({
   }
 };
 
-const deleteProgram = async (program_id: number) => {
-  try {
-    const result = await prisma.program.delete({
-      where: {
-        id: program_id,
-      },
-    });
+// const deleteProgram = async (program_id: number) => {
+//   try {
+//     const result = await prisma.program.delete({
+//       where: {
+//         id: program_id,
+//       },
+//     });
 
-    if (result) {
-      revalidatePath("/admin/programs");
-      return { isSuccess: true };
-    } else {
-      return { isSuccess: false };
-    }
-  } catch (error) {
-    return {
-      isSuccess: false,
-      issues: error,
-    };
-  }
-};
+//     if (result) {
+//       revalidatePath("/admin/programs");
+//       return { isSuccess: true };
+//     } else {
+//       return { isSuccess: false };
+//     }
+//   } catch (error) {
+//     return {
+//       isSuccess: false,
+//       issues: error,
+//     };
+//   }
+// };
+
+async function deleteProgram(program_id: number): Promise<DeleteResult> {
+  return await deleteEntity(prisma.program, program_id, "admin/programs");
+}
 
 const addProgram = async ({
   school_id,

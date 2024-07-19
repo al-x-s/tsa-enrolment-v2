@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { SortButton } from "@/components/tables/tableUtils";
+import { SortButton } from "@/components/DataTable/tableUtils";
 
 // Functions
 import { addGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";

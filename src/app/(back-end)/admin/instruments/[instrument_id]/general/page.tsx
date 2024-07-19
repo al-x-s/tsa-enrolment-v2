@@ -1,5 +1,5 @@
 "use client";
-import Loading from "@/components/tables/Loading";
+import Loading from "@/components/DataTable/Loading";
 import { Button } from "@/components/ui/button";
 import {
   Card,

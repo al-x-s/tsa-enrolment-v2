@@ -121,7 +121,7 @@ const createAccessories = async () => {
   }
 };
 
-const createInstrumentModel = async () => {
+const createModels = async () => {
   const models = [
     // CLARINETS
     {
@@ -169,7 +169,7 @@ const createInstrumentModel = async () => {
   ];
 
   for (const model of models) {
-    await prisma.instrumentModel.create({
+    await prisma.model.create({
       data: model,
     });
   }
@@ -195,6 +195,7 @@ const createInstruments = async () => {
       hire_insurance: 3,
       accessories: {
         connect: [{ name: "Music Stand" }],
+        connect: [{ name: "Clarinet Reeds" }],
       },
       models: {
         connect: [{ model: "YCL255" }, { model: "JCL700NA" }],
@@ -700,8 +701,8 @@ const load = async () => {
     console.log("CreateGrades ran successfully");
     await createAccessories();
     console.log("CreateAccessories ran successfully");
-    await createInstrumentModel();
-    console.log("CreateInstrumentModels ran successfully");
+    await createModels();
+    console.log("CreateModels ran successfully");
     await createInstruments();
     console.log("CreateInstruments ran successfully");
     await createPrograms();

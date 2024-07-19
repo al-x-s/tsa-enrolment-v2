@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Program } from "@prisma/client";
 import Link from "next/link";
-import { currencyFilter, SortButton } from "@/components/tables/tableUtils";
+import { currencyFilter, SortButton } from "@/components/DataTable/tableUtils";
 
 export const columns: ColumnDef<Program>[] = [
   {

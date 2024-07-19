@@ -2,7 +2,7 @@
 
 // Tanstack Table
 import { ColumnDef } from "@tanstack/react-table";
-import { SortButton, currencyFilter } from "@/components/tables/tableUtils";
+import { SortButton, currencyFilter } from "@/components/DataTable/tableUtils";
 
 // Types
 import { Grade } from "@prisma/client";

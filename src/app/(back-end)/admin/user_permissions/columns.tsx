@@ -19,7 +19,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 // Tanstack Table
 import { ColumnDef } from "@tanstack/react-table";
-import { SortButton } from "@/components/tables/tableUtils";
+import { SortButton } from "@/components/DataTable/tableUtils";
 import EditUser from "./EditUser";
 import { deleteUser } from "@/lib/server_actions/back_end/dbQueries_USER";
 

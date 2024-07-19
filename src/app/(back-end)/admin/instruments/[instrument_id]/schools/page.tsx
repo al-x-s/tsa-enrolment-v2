@@ -3,7 +3,7 @@ import React from "react";
 
 // Tanstack Table
 import { QueryClient, useQuery } from "@tanstack/react-query";
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@/components/DataTable/data-table";
 import { columns } from "./columns";
 
 // Db Queries
@@ -11,7 +11,7 @@ import { getSchoolsByInstrument } from "@/lib/server_actions/back_end/dbQueries_
 
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Loading from "@/components/tables/Loading";
+import Loading from "@/components/DataTable/Loading";
 
 const InstrumentSchools = ({ params }: any) => {
   const instrument_id = parseInt(decodeURI(params.instrument_id));

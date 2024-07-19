@@ -117,7 +117,7 @@ model Instrument {
   hire_insurance Int @default(0)
   accessories    Accessory[]
   schools        SchoolInstrument[]
-  models         InstrumentModel[]
+  models         Model[]
 }
 
 
@@ -126,7 +126,7 @@ model SchoolProgram {
   schoolId  Int
   program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
   programId Int
-  status    String @default("Active")
+  status    ActiveOrInactive @default(Active)
 
   @@id([schoolId, programId])
   @@index([schoolId])
@@ -169,7 +169,7 @@ model Grade {
 }
 
 
-model InstrumentModel {
+model Model {
   id                  Int           @id @default(autoincrement())
   instrument_category Instrument[]
   rrp                 Float

@@ -8,7 +8,7 @@ import useAppFormContext from "@/lib/hooks/useAppFormContext";
 // Components
 import FormWrapper from "@/components/FormWrapper";
 import FormActions from "@/components/FormActions";
-import { TuitionTypeOption } from "@/components/ui/tuition_type_option";
+import ProgramOption from "@/components/ProgramOption/ProgramOption";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Server Actions
@@ -56,6 +56,8 @@ export default function TuitionTypePage() {
     return;
   }
 
+  console.log("Programs Data --->", programsData);
+
   // Desctructure schoolData
   const { levyFee } = schoolData;
 
@@ -95,8 +97,9 @@ export default function TuitionTypePage() {
         <ScrollArea className="px-8 max-h-[calc(100%-160px)] lg:max-h-none overflow-auto">
           <div className="flex flex-col mt-6">
             {programsData?.map((program: any) => (
-              <TuitionTypeOption
+              <ProgramOption
                 key={program.programId}
+                schoolProgramStatus={program.status}
                 programData={program.program}
                 levyFee={parseInt(levyFee)}
                 handleClick={handleClick}

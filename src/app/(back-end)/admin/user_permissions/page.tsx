@@ -44,7 +44,7 @@ import getUser from "@/lib/server_actions/getUser";
 
 // Tanstack
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@/components/DataTable/data-table";
 import { columns } from "./columns";
 import { userSchema } from "@/lib/schema";
 

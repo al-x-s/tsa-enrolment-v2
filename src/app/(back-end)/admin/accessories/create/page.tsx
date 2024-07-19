@@ -41,7 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Loading from "@/components/tables/Loading";
+import Loading from "@/components/DataTable/Loading";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,12 +53,13 @@ import { accessorySchema, programSchema } from "@/lib/schema";
 
 // React Query and Queries
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { createAccessory } from "@/lib/server_actions/back_end/dbQueries_ACCESSORY";
 import {
-  createAccessory,
-  deleteAccessory,
-  getAccessory,
-  updateAccessory,
-} from "@/lib/server_actions/back_end/dbQueries_ACCESSORY";
+  AccessoryOptionWrapper,
+  RecommendedBadge,
+  ShortDescription,
+} from "@/components/AccessoryOption";
+import AccessoryOptionTitleAndPrice from "@/components/AccessoryOption/AccessoryOptionTitleAndPrice";
 
 const AccessoryPage = () => {
   const router = useRouter();
@@ -253,36 +254,20 @@ const AccessoryPage = () => {
           <h1 className="text-2xl font-bold text-white">What The User See's</h1>
         </div>
         <div className="max-w-[400px]">
-          {is_recommended && (
-            <div className="relative inline-flex w-[100%]">
-              <div
-                className={clsx(
-                  "absolute inset-x-0 mx-auto w-fit h-fit -translate-y-[20%] rounded-sm bg-[#979797]"
-                )}
-              >
-                <p className={clsx("text-white px-2 py-1")}>RECOMMENDED</p>
-              </div>
-            </div>
-          )}
-          <article
-            className={clsx(
-              "flex flex-row justify-between border-4 rounded-lg p-2 mb-4 h-fit bg-[#E6D3F9] border-[#979797] "
-            )}
-          >
+          {is_recommended && <RecommendedBadge isSelected={false} />}
+          <AccessoryOptionWrapper isSelected={false}>
             <div
               className={clsx("flex flex-col", is_recommended ? "pt-4" : "")}
             >
               <div className="flex space-between">
-                <h2 className="text-xl font-bold my-1 font-ubuntu">
-                  {name} - ${price}
-                </h2>
+                <AccessoryOptionTitleAndPrice name={name} price={price} />
               </div>
-              <p className="font-light pb-2">{description_short}</p>
+              <ShortDescription description_short={description_short} />
             </div>
             <div className="self-center pl-4">
               <Switch aria-readonly />
             </div>
-          </article>
+          </AccessoryOptionWrapper>
           <Card>
             <CardHeader>
               <CardTitle>Long Description</CardTitle>

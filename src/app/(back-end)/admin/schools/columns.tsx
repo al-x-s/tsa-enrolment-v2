@@ -8,7 +8,7 @@ import {
   currencyFilter,
   booleanFilter,
   arrayFilter,
-} from "@/components/tables/tableUtils";
+} from "@/components/DataTable/tableUtils";
 
 export type School = {
   id: string;

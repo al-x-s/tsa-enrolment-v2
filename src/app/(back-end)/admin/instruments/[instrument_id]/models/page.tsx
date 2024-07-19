@@ -3,7 +3,7 @@ import React from "react";
 
 // Tanstack Table
 import { useQuery } from "@tanstack/react-query";
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@/components/DataTable/data-table";
 import { columns } from "./columns";
 
 // Db Queries
@@ -11,7 +11,7 @@ import { getInstrumentModels } from "@/lib/server_actions/back_end/dbQueries_INS
 
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Loading from "@/components/tables/Loading";
+import Loading from "@/components/DataTable/Loading";
 import Link from "next/link";
 
 const InstrumentModels = ({ params }: any) => {

@@ -14,7 +14,7 @@ import {
   booleanFilter,
   currencyFilter,
   SortButton,
-} from "@/components/tables/tableUtils";
+} from "@/components/DataTable/tableUtils";
 
 export const columns: ColumnDef<Accessory>[] = [
   {

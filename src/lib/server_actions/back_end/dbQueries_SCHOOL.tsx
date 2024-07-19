@@ -1,6 +1,8 @@
 "use server";
 import z from "zod";
 import prisma from "@/prisma/client";
+import { deleteEntity } from "@/lib/helpers/dbHelpers";
+import { DeleteResult } from "@/lib/types";
 
 import { schoolSchema } from "@/lib/schema";
 // import { SchoolData } from "@/lib/types";
@@ -70,22 +72,8 @@ async function getSchoolsByInstrument(
   }
 }
 
-async function deleteSchool(school_id: number): Promise<any> {
-  try {
-    const school = await prisma.school.delete({
-      where: {
-        id: school_id,
-      },
-    });
-
-    if (school) {
-      revalidatePath("admin/schools");
-      return { isSuccess: true };
-    }
-  } catch (error) {
-    console.error("Error deleting school", error);
-    return null;
-  }
+async function deleteSchool(school_id: number): Promise<DeleteResult> {
+  return await deleteEntity(prisma.school, school_id, "admin/schools");
 }
 
 const createSchool = async (formData: z.infer<typeof schoolSchema>) => {

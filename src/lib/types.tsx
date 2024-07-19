@@ -70,3 +70,10 @@ export type InstrumentSelectMap = {
   program: string;
   children: Option[];
 };
+
+// DB QUERIES
+
+export type DeleteResult = {
+  isSuccess: boolean;
+  error?: any;
+};

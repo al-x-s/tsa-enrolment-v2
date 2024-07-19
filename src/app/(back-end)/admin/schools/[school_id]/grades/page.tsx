@@ -4,7 +4,7 @@ import Link from "next/link";
 
 // Tanstack Table
 import { useQuery, QueryClient } from "@tanstack/react-query";
-import { DataTable } from "@/components/tables/data-table";
+import { DataTable } from "@/components/DataTable/data-table";
 import { columns } from "./columns";
 
 // Db Queries
@@ -16,7 +16,7 @@ import {
 
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Loading from "@/components/tables/Loading";
+import Loading from "@/components/DataTable/Loading";
 
 const SchoolGrades = ({ params }: any) => {
   const school_id = parseInt(decodeURI(params.school_id));

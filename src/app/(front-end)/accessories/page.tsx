@@ -15,7 +15,7 @@ import { SelectedAccessory } from "@/lib/types";
 import FormWrapper from "@/components/FormWrapper";
 import FormActions from "@/components/FormActions";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { AccessoryOption } from "@/components/ui/accessory_option";
+import { AccessoryOption } from "@/components/AccessoryOption/AccessoryOption";
 import { useQuery } from "@tanstack/react-query";
 
 export default function InstrumentOptionsPage() {

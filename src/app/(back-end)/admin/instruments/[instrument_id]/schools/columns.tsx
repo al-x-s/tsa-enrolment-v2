@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { SortButton } from "@/components/tables/tableUtils";
+import { SortButton } from "@/components/DataTable/tableUtils";
 
 // Components
 import { ColumnDef } from "@tanstack/react-table";

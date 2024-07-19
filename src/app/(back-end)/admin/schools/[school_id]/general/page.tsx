@@ -2,7 +2,7 @@
 import React from "react";
 import InputCard from "./InputCard";
 import { useQuery } from "@tanstack/react-query";
-import Loading from "@/components/tables/Loading";
+import Loading from "@/components/DataTable/Loading";
 import {
   deleteSchool,
   getSchoolById,
