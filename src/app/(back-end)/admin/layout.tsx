@@ -9,7 +9,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 
-import ReactQueryProvider from "@/lib/hooks/ReactQueryProviders";
+import ReactQueryProvider from "@/components/Providers/ReactQueryProviders";
 
 // Components
 

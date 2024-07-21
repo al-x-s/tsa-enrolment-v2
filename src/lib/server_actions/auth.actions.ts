@@ -3,7 +3,7 @@
 import prisma from "@/prisma/client";
 // Schema
 import { z } from "zod";
-import { signInSchema } from "@/lib/schema";
+import { signInSchema } from "@/lib/schemas/schema";
 // Lucia Auth
 import { lucia, validateRequest } from "@/auth";
 import { Argon2id } from "oslo/password";

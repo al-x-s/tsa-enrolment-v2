@@ -9,8 +9,8 @@ import {
   getItemByCondition,
   findOne,
 } from "@/lib/helpers/dbHelpers";
-import { DeleteResult } from "@/lib/types";
-import { accessorySchema } from "@/lib/schema";
+import { DeleteResult } from "@/lib/types/types";
+import { accessorySchema } from "@/lib/schemas/schema";
 import prisma from "@/prisma/client";
 import { Accessory } from "@prisma/client";
 

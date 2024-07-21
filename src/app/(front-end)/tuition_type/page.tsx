@@ -4,23 +4,17 @@ import { useRouter } from "next/navigation";
 
 // Hooks
 import useAppFormContext from "@/lib/hooks/useAppFormContext";
+import { useUserSelections } from "@/components/Providers/UserSelectionsProvider";
 
 // Components
-import FormWrapper from "@/components/FormWrapper";
-import FormActions from "@/components/FormActions";
+import FormWrapper from "@/components/FrontEndForm/FormWrapper";
+import FormActions from "@/components/FrontEndForm/FormActions";
 import ProgramOption from "@/components/ProgramOption/ProgramOption";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-// Server Actions
-import getProgramsData from "@/lib/server_actions/front_end/getProgramsData";
-
-// Types
-import { SchoolProgramWithPrograms } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
-import getSchoolData from "@/lib/server_actions/front_end/getSchoolData";
-
 export default function TuitionTypePage() {
   const router = useRouter();
+  const { selectedSchoolData, availablePrograms } = useUserSelections();
 
   React.useEffect(() => {
     if (!student_school) {
@@ -30,36 +24,10 @@ export default function TuitionTypePage() {
   });
 
   // React hook form config
-  const { trigger, formState, control, watch, setValue } = useAppFormContext();
-  const {
-    student_school,
-    program_type,
-    school_id,
-    student_details,
-    selected_program_id,
-  } = watch();
-  const { instrument } = student_details;
+  const { trigger, formState, watch, setValue } = useAppFormContext();
+  const { student_school, selected_program_id } = watch();
   const { errors } = formState;
-
-  // Get page data
-  const { data: schoolData } = useQuery({
-    queryKey: ["schoolData", student_school],
-    queryFn: () => getSchoolData(student_school),
-  });
-
-  const { data: programsData, isPending } = useQuery({
-    queryKey: ["programsData", school_id, program_type],
-    queryFn: () => getProgramsData(parseInt(school_id!), program_type),
-  });
-
-  if (isPending) {
-    return;
-  }
-
-  console.log("Programs Data --->", programsData);
-
-  // Desctructure schoolData
-  const { levyFee } = schoolData;
+  const { levyFee } = selectedSchoolData;
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     if (event.target instanceof HTMLButtonElement) {
@@ -96,12 +64,12 @@ export default function TuitionTypePage() {
         )}
         <ScrollArea className="px-8 max-h-[calc(100%-160px)] lg:max-h-none overflow-auto">
           <div className="flex flex-col mt-6">
-            {programsData?.map((program: any) => (
+            {availablePrograms?.map((program: any) => (
               <ProgramOption
                 key={program.programId}
                 schoolProgramStatus={program.status}
                 programData={program.program}
-                levyFee={parseInt(levyFee)}
+                levyFee={levyFee}
                 handleClick={handleClick}
                 selectedTuitionType={selected_program_id}
               />

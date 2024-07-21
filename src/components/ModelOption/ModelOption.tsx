@@ -14,34 +14,34 @@ import ModelOptionButton from "./ModelOptionButton";
 type ModelProps = {
   className?: string;
   asChild?: boolean;
-  purchase_options: Model;
-  selectedPurchaseModel: any;
+  modelData: Model;
+  selectedModel: string;
   handleClick: React.MouseEventHandler<HTMLButtonElement>;
 };
 
 const ModelOption = ({
   className,
-  purchase_options,
+  modelData,
   asChild = false,
-  selectedPurchaseModel,
+  selectedModel,
   handleClick,
   ...props
 }: ModelProps) => {
-  const { brand, model, image, rrp, sale_price, status } = purchase_options;
+  const { brand, model, image, rrp, sale_price, status } = modelData;
 
   const isSoldOut = status === "Sold_Out" ? true : false;
   return (
     <ModelOptionWrapper
       isSoldOut={isSoldOut}
       model={model}
-      selectedPurchaseModel={selectedPurchaseModel}
+      selectedModel={selectedModel}
     >
       <div className="flex flex-row justify-between">
         <div className="w-[70%] flex flex-col justify-between ">
           <BrandAndStatus
             brand={brand}
             isSoldOut={isSoldOut}
-            selectedPurchaseModel={selectedPurchaseModel}
+            selectedModel={selectedModel}
             model={model}
           />
           <div className="px-4">

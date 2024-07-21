@@ -2,7 +2,7 @@
 import {
   SchoolInstrumentWithInstrument,
   SchoolProgramWithPrograms,
-} from "@/lib/types";
+} from "@/lib/types/types";
 
 export default function filterProgramsByInstrument(
   instrumentData: SchoolInstrumentWithInstrument[],

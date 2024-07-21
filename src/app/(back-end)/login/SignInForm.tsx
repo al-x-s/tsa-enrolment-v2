@@ -19,7 +19,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Input } from "@/components/ui/input";
-import { signInSchema } from "@/lib/schema";
+import { signInSchema } from "@/lib/schemas/schema";
 import { signIn } from "@/lib/server_actions/auth.actions";
 
 import { useRouter } from "next/navigation";

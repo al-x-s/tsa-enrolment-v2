@@ -38,7 +38,7 @@ import { DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { updateGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";
 import { updateUser } from "@/lib/server_actions/back_end/dbQueries_USER";
-import { userSchema } from "@/lib/schema";
+import { userSchema } from "@/lib/schemas/schema";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 

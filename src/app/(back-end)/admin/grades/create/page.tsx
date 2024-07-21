@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { gradeSchema } from "@/lib/schema";
+import { gradeSchema } from "@/lib/schemas/schema";
 import { createGrade } from "@/lib/server_actions/back_end/dbQueries_GRADE";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";

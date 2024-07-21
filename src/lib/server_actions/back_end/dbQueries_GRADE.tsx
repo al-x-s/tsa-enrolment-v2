@@ -7,8 +7,8 @@ import {
   parseFormData,
   addOrRemoveConnection,
 } from "@/lib/helpers/dbHelpers";
-import { DeleteResult } from "@/lib/types";
-import { gradeSchema } from "@/lib/schema";
+import { DeleteResult } from "@/lib/types/types";
+import { gradeSchema } from "@/lib/schemas/schema";
 import prisma from "@/prisma/client";
 import { Grade } from "@prisma/client";
 import { revalidatePath } from "next/cache";

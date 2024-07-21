@@ -1,15 +1,17 @@
 "use client";
 import React from "react";
-import clsx from "clsx";
-import useAppFormContext from "@/lib/hooks/useAppFormContext";
 import { useRouter } from "next/navigation";
-import FormWrapper from "@/components/FormWrapper";
-import FormActions from "@/components/FormActions";
 
-import { Button } from "@/components/ui/button";
+// React Hook Form
+import FormWrapper from "@/components/FrontEndForm/FormWrapper";
+import FormActions from "@/components/FrontEndForm/FormActions";
+
+// Hooks
+import useAppFormContext from "@/lib/hooks/useAppFormContext";
+
+// Components
 import { Input } from "@/components/ui/input";
 import {
-  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -19,7 +21,6 @@ import {
 } from "@/components/ui/form";
 import InputFormatted from "@/components/ui/input_formatted";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-
 import {
   Select,
   SelectContent,
@@ -27,42 +28,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQueryClient } from "@tanstack/react-query";
-import getHireableTableData from "@/lib/server_actions/front_end/getHireableTableData";
 
 export default function YourDetailsPage() {
   const router = useRouter();
   const { trigger, formState, control, watch, setFocus } = useAppFormContext();
   const { errors } = formState;
-  const {
-    student_school,
-    student_details,
-    your_details,
-    school_id,
-    program_type,
-  } = watch();
+  const { student_school, your_details } = watch();
   const { client_email, confirm_client_email } = your_details;
-  const instrument = student_details.instrument;
-  const queryClient = useQueryClient();
 
   React.useEffect(() => {
     if (!student_school) {
       router.replace("/welcome");
       return;
     }
-
-    queryClient.prefetchQuery({
-      queryKey: ["getHireableTableData", instrument],
-      queryFn: () => getHireableTableData(parseInt(school_id!), program_type!),
-    });
   }, []);
 
   const isEmailMatch = client_email === confirm_client_email ? true : false;
-
-  // Previous Step function
-  function previousStep() {
-    router.push("/tuition_type");
-  }
 
   const validateStep = async () => {
     if (client_email !== confirm_client_email) {
@@ -76,6 +57,11 @@ export default function YourDetailsPage() {
       router.push("/instrument_options");
     }
   };
+
+  // Previous Step function
+  function previousStep() {
+    router.push("/tuition_type");
+  }
 
   return (
     <div className="shadow-lg h-full">
@@ -187,44 +173,6 @@ export default function YourDetailsPage() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={control}
-              name="your_details.relationship"
-              render={({ field }) => (
-                <FormItem className="md:w-1/2 pb-6">
-                  <div className="flex items-baseline justify-between">
-                    <FormLabel className="text-white">
-                      Relationship to student
-                    </FormLabel>
-                  </div>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an option" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Parent" className="ml-3">
-                        Parent
-                      </SelectItem>
-                      <SelectItem value="Grandparent" className="ml-3">
-                        Grandparent
-                      </SelectItem>
-                      <SelectItem value="Guardian" className="ml-3">
-                        Guardian
-                      </SelectItem>
-                      <SelectItem value="Other" className="ml-3">
-                        Other
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
           <div className="border boder-2 border-white px-4 pt-4 mb-6">
             <h2 className="pb-4 text-white font-bold">Your Address</h2>
@@ -310,7 +258,6 @@ export default function YourDetailsPage() {
                       <FormLabel className="text-white">Postcode</FormLabel>
                     </div>
                     <FormControl>
-                      {/* <Input placeholder="" {...field} /> */}
                       <InputFormatted
                         {...field}
                         format="####"
@@ -319,7 +266,6 @@ export default function YourDetailsPage() {
                       />
                     </FormControl>
                     <FormMessage />
-                    {/* <FormDescription>Your first name.</FormDescription> */}
                   </FormItem>
                 )}
               />

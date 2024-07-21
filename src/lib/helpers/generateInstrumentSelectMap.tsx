@@ -3,7 +3,7 @@ import {
   Option,
   InstrumentSelectMap,
   SchoolInstrumentWithInstrument,
-} from "@/lib/types";
+} from "@/lib/types/types";
 
 export default function generateInstrumentSelectMap(
   data: SchoolInstrumentWithInstrument[] | undefined

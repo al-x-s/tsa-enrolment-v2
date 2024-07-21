@@ -4,7 +4,7 @@ import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import circleTick from "@/images/circle-tick.svg";
+
 import clsx from "clsx";
 import {
   Form,
@@ -59,7 +59,7 @@ import {
   updateProgram,
 } from "@/lib/server_actions/back_end/dbQueries_PROGRAM";
 
-import { programSchema } from "@/lib/schema";
+import { programSchema } from "@/lib/schemas/schema";
 import { Button } from "@/components/ui/button";
 
 import Image from "next/image";

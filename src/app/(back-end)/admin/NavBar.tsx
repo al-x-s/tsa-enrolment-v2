@@ -5,7 +5,7 @@ import React from "react";
 import Image from "next/image";
 import classnames from "classnames";
 
-import logo from "@/images/tsa-logo.png";
+// import logo from "images/tsa-logo.png";
 import { usePathname } from "next/navigation";
 
 import {
@@ -31,7 +31,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetClose,
@@ -115,7 +114,13 @@ const NavBar = ({ ...props }) => {
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 py-4 md:px-6 max-w-[1400px] w-full justify-self-center">
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6 ">
           <Link href="/admin">
-            <Image src={logo} alt="TSA Logo" className="max-w-14"></Image>
+            <Image
+              src={`/images/tsa-logo.png`}
+              width={1353}
+              height={1020}
+              alt="TSA Logo"
+              className="max-w-14"
+            ></Image>
           </Link>
           {links.map((link) => (
             <Link
@@ -147,7 +152,9 @@ const NavBar = ({ ...props }) => {
               <SheetClose asChild>
                 <Link href="/admin">
                   <Image
-                    src={logo}
+                    src={`/images/tsa-logo.png`}
+                    width={1353}
+                    height={1020}
                     alt="TSA Logo"
                     className="max-w-14 py-2"
                   ></Image>

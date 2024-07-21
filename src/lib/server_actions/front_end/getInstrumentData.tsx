@@ -2,37 +2,16 @@
 
 import prisma from "@/prisma/client";
 
-import { Model, Accessory } from "@prisma/client";
-import { InstrumentWithRelations } from "@/lib/types";
+import { Model, Accessory, Instrument } from "@prisma/client";
 
 type InstrumentDataResult = {
-  instrumentData: InstrumentWithRelations;
-  purchaseOptions: Model[];
-  accessoriesOptions: Accessory[];
+  instrumentData: Instrument;
+  models: Model[];
+  accessories: Accessory[];
 };
 
-const filterAndSortAccessories = (array: Accessory[]): Accessory[] => {
-  // remove items with status of "Hidden"
-  // const filtered = array.filter((option) => option.status !== "Inactive");
-  const order: Record<string, number> = { true: 1, false: 2 };
-  // sort by is_reccomended
-  array.sort((a, b) => {
-    return order[String(a.is_recommended)] - order[String(b.is_recommended)];
-  });
-  return array;
-};
-
-const filterAndSortModels = (array: Model[]): Model[] => {
-  // const filtered = array.filter((option) => option.status !== "Hidden");
-  const order: Record<string, number> = { Available: 1, Sold_Out: 2 };
-  array.sort((a, b) => (order[a.status] || 0) - (order[b.status] || 0));
-  return array;
-};
-
-export default async function getInstrumentData(
-  instrument: string
-): Promise<InstrumentDataResult | null> {
-  const instrumentData = await prisma.instrument.findFirst({
+async function fetchInstrumentData(instrument: string) {
+  return await prisma.instrument.findFirst({
     where: {
       name: instrument,
     },
@@ -55,21 +34,46 @@ export default async function getInstrumentData(
       },
     },
   });
+}
+
+function processModelOptions(models: Model[]): Model[] {
+  const order: Record<string, number> = { Available: 1, Sold_Out: 2 };
+  models.sort((a, b) => (order[a.status] || 0) - (order[b.status] || 0));
+  return models;
+}
+
+function processAccessoriesOptions(accessories: Accessory[]): Accessory[] {
+  const order: Record<string, number> = { true: 1, false: 2 };
+  accessories.sort((a, b) => {
+    return order[String(a.is_recommended)] - order[String(b.is_recommended)];
+  });
+  return accessories;
+}
+
+function removeDuplicateDataFromInstrumentData(data: any): any {
+  const { accessories, models, ...rest } = data;
+  return rest;
+}
+
+export default async function getInstrumentData(
+  instrument: string
+): Promise<InstrumentDataResult> {
+  let instrumentData = await fetchInstrumentData(instrument);
 
   if (!instrumentData) {
-    return null;
+    throw new Error("Instrument not found");
   }
 
-  const purchaseOptions: Model[] = filterAndSortModels(instrumentData?.models);
+  const models = processModelOptions(instrumentData.models);
+  const accessories = processAccessoriesOptions(instrumentData.accessories);
 
-  const accessoriesOptions: Accessory[] = filterAndSortAccessories(
-    instrumentData?.accessories
-  );
+  instrumentData = removeDuplicateDataFromInstrumentData(instrumentData);
 
   const result = {
-    instrumentData,
-    purchaseOptions,
-    accessoriesOptions,
+    instrumentData: instrumentData as Instrument,
+    models,
+    accessories,
   };
-  return JSON.parse(JSON.stringify(result));
+
+  return result;
 }

@@ -39,7 +39,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 // Tanstack
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { schoolInstrumentSchema } from "@/lib/schema";
+import { schoolInstrumentSchema } from "@/lib/schemas/schema";
 
 function useUpdateSchoolInstrument() {
   const queryClient = useQueryClient();

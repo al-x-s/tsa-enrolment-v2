@@ -1,10 +1,14 @@
 import Image from "next/image";
 import React from "react";
-import circleTick from "@/images/circle-tick.svg";
 
 const TickItem = ({ text }: { text: string }) => (
   <div className="flex flex-row items-center mt-2">
-    <Image alt="tick inside a circle" src={circleTick} />
+    <Image
+      alt="tick inside a circle"
+      src={`images/circle-tick.svg`}
+      height={16}
+      width={16}
+    />
     <p className="ml-2">{text}</p>
   </div>
 );

@@ -2,9 +2,9 @@
 import z from "zod";
 import prisma from "@/prisma/client";
 import { deleteEntity } from "@/lib/helpers/dbHelpers";
-import { DeleteResult } from "@/lib/types";
+import { DeleteResult } from "@/lib/types/types";
 
-import { schoolSchema } from "@/lib/schema";
+import { schoolSchema } from "@/lib/schemas/schema";
 // import { SchoolData } from "@/lib/types";
 import { School } from "@prisma/client";
 import { revalidatePath } from "next/cache";

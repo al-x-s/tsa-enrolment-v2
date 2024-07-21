@@ -1,4 +1,4 @@
-import { HireableInstrumentInput } from "../types";
+import { HireableInstrumentInput } from "../types/types";
 
 interface HireableTableData {
   hire_cost: number | null;

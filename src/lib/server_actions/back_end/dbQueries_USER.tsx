@@ -2,7 +2,7 @@
 import prisma from "@/prisma/client";
 import { revalidatePath } from "next/cache";
 import { Argon2id } from "oslo/password";
-import { userSchema } from "@/lib/schema";
+import { userSchema } from "@/lib/schemas/schema";
 import { validateRequest } from "@/auth";
 
 type User = {

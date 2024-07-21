@@ -4,52 +4,36 @@ import { useRouter } from "next/navigation";
 
 // Hooks
 import useAppFormContext from "@/lib/hooks/useAppFormContext";
-
-// Server Actions
-import getInstrumentData from "@/lib/server_actions/front_end/getInstrumentData";
+import { useUserSelections } from "@/components/Providers/UserSelectionsProvider";
 
 // Types
-import { SelectedAccessory } from "@/lib/types";
+import { SelectedAccessory } from "@/lib/types/types";
 
 // Components
-import FormWrapper from "@/components/FormWrapper";
-import FormActions from "@/components/FormActions";
+import FormWrapper from "@/components/FrontEndForm/FormWrapper";
+import FormActions from "@/components/FrontEndForm/FormActions";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { AccessoryOption } from "@/components/AccessoryOption/AccessoryOption";
-import { useQuery } from "@tanstack/react-query";
 
-export default function InstrumentOptionsPage() {
+export default function AccessoryOptionsPage() {
   const router = useRouter();
+  const { availableAccessories } = useUserSelections();
   // React hook form config
   const { watch, setValue } = useAppFormContext();
-  const { student_school, student_details, accessories } = watch();
-  const { instrument } = student_details;
+  const { student_school, accessories } = watch();
 
-  // Get page data
-  const { data, isPending, isError } = useQuery({
-    queryKey: ["instrumentData", instrument],
-    queryFn: () => getInstrumentData(instrument),
-  });
-
-  if (isPending || isError) {
-    return;
-  }
-
-  if (data === null) {
+  React.useEffect(() => {
     if (!student_school) {
       router.replace("/welcome");
     }
-    return;
-  }
-
-  const { accessoriesOptions } = data;
+  }, [student_school]);
 
   // A function that will be passed to AccessoryOption component
-  const updateAccessoriesObject = (name: string, value: boolean) => {
+  const updateAccessoriesObject = (name: string, isSelected: boolean) => {
     if (!accessories) return;
 
     const updatedObject: SelectedAccessory = { ...accessories };
-    updatedObject[name] = value;
+    updatedObject[name] = isSelected;
 
     setValue("accessories", updatedObject);
   };
@@ -70,7 +54,7 @@ export default function InstrumentOptionsPage() {
       >
         <ScrollArea className="px-4 md:px-8 max-h-[calc(100%-160px)] lg:max-h-none overflow-auto">
           <div className="flex flex-col mt-6">
-            {accessoriesOptions?.map((data: any) => (
+            {availableAccessories?.map((data: any) => (
               <AccessoryOption
                 updateAccessoriesObject={updateAccessoriesObject}
                 accessories={accessories}

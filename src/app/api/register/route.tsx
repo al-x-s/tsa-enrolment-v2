@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { FormDataSchema } from "@/lib/schema";
+import { FormDataSchema } from "@/lib/schemas/schema";
 
 export async function POST(req: NextRequest) {
   const data = await req.json();

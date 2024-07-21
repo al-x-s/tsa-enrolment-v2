@@ -4,11 +4,7 @@ import prisma from "@/prisma/client";
 import { generateAllHireOptionsObject } from "../../helpers/generateAllHireOptionsObject";
 import { ProgramType } from "@prisma/client";
 
-type HireableTableData = {
-  hire_cost: number | null;
-  insurance_cost: number | null;
-  instruments: string[];
-};
+import { HireableTableData } from "@/lib/types/types";
 
 export default async function getHireableTableData(
   school_id: number,

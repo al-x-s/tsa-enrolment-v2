@@ -1,6 +1,6 @@
 import prisma from "@/prisma/client";
 import { revalidatePath } from "next/cache";
-import { DeleteResult } from "../types";
+import { DeleteResult } from "../types/types";
 import { z } from "zod";
 
 export function parseFormData<T>(formData: T, schema: z.ZodSchema): T {

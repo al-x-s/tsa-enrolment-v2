@@ -1,25 +1,17 @@
-import { z } from "zod";
 import React from "react";
 import { Ubuntu } from "next/font/google";
-import clsx from "clsx";
+
 // Components
-import Provider from "@/components/Provider";
+import FrontEndProvider from "@/components/Providers/FrontEndProvider";
 
-import ReactQueryProvider from "@/lib/hooks/ReactQueryProviders";
+// React Query
+import { HydrationBoundary, QueryClient } from "@tanstack/react-query";
 
-import { FormDataSchema } from "@/lib/schema";
-
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
-
-// import Form from "@/components/Form";
 // Styles
 import "@/app/globals.css";
+
+// Data
 import getSchoolNames from "@/lib/server_actions/front_end/getSchoolNames";
-// import "@/stylesheets/fonts.css";
 
 export const metadata = {
   title: "TSA Enrolment",
@@ -55,9 +47,9 @@ export default async function RootLayout({
       <body className="font-ubuntu h-full flex flex-col justify-start lg:justify-center items-center">
         <main className="font-normal relative w-full max-w-lg lg:max-w-[940px] min-h-screen flex flex-col justify-start lg:justify-center items-center h-full">
           <div className=" w-full flex flex-col lg:flex-row px-4 lg:p-4 rounded-2xl h-[calc(100%-72px)] lg:h-4/5">
-            <Provider>
+            <FrontEndProvider>
               <HydrationBoundary>{children}</HydrationBoundary>
-            </Provider>
+            </FrontEndProvider>
           </div>
         </main>
       </body>

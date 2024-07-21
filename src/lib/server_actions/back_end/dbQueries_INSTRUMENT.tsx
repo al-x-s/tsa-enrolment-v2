@@ -1,7 +1,7 @@
 "use server";
 import prisma from "@/prisma/client";
 import z from "zod";
-import { DeleteResult } from "@/lib/types";
+import { DeleteResult } from "@/lib/types/types";
 import { deleteEntity } from "@/lib/helpers/dbHelpers";
 import { Instrument, Model } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -9,7 +9,7 @@ import {
   schoolInstrumentSchema,
   instrumentSchema,
   modelSchema,
-} from "@/lib/schema";
+} from "@/lib/schemas/schema";
 
 import { findOne } from "@/lib/helpers/dbHelpers";
 

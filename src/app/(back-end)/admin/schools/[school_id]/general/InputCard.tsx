@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { updateSchool } from "@/lib/server_actions/back_end/dbQueries_SCHOOL";
-import { schoolSchema } from "@/lib/schema";
+import { schoolSchema } from "@/lib/schemas/schema";
 import { School } from "@prisma/client";
 import { useToast } from "@/components/ui/use-toast";
 

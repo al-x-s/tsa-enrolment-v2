@@ -1,4 +1,13 @@
 import { Prisma } from "@prisma/client";
+import { SchoolGrade, SchoolInstrument } from "@prisma/client";
+
+export type SchoolDataResult = {
+  grades: SchoolGrade[];
+  levyFee: number;
+  instruments: SchoolInstrument[];
+  schoolId: number;
+  enrolmentYear: number;
+};
 
 export type SchoolProgramWithPrograms = Prisma.SchoolProgramGetPayload<{
   include: {
@@ -33,7 +42,7 @@ export type CostBreakdown = {
 
 // Summary Page
 
-export interface UserData {
+export interface FormSelections {
   selected_program_id: any;
   hire_purchase_byo: string;
   inst_is_insured: boolean | undefined;
@@ -51,6 +60,12 @@ export interface HireableInstrumentInput {
     hire_insurance: number | null;
   };
 }
+
+export type HireableTableData = {
+  hire_cost: number | null;
+  insurance_cost: number | null;
+  instruments: string[];
+};
 
 // Accessories Page
 

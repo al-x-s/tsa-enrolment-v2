@@ -2,6 +2,7 @@
 
 import prisma from "@/prisma/client";
 import generateInstrumentSelectMap from "../../helpers/generateInstrumentSelectMap";
+import { SchoolDataResult } from "@/lib/types/types";
 
 function getEnrolmentYear() {
   const today = new Date();
@@ -14,7 +15,9 @@ function getEnrolmentYear() {
   return year;
 }
 
-export default async function getSchoolData(schoolName: string): Promise<any> {
+export default async function getSchoolData(
+  schoolName: string
+): Promise<SchoolDataResult> {
   const schoolData = await prisma.school.findFirst({
     where: { name: schoolName },
     include: {

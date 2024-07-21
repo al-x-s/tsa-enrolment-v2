@@ -3,10 +3,10 @@ import prisma from "@/prisma/client";
 import z from "zod";
 // import { Program } from "@/lib/types";
 import { deleteEntity } from "@/lib/helpers/dbHelpers";
-import { DeleteResult } from "@/lib/types";
+import { DeleteResult } from "@/lib/types/types";
 import { Program } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { programSchema } from "@/lib/schema";
+import { programSchema } from "@/lib/schemas/schema";
 
 async function getProgram(program_id: number): Promise<Program> {
   try {

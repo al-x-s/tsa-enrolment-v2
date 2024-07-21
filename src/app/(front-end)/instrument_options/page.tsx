@@ -4,21 +4,17 @@ import { useRouter } from "next/navigation";
 
 // Hooks
 import useAppFormContext from "@/lib/hooks/useAppFormContext";
-
-// Server Actions
-import getInstrumentData from "@/lib/server_actions/front_end/getInstrumentData";
-import getHireableTableData from "@/lib/server_actions/front_end/getHireableTableData";
+import { useUserSelections } from "@/components/Providers/UserSelectionsProvider";
 
 // Types
 import { Model } from "@prisma/client";
 
 // Components
-import FormWrapper from "@/components/FormWrapper";
-import FormActions from "@/components/FormActions";
+import FormWrapper from "@/components/FrontEndForm/FormWrapper";
+import FormActions from "@/components/FrontEndForm/FormActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -26,11 +22,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableFooter,
   TableHead,
@@ -41,7 +35,6 @@ import {
   Dialog,
   DialogContent,
   DialogClose,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -54,7 +47,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelOption } from "@/components/ModelOption/ModelOption";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -64,8 +56,7 @@ import Link from "next/link";
 import {
   rentalTermsCheckboxes,
   RentalTermsDialogContent,
-} from "@/lib/terms_and_conditions/rentalTerms";
-import { useQuery } from "@tanstack/react-query";
+} from "@/app/(front-end)/instrument_options/rentalTerms";
 
 function CustomCheckbox({ ...props }) {
   return (
@@ -74,7 +65,7 @@ function CustomCheckbox({ ...props }) {
       name={props.name}
       render={({ field }) => (
         <FormItem
-          className="space-x-3 space-y-0"
+          className="space-x-3 space-y-0 mb-1"
           ref={(node) => {
             if (
               props.errors?.instrument_options?.agree_rental_terms?.[
@@ -132,20 +123,15 @@ function FormFieldInput({ ...props }) {
 
 export default function InstrumentOptionsPage() {
   const router = useRouter();
+  const { hireableTableData, availableModels, selectedInstrumentData } =
+    useUserSelections();
   // React hook form config
   const { trigger, formState, control, watch, setValue, setFocus } =
     useAppFormContext();
   const { errors } = formState;
-  const {
-    student_school,
-    instrument_options,
-    student_details,
-    school_id,
-    program_type,
-  } = watch();
+  const { student_school, instrument_options, student_details } = watch();
   const { instrument } = student_details;
-  const { purchased_model, hire_purchase_byo, agree_rental_terms } =
-    instrument_options;
+  const { purchased_model, hire_purchase_byo } = instrument_options;
 
   React.useEffect(() => {
     if (!student_school) {
@@ -158,31 +144,8 @@ export default function InstrumentOptionsPage() {
     }
   }, []);
 
-  // Get page data
-  const { data } = useQuery({
-    queryKey: ["instrumentData", instrument],
-    queryFn: () => getInstrumentData(instrument),
-  });
-
-  const { data: hireableTableData, isPending } = useQuery({
-    queryKey: ["getHireableTableData", instrument],
-    queryFn: () => getHireableTableData(parseInt(school_id!), program_type!),
-  });
-
-  if (isPending) {
-    return;
-  }
-
-  if (!data) {
-    return <p>Error retrieving data</p>;
-  }
-
-  const { instrumentData, purchaseOptions } = data;
-
-  // This is passed to the instrument_purchase_options to set the value of the purchased model when selected
-  const selectPurchaseInstrument: React.MouseEventHandler<HTMLButtonElement> = (
-    event
-  ) => {
+  // This is passed to the modelOptions to set the value of the purchased model when selected
+  const selectModel: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     if (event.target instanceof HTMLButtonElement) {
       setValue("instrument_options.purchased_model", event.target.value, {
         shouldValidate: true,
@@ -234,7 +197,7 @@ export default function InstrumentOptionsPage() {
                       defaultValue={field.value}
                       className="flex flex-col space-y-1"
                     >
-                      {instrumentData?.can_hire === true && (
+                      {selectedInstrumentData?.can_hire === true && (
                         <FormItem className="flex items-center space-x-3 space-y-0">
                           <FormControl>
                             <RadioGroupItem value="hire" />
@@ -288,19 +251,19 @@ export default function InstrumentOptionsPage() {
                     <TableBody>
                       <TableRow>
                         <TableCell>{instrument} Rental</TableCell>
-                        <TableCell className="text-right">{`$${instrumentData?.hire_cost}`}</TableCell>
+                        <TableCell className="text-right">{`$${selectedInstrumentData?.hire_cost}`}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Insurance (optional)</TableCell>
-                        <TableCell className="text-right">{`$${instrumentData?.hire_insurance}`}</TableCell>
+                        <TableCell className="text-right">{`$${selectedInstrumentData?.hire_insurance}`}</TableCell>
                       </TableRow>
                     </TableBody>
                     <TableFooter>
                       <TableRow>
                         <TableCell>TOTAL:</TableCell>
                         <TableCell className="text-right">{`$${
-                          (instrumentData?.hire_cost ?? 0) +
-                          (instrumentData?.hire_insurance ?? 0)
+                          (selectedInstrumentData?.hire_cost ?? 0) +
+                          (selectedInstrumentData?.hire_insurance ?? 0)
                         } a month`}</TableCell>
                       </TableRow>
                     </TableFooter>
@@ -379,72 +342,8 @@ export default function InstrumentOptionsPage() {
                   </Accordion>
                 </article>
 
-                <p className="text-white pb-6 font-semibold">
-                  Please read through the{" "}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Link href="" className="text-[#F6BD60] underline">
-                        rental terms and conditions
-                      </Link>
-                    </DialogTrigger>
-                    <DialogContent className="max-h-[90vh] md:max-h-[70vh] max-w-[90vw] md:max-w-lg rounded">
-                      <DialogHeader>
-                        <DialogTitle className="mb-2 text-xl text-center">
-                          Instrument Rental Terms and Conditions
-                        </DialogTitle>
-                      </DialogHeader>
-                      <RentalTermsDialogContent />
-
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button
-                            type="button"
-                            variant="unstyled"
-                            className="px-6 py-2 text-white bg-gradient-to-br from-theme-600 to bg-theme-900 rounded my-2 shadow hover:text-theme-grey-light"
-                          >
-                            Close
-                          </Button>
-                        </DialogClose>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>{" "}
-                  before proceeding.
-                </p>
-
                 {/* RENTAL TERMS AND CONDITIONS */}
 
-                {rentalTermsCheckboxes.map(({ name, id, term }) => (
-                  <CustomCheckbox
-                    key={name}
-                    control={control}
-                    name={name}
-                    errors={errors}
-                    term={term}
-                    id={id}
-                  />
-                ))}
-
-                <FormFieldInput
-                  control={control}
-                  name="instrument_options.drivers_license_no"
-                  label="Drivers License Number"
-                  className="w-full mb-6 mt-4"
-                />
-
-                <div className="md:flex md:flex-row md:gap-4">
-                  <FormFieldInput
-                    control={control}
-                    name="instrument_options.nearest_relative_name"
-                    label="Nearest Relative Name"
-                    className="w-full mb-6"
-                  />
-                  <FormFieldInput
-                    control={control}
-                    name="instrument_options.nearest_relative_phone"
-                    label="Nearest Relative Contact Number"
-                    className="w-full mb-6"
-                  />
-                </div>
                 <FormLabel className="text-white font-semibold">
                   Instrument Insurance
                 </FormLabel>
@@ -470,6 +369,20 @@ export default function InstrumentOptionsPage() {
                     </FormItem>
                   )}
                 />
+                <div className="md:flex md:flex-row md:gap-4">
+                  <FormFieldInput
+                    control={control}
+                    name="instrument_options.nearest_relative_name"
+                    label="Nearest Relative Name"
+                    className="w-full mb-6"
+                  />
+                  <FormFieldInput
+                    control={control}
+                    name="instrument_options.nearest_relative_phone"
+                    label="Nearest Relative Contact Number"
+                    className="w-full mb-6"
+                  />
+                </div>
                 <div className="border boder-2 border-white px-4 pt-4 mb-6 rounded">
                   <h2 className="pb-4 text-white font-bold">
                     Household Main Income Earner
@@ -504,6 +417,47 @@ export default function InstrumentOptionsPage() {
                     />
                   </div>
                 </div>
+                <p className="text-white pb-6 font-semibold">
+                  Please read through the{" "}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Link href="" className="text-[#F6BD60] underline">
+                        rental terms and conditions
+                      </Link>
+                    </DialogTrigger>
+                    <DialogContent className="max-h-[90vh] md:max-h-[70vh] max-w-[90vw] md:max-w-lg rounded">
+                      <DialogHeader>
+                        <DialogTitle className="mb-2 text-xl text-center">
+                          Instrument Rental Terms and Conditions
+                        </DialogTitle>
+                      </DialogHeader>
+                      <RentalTermsDialogContent />
+
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button
+                            type="button"
+                            variant="unstyled"
+                            className="px-6 py-2 text-white bg-gradient-to-br from-theme-600 to bg-theme-900 rounded my-2 shadow hover:text-theme-grey-light"
+                          >
+                            Close
+                          </Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>{" "}
+                  before proceeding.
+                </p>
+                {rentalTermsCheckboxes.map(({ name, id, term }) => (
+                  <CustomCheckbox
+                    key={name}
+                    control={control}
+                    name={name}
+                    errors={errors}
+                    term={term}
+                    id={id}
+                  />
+                ))}
               </div>
             )}
 
@@ -512,12 +466,12 @@ export default function InstrumentOptionsPage() {
                 <h2 className="text-white text-2xl text-center mb-6 font-bold">
                   Choose an Instrument
                 </h2>
-                {purchaseOptions?.map((data: Model) => (
+                {availableModels?.map((data: Model) => (
                   <ModelOption
                     key={crypto.randomUUID()}
-                    handleClick={selectPurchaseInstrument}
-                    selectedPurchaseModel={purchased_model}
-                    purchase_options={data}
+                    handleClick={selectModel}
+                    selectedModel={purchased_model}
+                    modelData={data}
                   />
                 ))}
               </>

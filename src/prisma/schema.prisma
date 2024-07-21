@@ -41,7 +41,7 @@ model Enrolment {
   selected_program_id        String
   client_first_name          String
   client_surname             String
-  relationship               String?
+  
   secondary_first_name       String?
   secondary_surname          String?
   secondary_email            String?
@@ -56,7 +56,7 @@ model Enrolment {
   client_postcode            String
   hire_purchase_byo          String
   inst_is_insured            Boolean
-  drivers_license_no         String?
+  
   nearest_relative_name      String?
   nearest_relative_phone     String?
   main_earner_name           String?

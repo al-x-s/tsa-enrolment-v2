@@ -1,5 +1,5 @@
 import z from "zod";
-import { FormDataSchema } from "@/lib/schema";
+import { FormDataSchema } from "@/lib/schemas/schema";
 
 export const formDefaultValues: z.infer<typeof FormDataSchema> = {
   student_school: "",
@@ -22,7 +22,6 @@ export const formDefaultValues: z.infer<typeof FormDataSchema> = {
   your_details: {
     client_first_name: "",
     client_surname: "",
-    relationship: "",
 
     client_email: "",
     confirm_client_email: "",
@@ -38,7 +37,7 @@ export const formDefaultValues: z.infer<typeof FormDataSchema> = {
     // Disciminating key
     hire_purchase_byo: "",
     // Hire options (optional)
-    drivers_license_no: "",
+
     nearest_relative_name: "",
     nearest_relative_phone: "",
     main_earner_name: "",
@@ -80,7 +79,4 @@ export const formDefaultValues: z.infer<typeof FormDataSchema> = {
     bank_bsb: "",
     bank_acc_number: "",
   },
-  // CONTEXT VARIABLES
-  school_id: "",
-  program_type: "Band",
 };

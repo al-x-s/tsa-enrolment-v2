@@ -5,7 +5,7 @@ import { useSelectedLayoutSegment } from "next/navigation";
 import Image from "next/image";
 import Step from "./Step";
 // Images
-import logo from "@/images/tsa-logo.png";
+// import logo from "images/tsa-logo.png";
 
 export default function Sidebar() {
   const segment = useSelectedLayoutSegment() as
@@ -74,25 +74,15 @@ export default function Sidebar() {
     <div className="relative shrink-0">
       <div className="lg:inset-0 lg:px-8 py-8 lg:py-0 flex flex-row justify-center lg:justify-stretch lg:flex-col gap-4 lg:gap-6">
         <Image
-          src={logo}
+          src={`/images/tsa-logo.png`}
+          width={1353}
+          height={1020}
           alt="TSA Logo"
           priority
           className="hidden lg:block -z-10 max-w-40"
         />
         {Steps}
       </div>
-      {/* <Image
-        src={bgSidebarDesktop}
-        alt=""
-        priority
-        className="hidden lg:block -z-10"
-      />
-      <Image
-        src={bgSidebarMobile}
-        alt=""
-        priority
-        className="lg:hidden w-full h-full fixed top-0 inset-x-0 -z-10 max-h-[172px] object-cover object-center"
-      /> */}
     </div>
   );
 }

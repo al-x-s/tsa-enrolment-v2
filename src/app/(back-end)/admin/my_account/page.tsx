@@ -61,7 +61,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 // Tanstack
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/cn";
 import { TypedArray } from "oslo";
 
 function useUpdateUser() {

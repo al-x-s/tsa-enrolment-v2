@@ -25,13 +25,12 @@ import {
 import { getInstrumentImages } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
 
 //Schemas
-import { modelSchema } from "@/lib/schema";
+import { modelSchema } from "@/lib/schemas/schema";
 
 // Styling
 import clsx from "clsx";
 
 // Images
-import circleTick from "@/images/circle-tick.svg";
 
 // Components
 import { Input } from "@/components/ui/input";
@@ -416,7 +415,7 @@ const ModelPage = ({ params }: any) => {
               </div>
               <ModelOptionWrapper
                 isSoldOut={isSoldOut}
-                selectedPurchaseModel="demo"
+                selectedModel="demo"
                 model={model}
               >
                 <div className="flex flex-row justify-between">
@@ -424,7 +423,7 @@ const ModelPage = ({ params }: any) => {
                     <BrandAndStatus
                       brand={brand}
                       isSoldOut={isSoldOut}
-                      selectedPurchaseModel="demo"
+                      selectedModel="demo"
                       model={model}
                     />
                     <div className="px-4">

@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { Program } from "@prisma/client";
-import questionButton from "@/images/question-mark-with-circle.svg";
+// import questionButton from "images/question-mark-with-circle.svg";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,9 @@ const MoreInfoDialog = ({
           className="bg-transparent hover:fill-ghost p-0 h-fit"
         >
           <Image
-            src={questionButton}
+            src={`/images/question-mark-with-circle.svg`}
+            height={24}
+            width={24}
             alt="Price breakdown button"
             className="w-[24px] ml-2 hover:fill-theme-800"
           />

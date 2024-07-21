@@ -13,27 +13,26 @@ import {
 } from "@/components/ui/table";
 
 // Types
-import { UserData, InstrumentWithRelations } from "@/lib/types";
-import { Accessory } from "@prisma/client";
+import { FormSelections } from "@/lib/types/types";
+import { Accessory, Instrument, Model } from "@prisma/client";
 
 interface SummaryTableProps {
   schoolData: any | null;
-  instrumentData: InstrumentWithRelations | null;
-  accessoriesOptions: Accessory[] | null;
-  userData: UserData | null;
-  programsData: any;
+  selectedModelData: Model;
+  selectedAccessoriesData: Accessory[];
+  formSelections: FormSelections;
+  selectedProgramData: any;
+  selectedInstrumentData: Instrument;
 }
 
 const SummaryTable = ({
-  instrumentData,
-  userData,
+  selectedModelData,
+  formSelections,
   schoolData,
-  accessoriesOptions,
-  programsData,
+  selectedAccessoriesData,
+  selectedProgramData,
+  selectedInstrumentData,
 }: SummaryTableProps) => {
-  if (!userData || !schoolData || !instrumentData) {
-    return;
-  }
   const {
     selected_program_id,
     hire_purchase_byo,
@@ -41,40 +40,47 @@ const SummaryTable = ({
     purchased_model,
     accessories,
     instrument,
-  } = userData;
+  } = formSelections;
 
   const isHire = hire_purchase_byo === "hire" ? true : false;
   const isPurchase = hire_purchase_byo === "purchase" ? true : false;
   const { levyFee } = schoolData;
 
   // Getting the tuition fee for the selected program
-  const chosenProgram = programsData?.filter(
-    (program: any) => program.programId.toString() === selected_program_id
-  );
+  // const chosenProgram = programsData?.filter(
+  //   (program: any) => program.programId.toString() === selected_program_id
+  // );
   const { rehearsal_fee, tuition_fee, enrol_fee, classType } =
-    chosenProgram[0].program;
+    selectedProgramData;
 
   // Getting the rental costs
-  const hireFee = instrumentData.hire_cost;
-  const insuranceFee = inst_is_insured ? instrumentData.hire_insurance : 0;
+  const hireFee = selectedInstrumentData.hire_cost;
+  const insuranceFee = inst_is_insured
+    ? selectedInstrumentData.hire_insurance
+    : 0;
 
   // Getting the selected accessories
-  const selectedAccessories = accessoriesOptions?.filter(
-    (accessory) => accessories[accessory.name]
-  );
+  // const selectedAccessories = accessoriesOptions?.filter(
+  //   (accessory) => accessories[accessory.name]
+  // );
 
-  const accessoriesTotalCost = selectedAccessories?.reduce((total, item) => {
-    return total + Number(item.price);
-  }, 0);
+  const accessoriesTotalCost = selectedAccessoriesData?.reduce(
+    (total, item) => {
+      return total + Number(item.price);
+    },
+    0
+  );
 
   // Getting the cost of any purchased instrument
   let brand, sale_price;
   if (purchased_model) {
-    const purchasedInstrument = instrumentData?.models?.filter(
-      (instrument) => instrument.model === purchased_model
-    );
-    brand = purchasedInstrument[0].brand;
-    sale_price = purchasedInstrument[0].sale_price;
+    // const purchasedInstrument = instrumentData?.models?.filter(
+    //   (instrument) => instrument.model === purchased_model
+    // );
+    // brand = purchasedInstrument[0].brand;
+    // sale_price = purchasedInstrument[0].sale_price;
+    brand = selectedModelData.brand;
+    sale_price = selectedModelData.sale_price;
   }
 
   return (
@@ -126,7 +132,7 @@ const SummaryTable = ({
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell>{instrumentData.name} Rental</TableCell>
+                <TableCell>{selectedInstrumentData.name} Rental</TableCell>
                 <TableCell className="text-right">{`$${hireFee}`}</TableCell>
               </TableRow>
               {inst_is_insured && (
@@ -168,7 +174,7 @@ const SummaryTable = ({
               <TableCell className="text-right">{`$${sale_price}`}</TableCell>
             </TableRow>
           )}
-          {selectedAccessories?.map((accessory) => (
+          {selectedAccessoriesData?.map((accessory: any) => (
             <TableRow key={accessory.name}>
               <TableCell>{accessory.name}</TableCell>
               <TableCell className="text-right">{`$${accessory.price}`}</TableCell>

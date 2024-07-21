@@ -2,7 +2,7 @@
 "use client";
 
 //  Form Provider
-import Provider from "@/components/Provider";
+import Provider from "@/components/Providers/FrontEndProvider";
 
 // Since QueryClientProvider relies on useContext under the hood, we have to put 'use client' on top
 import {

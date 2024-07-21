@@ -49,7 +49,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // Schema
-import { accessorySchema, programSchema } from "@/lib/schema";
+import { accessorySchema, programSchema } from "@/lib/schemas/schema";
 
 // React Query and Queries
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";

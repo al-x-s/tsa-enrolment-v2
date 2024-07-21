@@ -34,7 +34,7 @@ import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
-import { instrumentSchema, schoolSchema } from "@/lib/schema";
+import { instrumentSchema, schoolSchema } from "@/lib/schemas/schema";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { createSchool } from "@/lib/server_actions/back_end/dbQueries_SCHOOL";

@@ -1,18 +1,16 @@
 "use client";
 import React from "react";
-import clsx from "clsx";
 import useAppFormContext from "@/lib/hooks/useAppFormContext";
 import { useRouter } from "next/navigation";
+import { useUserSelections } from "@/components/Providers/UserSelectionsProvider";
 
 // Components
-import FormWrapper from "@/components/FormWrapper";
-import FormActions from "@/components/FormActions";
-import { Button } from "@/components/ui/button";
+import FormWrapper from "@/components/FrontEndForm/FormWrapper";
+import FormActions from "@/components/FrontEndForm/FormActions";
+
 import { Input } from "@/components/ui/input";
 import {
-  Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -31,20 +29,15 @@ import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
-// Server Actions
-import getInstrumentData from "@/lib/server_actions/front_end/getInstrumentData";
-
-// Helper Functions
-import generateInstrumentSelectMap from "@/lib/helpers/generateInstrumentSelectMap";
-
-// Types
-import { InstrumentSelectMap, SchoolGradeWithGrades } from "@/lib/types";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import getSchoolData from "@/lib/server_actions/front_end/getSchoolData";
-import getProgramsData from "@/lib/server_actions/front_end/getProgramsData";
-
 export default function StudentDetailsPage() {
   const router = useRouter();
+  const { selectedSchoolData } = useUserSelections();
+
+  // React hook form config
+  const { trigger, formState, control, watch, setValue } = useAppFormContext();
+  const { errors } = formState;
+  const { student_school, student_details } = watch();
+  const { student_medical, instrument } = student_details;
 
   React.useEffect(() => {
     if (!student_school) {
@@ -52,66 +45,21 @@ export default function StudentDetailsPage() {
     }
   }, []);
 
-  // React hook form config
-  const { trigger, formState, control, watch, setValue } = useAppFormContext();
-  const { errors } = formState;
-  const { student_school, student_details, school_id } = watch();
-  const { student_medical, instrument } = student_details;
+  // Destructure values from schoolData
+  const { grades, instruments, enrolmentYear } = selectedSchoolData;
 
-  // Get page data
-  const { data: schoolData, isPending } = useQuery({
-    queryKey: ["schoolData", student_school],
-    queryFn: () => getSchoolData(student_school),
-  });
-
-  if (isPending) {
-    return;
-  }
-
-  // Destructure values from schoolData and set school_id
-  const { grades, instruments, enrolmentYear, schoolId } = schoolData;
-
-  // Prefetch data when instrument is changed
-  const queryClient = useQueryClient();
   React.useEffect(() => {
-    // Prefetch Instrument Data
-    queryClient.prefetchQuery({
-      queryKey: ["instrumentData", instrument],
-      queryFn: () => getInstrumentData(instrument),
-    });
-
-    // Prefetch Programs Data
-    // queryClient.prefetchQuery({
-    //   queryKey: ["programsData", school_id, instrument],
-    //   queryFn: () => getProgramsData(parseInt(school_id!), instrument),
-    // });
-
     // If instrument is changed the below values will be reset
     setValue("selected_program_id", "");
     setValue("instrument_options.purchased_model", "");
     setValue("accessories", {});
-    setValue("program_type", "Band");
   }, [instrument]);
-
-  // Fetch instrument data to set value of program type within validateStep function
-  const { data } = useQuery({
-    queryKey: ["instrumentData", instrument],
-    queryFn: () => getInstrumentData(instrument),
-    enabled: !!instrument,
-  });
 
   // Check form fields before moving to tuition_type
   const validateStep = async () => {
     const isValid = await trigger(["student_details"], {
       shouldFocus: true,
     });
-
-    if (!data) {
-      return;
-    }
-
-    const { instrumentData } = data;
-    setValue("program_type", instrumentData?.program_type);
 
     if (isValid) {
       router.push("/tuition_type");
@@ -146,7 +94,6 @@ export default function StudentDetailsPage() {
                       <Input placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
-                    {/* <FormDescription>Your first name.</FormDescription> */}
                   </FormItem>
                 )}
               />
@@ -164,7 +111,6 @@ export default function StudentDetailsPage() {
                       <Input placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
-                    {/* <FormDescription>Your first name.</FormDescription> */}
                   </FormItem>
                 )}
               />

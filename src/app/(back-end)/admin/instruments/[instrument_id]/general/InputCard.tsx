@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { instrumentSchema } from "@/lib/schema";
+import { instrumentSchema } from "@/lib/schemas/schema";
 import { updateInstrument } from "@/lib/server_actions/back_end/dbQueries_INSTRUMENT";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Instrument } from "@prisma/client";

@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import questionButton from "@/images/question-mark-with-circle.svg";
+// import questionButton from "images/question-mark-with-circle.svg";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +28,9 @@ const AccessoryOptionDialog = ({
         className="bg-transparent hover:fill-ghost p-0 h-fit self-center"
       >
         <Image
-          src={questionButton}
+          src={`/images/question-mark-with-circle.svg`}
+          height={24}
+          width={24}
           alt="Accessory Information"
           className="w-[24px] h-[24px] ml-2 hover:fill-theme-800"
         />

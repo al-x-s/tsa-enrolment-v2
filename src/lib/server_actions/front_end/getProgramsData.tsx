@@ -1,6 +1,6 @@
 "use server";
 import prisma from "@/prisma/client";
-import { SchoolProgramWithPrograms } from "@/lib/types";
+import { SchoolProgramWithPrograms } from "@/lib/types/types";
 
 export default async function getProgramsData(
   school_id: number | undefined,
@@ -21,5 +21,5 @@ export default async function getProgramsData(
   result?.sort((a: SchoolProgramWithPrograms, b: SchoolProgramWithPrograms) => {
     return order[a.program.classType] - order[b.program.classType];
   });
-  return JSON.parse(JSON.stringify(result));
+  return result;
 }
