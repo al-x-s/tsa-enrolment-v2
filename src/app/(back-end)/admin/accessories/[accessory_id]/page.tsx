@@ -82,7 +82,6 @@ function useUpdateAccessory() {
   return useMutation({
     mutationFn: updateAccessory,
     onSuccess: (data: any) => {
-      console.log(data);
       queryClient.invalidateQueries({
         queryKey: ["accessory", data.id],
       });

@@ -11,7 +11,7 @@ import { HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import "@/app/globals.css";
 
 // Data
-import getSchoolNames from "@/lib/server_actions/front_end/getSchoolNames";
+import getSchoolNames from "@/lib/server_actions/front_end/getSchoolsData";
 
 export const metadata = {
   title: "TSA Enrolment",

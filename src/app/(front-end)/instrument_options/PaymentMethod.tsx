@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-function RadioOption({ ...props }) {
+export function RadioOption({ ...props }) {
   return (
     <FormItem className="flex items-center space-x-3 space-y-0">
       <FormControl>

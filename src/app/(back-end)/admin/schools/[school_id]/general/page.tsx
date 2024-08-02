@@ -68,6 +68,14 @@ const SchoolGeneral = ({ params }: any) => {
         inputType="text"
         description="The schools name"
       />
+      <InputCard
+        title="Welcome Message"
+        fieldName="welcome_message"
+        school_id={school_id}
+        data={school_details}
+        inputType="textarea"
+        description="A custom message that will be displayed when a user selects this school"
+      />
       {/* TODO - Not sure if I want the State/Territory to be editable after the school is created
       <InputCard
         title="State or Territory"

@@ -12,14 +12,32 @@ import useCardImage from "@/lib/hooks/useCardImage";
 // Components
 import FormWrapper from "@/components/FrontEndForm/FormWrapper";
 import FormActions from "@/components/FrontEndForm/FormActions";
-import DirectDebit from "@/components/DirectDebit/DirectDebit";
 import CreditCard from "@/components/CreditCard/CreditCard";
 import { SummaryTable } from "@/components/SummaryTable/SummaryTable";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import PaymentMethod from "@/components/PaymentMethod/PaymentMethod";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 // Types
 import { FormSelections } from "@/lib/types/types";
+import { Checkbox } from "@/components/ui/checkbox";
+
+export function RadioOption({ ...props }) {
+  return (
+    <FormItem className="flex items-center space-x-3 space-y-0">
+      <FormControl>
+        <RadioGroupItem value={props.value} />
+      </FormControl>
+      <FormLabel className="font-ubuntu text-white">{props.label}</FormLabel>
+    </FormItem>
+  );
+}
 
 export default function SummaryPage() {
   const router = useRouter();
@@ -30,7 +48,7 @@ export default function SummaryPage() {
     selectedAccessoriesData,
     selectedProgramData,
   } = useUserSelections();
-  const { watch, control } = useAppFormContext();
+  const { watch, control, setValue } = useAppFormContext();
   const {
     student_school,
     student_details,
@@ -49,13 +67,22 @@ export default function SummaryPage() {
   const { instrument } = student_details;
   const { inst_is_insured, hire_purchase_byo, purchased_model } =
     instrument_options;
-  const { payment_method } = payment_options;
+  const { payment_method, use_same_card } = payment_options;
   const cc_number =
     "cc_number" in payment_options ? payment_options.cc_number : "";
+  const hire_payment_method =
+    "hire_payment_method" in instrument_options
+      ? instrument_options.hire_payment_method
+      : "";
 
-  const cardImage = useCardImage(
-    payment_method === "credit card" && cc_number ? cc_number : ""
-  );
+  const hire_cc_number =
+    "cc_number" in instrument_options ? instrument_options.cc_number : "";
+  const hire_cc_name =
+    "cc_name" in instrument_options ? instrument_options.cc_name : "";
+  const hire_cc_cvv =
+    "cc_cvv" in instrument_options ? instrument_options.cc_cvv : "";
+  const hire_cc_expiry =
+    "cc_expiry" in instrument_options ? instrument_options.cc_expiry : "";
 
   if (
     !selectedSchoolData ||
@@ -66,6 +93,20 @@ export default function SummaryPage() {
   ) {
     return;
   }
+
+  React.useEffect(() => {
+    if (use_same_card) {
+      setValue("payment_options.cc_name", hire_cc_name);
+      setValue("payment_options.cc_number", hire_cc_number);
+      setValue("payment_options.cc_cvv", hire_cc_cvv);
+      setValue("payment_options.cc_expiry", hire_cc_expiry);
+    } else {
+      setValue("payment_options.cc_name", "");
+      setValue("payment_options.cc_number", "");
+      setValue("payment_options.cc_cvv", "");
+      setValue("payment_options.cc_expiry", "");
+    }
+  }, [use_same_card]);
 
   const formSelections: FormSelections = {
     selected_program_id,
@@ -113,15 +154,86 @@ export default function SummaryPage() {
               Payment
             </h1>
 
-            {hire_purchase_byo !== "purchase" && (
-              <PaymentMethod control={control} hpb={hire_purchase_byo} />
+            {hire_purchase_byo === "bring own" && (
+              <FormField
+                control={control}
+                name="payment_options.payment_method"
+                render={({ field }) => (
+                  <FormItem className="space-y-3 mb-4">
+                    <FormLabel className="text-white">Payment Method</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                      >
+                        <RadioOption value="credit card" label="Credit Card" />
+
+                        <RadioOption
+                          value="invoice"
+                          label="Prefer to be invoiced"
+                        />
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
+            {hire_purchase_byo === "hire" &&
+              hire_payment_method === "credit card" && (
+                <FormField
+                  control={control}
+                  name="payment_options.use_same_card"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-white font-semibold leading-6">
+                          Tick this box if you'd like to use the previously
+                          provided credit card to pay for term fee's
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
 
             {payment_method === "credit card" && (
-              <CreditCard control={control} cardImage={cardImage} />
-            )}
-            {payment_method === "direct debit" && (
-              <DirectDebit control={control} />
+              <>
+                <CreditCard
+                  control={control}
+                  ccNumber={cc_number}
+                  schemaObject="payment_options"
+                >
+                  <FormField
+                    control={control}
+                    name="payment_options.cc_autodebit"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-white font-semibold leading-6">
+                            Tick this box if you would like TSA to use this
+                            Credit Card to automatically debit lesson fees at
+                            the commencement of each term.
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </CreditCard>
+              </>
             )}
           </div>
         </ScrollArea>

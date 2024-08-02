@@ -10,7 +10,7 @@ import Image from "next/image";
 
 export default function ThankYouPage() {
   const router = useRouter();
-  const { watch } = useAppFormContext();
+  const { watch, formState } = useAppFormContext();
 
   const { student_school } = watch();
 

@@ -46,10 +46,6 @@ const SummaryTable = ({
   const isPurchase = hire_purchase_byo === "purchase" ? true : false;
   const { levyFee } = schoolData;
 
-  // Getting the tuition fee for the selected program
-  // const chosenProgram = programsData?.filter(
-  //   (program: any) => program.programId.toString() === selected_program_id
-  // );
   const { rehearsal_fee, tuition_fee, enrol_fee, classType } =
     selectedProgramData;
 
@@ -58,11 +54,6 @@ const SummaryTable = ({
   const insuranceFee = inst_is_insured
     ? selectedInstrumentData.hire_insurance
     : 0;
-
-  // Getting the selected accessories
-  // const selectedAccessories = accessoriesOptions?.filter(
-  //   (accessory) => accessories[accessory.name]
-  // );
 
   const accessoriesTotalCost = selectedAccessoriesData?.reduce(
     (total, item) => {
@@ -74,11 +65,6 @@ const SummaryTable = ({
   // Getting the cost of any purchased instrument
   let brand, sale_price;
   if (purchased_model) {
-    // const purchasedInstrument = instrumentData?.models?.filter(
-    //   (instrument) => instrument.model === purchased_model
-    // );
-    // brand = purchasedInstrument[0].brand;
-    // sale_price = purchasedInstrument[0].sale_price;
     brand = selectedModelData.brand;
     sale_price = selectedModelData.sale_price;
   }
@@ -120,94 +106,38 @@ const SummaryTable = ({
         </TableFooter>
       </Table>
 
-      {isHire && (
+      {(isPurchase || selectedAccessoriesData.length > 0) && (
         <>
-          <h2 className="text-center font-semibold">Instrument Rental</h2>
+          <h2 className="text-center font-semibold">Additional Costs</h2>
           <Table className="mb-4">
+            <TableCaption className="text-left px-2">
+              There will also be a one off enrolment fee of ${enrol_fee} which
+              covers the cost of the method book which students will learn from
+              and all the costs associated with enrolment administration
+            </TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[200px]">Item</TableHead>
-                <TableHead className="text-right">Price Per Month</TableHead>
+                <TableHead className="text-right">Price</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>{selectedInstrumentData.name} Rental</TableCell>
-                <TableCell className="text-right">{`$${hireFee}`}</TableCell>
-              </TableRow>
-              {inst_is_insured && (
+              {isPurchase && (
                 <TableRow>
-                  <TableCell>Instrument Insurance</TableCell>
-                  <TableCell className="text-right">{`$${insuranceFee}`}</TableCell>
+                  <TableCell>{`${brand} ${purchased_model} ${instrument}`}</TableCell>
+                  <TableCell className="text-right">{`$${sale_price}`}</TableCell>
                 </TableRow>
               )}
+              {selectedAccessoriesData?.map((accessory: any) => (
+                <TableRow key={accessory.name}>
+                  <TableCell>{accessory.name}</TableCell>
+                  <TableCell className="text-right">{`$${accessory.price}`}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell>Monthly TOTAL</TableCell>
-                <TableCell className="text-right">{`$${
-                  hireFee! + insuranceFee!
-                }`}</TableCell>
-              </TableRow>
-            </TableFooter>
           </Table>
         </>
       )}
-
-      <h2 className="text-center font-semibold">Additional Costs</h2>
-      <Table className="mb-4">
-        <TableCaption className="text-left px-2">
-          * The enrolment fee covers the cost of the method book which students
-          will learn from and all the costs associated with enrolment
-          administration
-        </TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[200px]">Item</TableHead>
-            <TableHead className="text-right">Price</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isPurchase && (
-            <TableRow>
-              <TableCell>{`${brand} ${purchased_model} ${instrument}`}</TableCell>
-              <TableCell className="text-right">{`$${sale_price}`}</TableCell>
-            </TableRow>
-          )}
-          {selectedAccessoriesData?.map((accessory: any) => (
-            <TableRow key={accessory.name}>
-              <TableCell>{accessory.name}</TableCell>
-              <TableCell className="text-right">{`$${accessory.price}`}</TableCell>
-            </TableRow>
-          ))}
-          <TableRow>
-            <TableCell>Enrolment Fee *</TableCell>
-            <TableCell className="text-right">{`$${enrol_fee}`}</TableCell>
-          </TableRow>
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TableCell>One Off Payments TOTAL</TableCell>
-            <TableCell className="text-right">{`$${
-              accessoriesTotalCost + enrol_fee + (isPurchase ? sale_price : 0)
-            }`}</TableCell>
-          </TableRow>
-        </TableFooter>
-      </Table>
-
-      <div className="flex my-4 text-2xl justify-around">
-        <h3>Initial Payment Total:</h3>
-        <p className="mr-2">{`$${
-          tuition_fee +
-          rehearsal_fee +
-          levyFee +
-          accessoriesTotalCost +
-          enrol_fee +
-          (isPurchase ? sale_price : 0) +
-          (isHire ? hireFee : 0) +
-          (inst_is_insured ? insuranceFee : 0)
-        }`}</p>
-      </div>
     </article>
   );
 };

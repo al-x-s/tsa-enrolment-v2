@@ -2,8 +2,10 @@ import React from "react";
 import Image from "next/image";
 import FormFieldInput from "@/components/FormFieldInput/FormFieldInput"; // import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import CreditCardInput from "./CreditCardInput";
+import useCardImage from "@/lib/hooks/useCardImage";
 
-export default function CreditCard({ ...props }) {
+export default function CreditCard({ children, ...props }: any) {
+  const cardImage = useCardImage(props.ccNumber);
   return (
     <section className="border border-white rounded-lg p-4 my-4 max-w-[400px] self-center">
       <div className="flex flex-row items-center">
@@ -27,35 +29,18 @@ export default function CreditCard({ ...props }) {
       </div>
       <FormFieldInput
         control={props.control}
-        name="payment_options.cc_name"
+        name={`${props.schemaObject}.cc_name`}
         label="Name on Card"
       />
-      {/* <FormField
-        control={props.control}
-        name="payment_options.cc_name"
-        render={({ field }) => (
-          <FormItem className="w-full pb-6 pt-4">
-            <div className="flex items-baseline justify-between">
-              <FormLabel className="text-white">Name on Card</FormLabel>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <FormControl>
-                <Input placeholder="" {...field} />
-              </FormControl>
-            </div>
-            <FormMessage />
-          </FormItem>
-        )}
-      /> */}
       <div className="flex justify-between gap-2">
         <CreditCardInput
           control={props.control}
-          name="payment_options.cc_number"
+          name={`${props.schemaObject}.cc_number`}
           label="Card Number"
           format="#### #### #### ####"
         />
         <Image
-          src={props.cardImage}
+          src={cardImage}
           alt="Credit Card Icon"
           width={780}
           height={500}
@@ -65,17 +50,18 @@ export default function CreditCard({ ...props }) {
       <div className="flex flex-row gap-4">
         <CreditCardInput
           control={props.control}
-          name="payment_options.cc_expiry"
+          name={`${props.schemaObject}.cc_expiry`}
           label="Expiry"
           format="##/##"
         />
         <CreditCardInput
           control={props.control}
-          name="payment_options.cc_ccv"
-          label="CCV"
+          name={`${props.schemaObject}.cc_cvv`}
+          label="CVV"
           format="###"
         />
       </div>
+      {children}
     </section>
   );
 }

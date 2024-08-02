@@ -21,14 +21,17 @@ import Link from "next/link";
 import { GeneralTermsDialogContent } from "./generalTerms";
 
 export function WelcomeMessage({ ...props }) {
+  const student_school = props.student_school;
+  const welcome_message = props.schoolsData[student_school].welcome_message;
   return (
     <div>
       <p className="text-white pb-4 leading-8">
         Welcome to the online enrolment platform for Teaching Services
         Australia. We work closely with{" "}
-        <span className="font-semibold">{props.student_school}</span> to provide
-        an inclusive and engaging instrumental tuition program.
+        <span className="font-semibold">{student_school}</span> to provide an
+        inclusive and engaging instrumental tuition program.
       </p>
+      <p className="text-white pb-4 leading-8">{welcome_message}</p>
       <p className="text-white pb-4 leading-8">
         Before you continue please read and agree to the{" "}
         <Dialog>

@@ -8,12 +8,13 @@ import { useUserSelections } from "@/components/Providers/UserSelectionsProvider
 
 // Types
 import { Model } from "@prisma/client";
+type HirePaymentMethod = "credit card" | "direct debit" | "";
 
 // Components
 import FormWrapper from "@/components/FrontEndForm/FormWrapper";
 import FormActions from "@/components/FrontEndForm/FormActions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import {
   FormControl,
   FormDescription,
@@ -23,15 +24,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Dialog,
   DialogContent,
   DialogClose,
@@ -40,12 +32,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelOption } from "@/components/ModelOption/ModelOption";
@@ -57,6 +43,13 @@ import {
   rentalTermsCheckboxes,
   RentalTermsDialogContent,
 } from "@/app/(front-end)/instrument_options/rentalTerms";
+import BringOwnMessage from "./BringOwnMessage";
+import InstrumentRentalCosts from "./InstrumentRentalCosts";
+import { RadioOption } from "@/app/(front-end)/instrument_options/PaymentMethod";
+import CreditCard from "@/components/CreditCard/CreditCard";
+import DirectDebit from "@/app/(front-end)/instrument_options/DirectDebit";
+import FormFieldInput from "@/components/FormFieldInput/FormFieldInput";
+import { Input } from "@/components/ui/input";
 
 function CustomCheckbox({ ...props }) {
   return (
@@ -100,27 +93,6 @@ function CustomCheckbox({ ...props }) {
   );
 }
 
-function FormFieldInput({ ...props }) {
-  return (
-    <FormField
-      control={props.control}
-      name={props.name}
-      render={({ field }) => (
-        <FormItem className={props.className}>
-          <div className="flex items-baseline justify-between">
-            <FormLabel className="text-white">{props.label}</FormLabel>
-          </div>
-          <FormControl>
-            <Input placeholder="" {...field} />
-          </FormControl>
-
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
-
 export default function InstrumentOptionsPage() {
   const router = useRouter();
   const { hireableTableData, availableModels, selectedInstrumentData } =
@@ -131,7 +103,17 @@ export default function InstrumentOptionsPage() {
   const { errors } = formState;
   const { student_school, instrument_options, student_details } = watch();
   const { instrument } = student_details;
-  const { purchased_model, hire_purchase_byo } = instrument_options;
+  const { purchased_model, hire_purchase_byo, hire_payment_method } =
+    instrument_options as {
+      purchased_model: string;
+      hire_purchase_byo: string;
+      hire_payment_method: HirePaymentMethod;
+    };
+
+  const hire_cc_number =
+    "hire_cc_number" in instrument_options
+      ? instrument_options.hire_cc_number
+      : "";
 
   React.useEffect(() => {
     if (!student_school) {
@@ -235,114 +217,11 @@ export default function InstrumentOptionsPage() {
                   Rental Application
                 </h2>
 
-                <article className="bg-[#E6D3F9] p-2 rounded-sm mb-6">
-                  <h2 className="py-2 text-center font-semibold">
-                    Instrument Rental Costs
-                  </h2>
-                  <Table className="mb-4">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-3/5">Item</TableHead>
-                        <TableHead className="w-2/5 text-right">
-                          Price Per Month
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>{instrument} Rental</TableCell>
-                        <TableCell className="text-right">{`$${selectedInstrumentData?.hire_cost}`}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Insurance (optional)</TableCell>
-                        <TableCell className="text-right">{`$${selectedInstrumentData?.hire_insurance}`}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                    <TableFooter>
-                      <TableRow>
-                        <TableCell>TOTAL:</TableCell>
-                        <TableCell className="text-right">{`$${
-                          (selectedInstrumentData?.hire_cost ?? 0) +
-                          (selectedInstrumentData?.hire_insurance ?? 0)
-                        } a month`}</TableCell>
-                      </TableRow>
-                    </TableFooter>
-                  </Table>
-                  <Accordion className="px-2" type="single" collapsible>
-                    <AccordionItem value="item-1">
-                      <AccordionTrigger>
-                        What are the rental costs for other instruments?
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <Table className="mb-4">
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Instruments</TableHead>
-                              <TableHead>Cost Per Month</TableHead>
-                              <TableHead>
-                                Insurance Per Month (optional)
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {hireableTableData?.map(
-                              ({ instruments, hire_cost, insurance_cost }) => (
-                                <TableRow key={crypto.randomUUID()}>
-                                  <TableCell>
-                                    {instruments.join(", ")}
-                                  </TableCell>
-                                  <TableCell>${hire_cost}</TableCell>
-                                  <TableCell>${insurance_cost}</TableCell>
-                                </TableRow>
-                              )
-                            )}
-                          </TableBody>
-                        </Table>
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2">
-                      <AccordionTrigger>
-                        Do you have a rent to buy scheme?
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <p>
-                          Yes we do! Here are our terms for the rent to buy
-                          scheme:
-                        </p>
-                        <br />
-                        <ul
-                          role="list"
-                          className="flex flex-col gap-1 list list-disc leading-6 pl-6"
-                        >
-                          <li className="leading-6">
-                            The instrument may be purchased at any time
-                            throughout the rental period.
-                          </li>
-                          <li className="leading-6">
-                            For the first 12 months all rental payments
-                            (excluding insurance) are deducted from the retail
-                            price of the instrument.
-                          </li>
-                          <li className="leading-6">
-                            Between 12 and 24 months 50% of rental payments are
-                            deducted
-                          </li>
-                          <li className="leading-6">
-                            After 24 months no more equity is put towards the
-                            buyout price.
-                          </li>
-                          <li className="leading-6">
-                            You can contact TSA at any time to obtain a buy-out
-                            price. We do not contact customers to give updates
-                            on buyout prices unless requested by you.
-                          </li>
-                        </ul>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </article>
-
-                {/* RENTAL TERMS AND CONDITIONS */}
+                <InstrumentRentalCosts
+                  selectedInstrumentData={selectedInstrumentData}
+                  hireableTableData={hireableTableData}
+                  instrument={instrument}
+                />
 
                 <FormLabel className="text-white font-semibold">
                   Instrument Insurance
@@ -374,13 +253,25 @@ export default function InstrumentOptionsPage() {
                     control={control}
                     name="instrument_options.nearest_relative_name"
                     label="Nearest Relative Name"
-                    className="w-full mb-6"
                   />
-                  <FormFieldInput
+                  <FormField
                     control={control}
                     name="instrument_options.nearest_relative_phone"
-                    label="Nearest Relative Contact Number"
-                    className="w-full mb-6"
+                    render={({ field }) => (
+                      <FormItem className="w-full pb-6 pt-4">
+                        <div className="flex items-baseline justify-between">
+                          <FormLabel className="text-white">
+                            Nearest Relative Contact Number
+                          </FormLabel>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <FormControl>
+                            <Input placeholder="" type="tel" {...field} />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
                 <div className="border boder-2 border-white px-4 pt-4 mb-6 rounded">
@@ -392,14 +283,25 @@ export default function InstrumentOptionsPage() {
                       control={control}
                       name="instrument_options.main_earner_name"
                       label="Name"
-                      className="w-full mb-6"
                     />
-
-                    <FormFieldInput
+                    <FormField
                       control={control}
                       name="instrument_options.main_earner_mobile"
-                      label="Mobile Number"
-                      className="w-full mb-6"
+                      render={({ field }) => (
+                        <FormItem className="w-full pb-6 pt-4">
+                          <div className="flex items-baseline justify-between">
+                            <FormLabel className="text-white">
+                              Mobile Number
+                            </FormLabel>
+                          </div>
+                          <div className="flex items-center justify-between gap-2">
+                            <FormControl>
+                              <Input placeholder="" type="tel" {...field} />
+                            </FormControl>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
                   <div className="md:flex md:flex-row md:gap-4">
@@ -407,16 +309,83 @@ export default function InstrumentOptionsPage() {
                       control={control}
                       name="instrument_options.main_earner_employer_name"
                       label="Employer Name"
-                      className="w-full mb-6"
                     />
-                    <FormFieldInput
+                    <FormField
                       control={control}
                       name="instrument_options.main_earner_employer_phone"
-                      label="Employer Contact Number"
-                      className="w-full mb-6"
+                      render={({ field }) => (
+                        <FormItem className="w-full pb-6 pt-4">
+                          <div className="flex items-baseline justify-between">
+                            <FormLabel className="text-white">
+                              Employer Contact Number
+                            </FormLabel>
+                          </div>
+                          <div className="flex items-center justify-between gap-2">
+                            <FormControl>
+                              <Input placeholder="" type="tel" {...field} />
+                            </FormControl>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
                 </div>
+                {/*RENTAL TERM PAYMENT OPTIONS 
+                hire_payment_method
+                  1 - CREDIT CARD
+                  2 - DEBIT CARD
+                
+                */}
+                <FormField
+                  control={control}
+                  name="instrument_options.hire_payment_method"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3 mb-4">
+                      <FormLabel className="text-white">
+                        Payment Method
+                      </FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-1"
+                        >
+                          <RadioOption
+                            value="credit card"
+                            label="Credit Card"
+                          />
+                          <RadioOption
+                            value="direct debit"
+                            label="Direct Debit"
+                          />
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {hire_payment_method === "credit card" && (
+                  <>
+                    <p className="text-white pb-2 font-semibold">
+                      I/We authorise Teaching Services Australia to debit my/our
+                      account detailed below until further notice.
+                    </p>
+                    <CreditCard
+                      control={control}
+                      ccNumber={hire_cc_number}
+                      schemaObject="instrument_options"
+                    />
+                  </>
+                )}
+                {hire_payment_method === "direct debit" && (
+                  <>
+                    <p className="text-white pb-2 font-semibold">
+                      I hereby give TSA authorisation to debit my:
+                    </p>
+                    <DirectDebit control={control} />
+                  </>
+                )}
                 <p className="text-white pb-6 font-semibold">
                   Please read through the{" "}
                   <Dialog>
@@ -476,56 +445,7 @@ export default function InstrumentOptionsPage() {
                 ))}
               </>
             )}
-            {hire_purchase_byo === "bring own" && (
-              <>
-                <h2 className="text-white text-2xl text-center mb-6 font-bold">
-                  Choosing The Right Instrument
-                </h2>
-                <h3 className="text-white font-semibold text-xl mb-4">
-                  Be wary of 'budget' instruments
-                </h3>
-                <p className="text-white mb-4 leading-8">
-                  Although 'budget' instruments advertised online or through a
-                  chain/discount store can present a cheap initial outlay, they
-                  are not always the best option. Repair costs, poor resale and
-                  difficulty in playing make these instruments a poor choice. If
-                  you are budget conscious, consider buying a reputable brand
-                  instrument secondhand instead.
-                </p>
-                <p className="text-white mb-4 leading-8">
-                  'Budget' instruments are generally made of inferior material
-                  which won't hold up to the rigors of primary school use. They
-                  may last 12 months or they may last 12 weeks. Once they do
-                  need a trip to the repair shop even a basic service will cost
-                  around $110. In fact, most repairers refuse to work on
-                  'budget' instruments altogether.
-                </p>
-                <p className="text-white mb-4 leading-8">
-                  Also be aware that many 'budget' brand instruments save money
-                  by leaving out features and materials that make it easier to
-                  play for young musicians. This makes learning harder for your
-                  child, decreasing their chance of success.
-                </p>
-                <p className="text-white mb-4 leading-8">
-                  Purchasing a reputable brand will ensure your child is
-                  learning on a durable instrument that is easier to play and
-                  will hold greater resale value. It gives the best chance of
-                  success and will almost certainly cost you less in the long
-                  run.
-                </p>
-                <p className="text-white mb-4 leading-8">
-                  If you'd like advice on which brands are reputable, or where
-                  you may find suitable second hand options please contact us on{" "}
-                  <Link
-                    href="tel:(02)96517333"
-                    className="text-[#F6BD60] underline"
-                  >
-                    9651 7333
-                  </Link>{" "}
-                  (extension #2).
-                </p>
-              </>
-            )}
+            {hire_purchase_byo === "bring own" && <BringOwnMessage />}
           </div>
         </ScrollArea>
       </FormWrapper>

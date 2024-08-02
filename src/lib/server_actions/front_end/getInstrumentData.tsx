@@ -29,7 +29,7 @@ async function fetchInstrumentData(instrument: string) {
           {
             status: "asc",
           },
-          { id: "asc" },
+          { sale_price: "desc" },
         ],
       },
     },

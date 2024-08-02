@@ -9,7 +9,7 @@ import FormActions from "@/components/FrontEndForm/FormActions";
 
 // React Query and related server actions
 import { useQuery } from "@tanstack/react-query";
-import getSchoolNames from "@/lib/server_actions/front_end/getSchoolNames";
+import getSchoolsData from "@/lib/server_actions/front_end/getSchoolsData";
 
 // Components
 import {
@@ -38,10 +38,14 @@ export default function WelcomePage() {
   const { errors } = formState;
 
   // Get page data
-  const { data: schoolNames } = useQuery({
-    queryKey: ["schoolNames"],
+  const {
+    data: schoolsData,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["schoolsData"],
     queryFn: async () => {
-      const data = await getSchoolNames();
+      const data = await getSchoolsData();
       return data;
     },
   });
@@ -57,6 +61,12 @@ export default function WelcomePage() {
     setValue("instrument_options.purchased_model", "");
     setValue("accessories", {});
   }, [student_school]);
+
+  if (isPending || isError) {
+    return;
+  }
+
+  const school_names = Object.keys(schoolsData);
 
   // Check form fields before moving to student_details
   const validateStep = async () => {
@@ -96,9 +106,9 @@ export default function WelcomePage() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {schoolNames?.map((school: any) => (
-                        <SelectItem key={school.name} value={school.name}>
-                          {school.name}
+                      {school_names.map((name: string) => (
+                        <SelectItem key={name} value={name}>
+                          {name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -111,6 +121,7 @@ export default function WelcomePage() {
               <>
                 <WelcomeMessage
                   student_school={student_school}
+                  schoolsData={schoolsData}
                   control={control}
                   errors={errors}
                 />

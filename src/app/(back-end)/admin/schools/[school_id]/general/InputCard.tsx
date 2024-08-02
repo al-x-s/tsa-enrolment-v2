@@ -39,6 +39,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 // Tanstack
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Textarea } from "@/components/ui/textarea";
 
 function useUpdateSchool() {
   const queryClient = useQueryClient();
@@ -167,6 +168,11 @@ const InputCard = ({ ...props }) => {
                           </SelectContent>
                         </Select>
                       </>
+                    )}
+                    {props.inputType === "textarea" && (
+                      <FormControl>
+                        <Textarea className="max-w-[300px]" {...field} />
+                      </FormControl>
                     )}
                   </>
 
