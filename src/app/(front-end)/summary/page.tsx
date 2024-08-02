@@ -27,17 +27,17 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 // Types
 import { FormSelections } from "@/lib/types/types";
 import { Checkbox } from "@/components/ui/checkbox";
-
-export function RadioOption({ ...props }) {
-  return (
-    <FormItem className="flex items-center space-x-3 space-y-0">
-      <FormControl>
-        <RadioGroupItem value={props.value} />
-      </FormControl>
-      <FormLabel className="font-ubuntu text-white">{props.label}</FormLabel>
-    </FormItem>
-  );
-}
+import RadioOption from "./RadioOption";
+// export function RadioOption({ ...props }) {
+//   return (
+//     <FormItem className="flex items-center space-x-3 space-y-0">
+//       <FormControl>
+//         <RadioGroupItem value={props.value} />
+//       </FormControl>
+//       <FormLabel className="font-ubuntu text-white">{props.label}</FormLabel>
+//     </FormItem>
+//   );
+// }
 
 export default function SummaryPage() {
   const router = useRouter();
